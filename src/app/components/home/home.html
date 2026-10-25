@@ -1,0 +1,48 @@
+<div class="welcome-wrapper d-flex align-items-center justify-content-center"
+     [style.backgroundImage]="tema?.fondoUrl && !esVideoFondo() ? 'url(' + tema!.fondoUrl + ')' : 'none'"
+     style="flex-direction:column; background-size:cover; background-position:center; background-repeat:no-repeat;">
+
+  <!-- Video de fondo en loop -->
+  <video
+    *ngIf="esVideoFondo()"
+    class="welcome-video"
+    [src]="tema!.fondoUrl"
+    autoplay
+    [muted]="true"
+    loop
+    playsinline
+    preload="auto"></video>
+
+  <!-- Overlay oscuro cinemático para legibilidad -->
+  <div class="welcome-overlay"></div>
+
+  <!-- Contenido centrado -->
+  <div class="welcome-card text-center">
+
+    <!-- Logo dinámico o fallback de texto -->
+    <div class="logo-container mb-4">
+      <img
+        *ngIf="logoUrl"
+        [src]="logoUrl"
+        alt="Logo del cine"
+        class="welcome-logo"
+        (error)="onLogoError()"
+      />
+      <div *ngIf="!logoUrl" class="logo-fallback">
+        <span class="material-icons splash-movie-icon">movie</span>
+      </div>
+    </div>
+
+    <h1 class="welcome-title">{{ tema?.nombreCine || 'Cinemacenter' }}</h1>
+    <p class="welcome-sub">Disfruta de las mejores producciones en pantalla grande</p>
+
+    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mt-4 pt-2">
+      <button class="btn btn-primary btn-lg px-5 btn-welcome" (click)="goRegistro()">
+        Registrarse <span class="material-icons font-icon-sm">person_add</span>
+      </button>
+      <button class="btn btn-outline-light btn-lg px-4 btn-welcome" (click)="goLogin()">
+        Iniciar sesión <span class="material-icons font-icon-sm">login</span>
+      </button>
+    </div>
+  </div>
+</div>
