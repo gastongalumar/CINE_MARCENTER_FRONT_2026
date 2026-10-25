@@ -1,12 +1,40 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+// import { OnInit } from '@angular/core';
+// import { CommonModule } from '@angular/common';
+// import { Router, NavigationEnd } from '@angular/router';
+// import { HeaderComponent } from './components/header/header';
+// import { FooterComponent } from './components/footer/footer';
+// import { SplashComponent } from './pages/splash/splash.component';
+// import { LoadingService } from './services/loading.service';
+// import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
+  // imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, SplashComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css'],
 })
-export class App {
-  protected readonly title = signal('CINE_MARCENTER_FRONT_2026');
+export class AppComponent {
+  title = 'Gestor de Cine';
+  showSplash = false;
+
+  // constructor(
+  //   private loadingService: LoadingService,
+  //   private router: Router
+  // ) {}
+  //
+  // ngOnInit() {
+  //   this.loadingService.isLoading$.subscribe((loading) => {
+  //     this.showSplash = loading;
+  //   });
+  //
+  //   this.router.events.pipe(
+  //     filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+  //   ).subscribe(() => {
+  //     this.loadingService.forceHide();
+  //   });
+  // }
 }

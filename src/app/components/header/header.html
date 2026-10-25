@@ -1,1 +1,140 @@
-<p>header works!</p>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" routerLink="/">
+      <img
+        *ngIf="(tema$ | async)?.logoUrl"
+        [src]="(tema$ | async)?.logoUrl"
+        [hidden]="logoUnavailable"
+        alt="Cinemacenter"
+        class="app-logo"
+        (load)="logoUnavailable = false"
+        (error)="onLogoError()">
+      <span *ngIf="!(tema$ | async)?.logoUrl || logoUnavailable" class="app-logo-fallback" aria-label="Cinemacenter">
+        <span class="material-icons">movie</span>
+        <span>Cinemacenter</span>
+      </span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/cartelera" routerLinkActive="active">Cartelera</a>
+        </li>
+
+        <ng-container *ngIf="authService.isAuthenticated() && authService.getTipoUsuario() !== 'ADMINISTRADOR'">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="active">Mis Reservas</a>
+          </li>
+        </ng-container>
+        <ng-container *ngIf="authService.isAuthenticated()">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/perfil" routerLinkActive="active">Perfil</a>
+          </li>
+        </ng-container>
+
+        <ng-container *ngIf="authService.getTipoUsuario() === 'ADMINISTRADOR'">
+          <li class="nav-item dropdown admin-nav-dropdown">
+            <a class="nav-link dropdown-toggle admin-nav-toggle" href="#" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="material-icons admin-nav-icon">admin_panel_settings</span>
+              Administración
+            </a>
+            <ul class="dropdown-menu admin-dropdown-menu shadow-lg">
+              <li class="dropdown-header admin-dropdown-title">
+                <span class="material-icons">dashboard</span>
+                Panel de administración
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin" routerLinkActive="active">
+                  <span class="material-icons">home</span>
+                  <span>Dashboard</span>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider admin-dropdown-divider"></li>
+              <li class="dropdown-header admin-dropdown-section">Gestión</li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/peliculas" routerLinkActive="active">
+                  <span class="material-icons">movie</span>
+                  <span>Películas</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/funciones" routerLinkActive="active">
+                  <span class="material-icons">schedule</span>
+                  <span>Funciones</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/salas" routerLinkActive="active">
+                  <span class="material-icons">meeting_room</span>
+                  <span>Salas</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/usuarios" routerLinkActive="active">
+                  <span class="material-icons">group</span>
+                  <span>Usuarios</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/validar-ticket" routerLinkActive="active">
+                  <span class="material-icons">confirmation_number</span>
+                  <span>Validar Ticket</span>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider admin-dropdown-divider"></li>
+              <li class="dropdown-header admin-dropdown-section">Sistema</li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/tema" routerLinkActive="active">
+                  <span class="material-icons">palette</span>
+                  <span>Personalizar Tema</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/crear-admin" routerLinkActive="active">
+                  <span class="material-icons">person_add</span>
+                  <span>Crear Admin</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/estadisticas" routerLinkActive="active">
+                  <span class="material-icons">analytics</span>
+                  <span>Estadísticas</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ng-container>
+      </ul>
+
+      <ul class="navbar-nav align-items-center">
+        <li class="nav-item me-2">
+          <button class="theme-toggle btn" (click)="toggleTheme()" title="Cambiar tema">
+            <span *ngIf="isLightTheme" class="material-icons">light_mode</span>
+            <span *ngIf="!isLightTheme" class="material-icons">dark_mode</span>
+          </button>
+        </li>
+        <ng-container *ngIf="authService.isAuthenticated(); else loginBlock">
+          <li class="nav-item me-2">
+            <span class="nav-link user-greet">Hola, {{ (authService.getCurrentUser()?.nombre || '').split(' ')[0] }}</span>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
+          </li>
+        </ng-container>
+        <ng-template #loginBlock>
+          <li class="nav-item me-2">
+            <a class="nav-link" routerLink="/login">Iniciar Sesión</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm" routerLink="/registro">Registrarse</a>
+          </li>
+        </ng-template>
+      </ul>
+    </div>
+  </div>
+</nav>
