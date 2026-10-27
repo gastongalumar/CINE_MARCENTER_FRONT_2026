@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 // import { OnInit } from '@angular/core';
 // import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   // imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, SplashComponent],
   templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./app.css'],
 })
 export class AppComponent {
