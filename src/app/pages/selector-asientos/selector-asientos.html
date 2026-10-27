@@ -1,0 +1,242 @@
+<div class="container py-4">
+
+  <!-- PASO 1: Elegir horario de función -->
+  <div *ngIf="paso === 1">
+    <div class="d-flex align-items-center mb-4 gap-3">
+      <button class="btn btn-secondary btn-sm" (click)="volver()">
+        <span class="material-icons font-icon-sm">arrow_back</span> Volver
+      </button>
+      <h2 class="mb-0 page-title-cinematic">Seleccionar Horario</h2>
+    </div>
+
+    <div *ngIf="loadingFunciones" class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-3 text-muted">Cargando funciones disponibles...</p>
+    </div>
+
+    <div *ngIf="!loadingFunciones && funciones.length === 0" class="alert alert-warning d-inline-block">
+      No hay funciones disponibles para esta película en este momento.
+      <br><a routerLink="/cartelera" class="btn btn-primary btn-sm mt-3">← Volver a Cartelera</a>
+    </div>
+
+    <div class="row g-4" *ngIf="!loadingFunciones && funciones.length > 0">
+      <div class="col-12 mb-2">
+        <h4 class="text-accent-gold">{{ funciones[0]?.peliculaNombre }}</h4>
+      </div>
+      <div class="col-xl-3 col-md-4 col-sm-6" *ngFor="let f of funciones">
+        <div class="card funcion-card h-100" (click)="elegirFuncion(f)" style="cursor:pointer;">
+          <div class="card-body text-center p-4">
+            <div class="fecha-dia text-uppercase small text-accent-gold fw-bold">{{ f.horario | fechaApi:'EEEE' | titlecase }}</div>
+            <div class="fecha-numero display-6 font-weight-bold my-1">{{ f.horario | fechaApi:'d MMM' }}</div>
+            <div class="hora-badge mt-2">{{ f.horario | fechaApi:'HH:mm' }} hs</div>
+
+            <div class="ticket-divider-dash"></div>
+
+            <div class="sala-texto d-flex align-items-center justify-content-center gap-2 mb-2">
+              <span class="material-icons font-icon-sm text-muted">meeting_room</span>
+              <span>{{ f.salaNombre }}</span>
+            </div>
+            <div class="precio-texto mt-1" *ngIf="!esAdmin">$ {{ f.precio | number:'1.0-0' }}</div>
+            <button class="btn btn-primary btn-sm mt-3 w-100 btn-select-time">
+              {{ esAdmin ? 'Ver Ocupación' : 'Seleccionar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2: Seleccionar asientos -->
+  <div *ngIf="paso === 2">
+    <div class="d-flex align-items-center mb-4 gap-3">
+      <button class="btn btn-secondary btn-sm" (click)="paso = 1">
+        <span class="material-icons font-icon-sm">arrow_back</span> Horarios
+      </button>
+      <h2 class="mb-0 page-title-cinematic">{{ esAdmin ? 'Ocupación de la Función' : 'Elegir Asientos' }}</h2>
+    </div>
+
+    <!-- Info función elegida -->
+    <div class="card mb-4 border-accent-left shadow-sm" *ngIf="funcion">
+      <div class="card-body py-3 px-4">
+        <div class="row g-3 text-center text-md-start">
+          <div class="col-md col-6">
+            <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Película</small>
+            <strong class="text-accent-gold" style="font-size:1.05rem;">{{ funcion.peliculaNombre }}</strong>
+          </div>
+          <div class="col-md col-6">
+            <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Fecha</small>
+            <strong style="font-size:1.05rem;">{{ funcion.horario | fechaApi:'dd/MM/yyyy' }}</strong>
+          </div>
+          <div class="col-md col-6">
+            <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Horario</small>
+            <strong style="font-size:1.05rem;">{{ funcion.horario | fechaApi:'HH:mm' }} hs</strong>
+          </div>
+          <div class="col-md col-6">
+            <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Sala</small>
+            <strong style="font-size:1.05rem;">{{ funcion.salaNombre }}</strong>
+          </div>
+          <div class="col-md col-12" *ngIf="!esAdmin">
+            <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Precio Entrada</small>
+            <strong class="text-success" style="font-size:1.05rem;">$ {{ funcion.precio | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mapa de butacas (componente reutilizable) -->
+    <app-seat-map
+      [filas]="salaFilas"
+      [columnas]="salaColumnas"
+      [ocupados]="asientosOcupados"
+      [seleccionados]="asientosSeleccionados"
+      [soloLectura]="esAdmin"
+      (seleccionChange)="asientosSeleccionados = $event">
+    </app-seat-map>
+
+    <!-- Reporte de ocupación (solo admin) -->
+    <div class="ocupacion-report mt-4 p-4 text-center" *ngIf="esAdmin">
+      <div class="row">
+        <div class="col-4 border-end border-secondary">
+          <div class="report-value">{{ totalAsientos }}</div>
+          <div class="report-label">Total Asientos</div>
+        </div>
+        <div class="col-4 border-end border-secondary">
+          <div class="report-value ocupados text-danger">{{ asientosOcupados.length }}</div>
+          <div class="report-label">Ocupados</div>
+        </div>
+        <div class="col-4">
+          <div class="report-value libres text-success">{{ totalAsientos - asientosOcupados.length }}</div>
+          <div class="report-label">Libres</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen de selección -->
+    <div class="selection-summary mt-4 p-3 px-4 border-accent-left">
+      <div class="row align-items-center g-3">
+        <div class="col-md-8 text-center text-md-start">
+          <strong class="text-uppercase text-muted d-block" style="font-size:0.75rem;">Asientos seleccionados ({{ asientosSeleccionados.length }})</strong>
+          <span class="fs-5 text-accent-gold" *ngIf="asientosSeleccionados.length > 0">{{ asientosSeleccionados.join(', ') }}</span>
+          <span class="text-muted italic fs-6" *ngIf="asientosSeleccionados.length === 0">Ninguno</span>
+        </div>
+        <div class="col-md-4 text-center text-md-end" *ngIf="!esAdmin">
+          <small class="text-muted d-block text-uppercase font-weight-bold" style="font-size:0.75rem;">Total a Pagar</small>
+          <span class="total-text">$ {{ calcularTotal() | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-4" *ngIf="!esAdmin">
+      <button
+        class="btn btn-primary btn-lg py-3"
+        [disabled]="asientosSeleccionados.length === 0"
+        (click)="paso = 3">
+        Continuar al Pago <span class="material-icons font-icon-sm">arrow_forward</span>
+      </button>
+    </div>
+    <div class="d-grid gap-2 mt-4" *ngIf="esAdmin">
+      <button class="btn btn-outline-light btn-lg py-3" (click)="volver()">
+        <span class="material-icons font-icon-sm">arrow_back</span> Volver a Cartelera
+      </button>
+    </div>
+  </div>
+
+  <!-- PASO 3: Método de pago y confirmar -->
+  <div *ngIf="paso === 3">
+    <div class="d-flex align-items-center mb-4 gap-3">
+      <button class="btn btn-secondary btn-sm" (click)="paso = 2">
+        <span class="material-icons font-icon-sm">arrow_back</span> Asientos
+      </button>
+      <h2 class="mb-0 page-title-cinematic">Confirmar Pago</h2>
+    </div>
+
+    <div class="row g-4">
+      <!-- Resumen de compra -->
+      <div class="col-lg-6">
+        <div class="card mb-4 h-100" *ngIf="funcion">
+          <div class="card-header"><strong class="fs-5">Resumen de tu Compra</strong></div>
+          <div class="card-body p-4">
+            <div class="row mb-3">
+              <div class="col-4 text-muted font-weight-bold">Película:</div>
+              <div class="col-8"><strong class="text-accent-gold fs-5">{{ funcion.peliculaNombre }}</strong></div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-4 text-muted">Sala:</div>
+              <div class="col-8">{{ funcion.salaNombre }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-4 text-muted">Fecha y hora:</div>
+              <div class="col-8 fw-bold">{{ funcion.horario | fechaApi:'dd/MM/yyyy HH:mm' }} hs</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-4 text-muted">Asientos:</div>
+              <div class="col-8"><span class="badge bg-secondary fs-6 px-3">{{ asientosSeleccionados.join(', ') }}</span></div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-4 text-muted">Cantidad:</div>
+              <div class="col-8 fw-bold">{{ asientosSeleccionados.length }} entrada(s)</div>
+            </div>
+            <hr class="my-4 rgba-white-light">
+            <div class="row">
+              <div class="col-4 text-muted d-flex align-items-center">Total:</div>
+              <div class="col-8"><strong class="total-text fs-3">$ {{ calcularTotal() | number:'1.0-0' }}</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Método de pago -->
+      <div class="col-lg-6">
+        <div class="card mb-4 h-100">
+          <div class="card-header"><strong class="fs-5">Método de Pago</strong></div>
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div class="row g-3">
+              <div class="col-12" *ngFor="let metodo of metodosPago">
+                <div class="metodo-pago-card d-flex align-items-center gap-3"
+                  [class.active]="metodoPago === metodo.valor"
+                  (click)="metodoPago = metodo.valor"
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="metodoPago = metodo.valor"
+                  [attr.aria-pressed]="metodoPago === metodo.valor">
+                  <div class="metodo-icon text-accent-gold">
+                    <span class="material-icons">{{ metodo.icono }}</span>
+                  </div>
+                  <div class="text-start">
+                    <div class="metodo-nombre text-uppercase fw-bold">{{ metodo.etiqueta }}</div>
+                    <div class="metodo-desc">{{ metodo.descripcion }}</div>
+                  </div>
+                  <span class="material-icons ms-auto metodo-check" *ngIf="metodoPago === metodo.valor">
+                    check_circle
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4 pt-2">
+              <button
+                class="btn btn-primary btn-lg py-3 w-100"
+                [disabled]="!metodoPago || confirmando"
+                (click)="confirmarCompra()">
+                <span *ngIf="confirmando" class="spinner-border spinner-border-sm me-2"></span>
+                {{ confirmando ? 'Procesando...' : '' }}
+                <span *ngIf="!confirmando" class="d-flex align-items-center justify-content-center gap-2">
+                  <span class="material-icons">check_circle</span> Confirmar Compra
+                </span>
+              </button>
+              <button class="btn btn-secondary py-3" routerLink="/cartelera">Cancelar Compra</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template loading -->
+  <ng-template #loadingTemplate>
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+    </div>
+  </ng-template>
+
+</div>

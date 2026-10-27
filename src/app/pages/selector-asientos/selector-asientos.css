@@ -1,0 +1,119 @@
+.page-title-cinematic {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border-left: 4px solid var(--color-accent);
+  padding-left: 12px;
+}
+.text-accent-gold {
+  color: var(--color-accent) !important;
+}
+.border-accent-left {
+  border-left: 4px solid var(--color-accent) !important;
+}
+.rgba-white-light {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* Tarjetas de función estilo ticket digital */
+.funcion-card {
+  background: var(--color-surface) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--border-radius-lg);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.funcion-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-slider) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 197, 24, 0.15);
+}
+.funcion-card::before, .funcion-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--color-fondo);
+  border-radius: 50%;
+  z-index: 2;
+}
+.funcion-card::before {
+  left: -8px;
+  transform: translateY(-50%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.funcion-card::after {
+  right: -8px;
+  transform: translateY(-50%);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ticket-divider-dash {
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  margin: 1.25rem 0;
+}
+
+.fecha-dia { font-size: 0.85rem; letter-spacing: 1px; }
+.fecha-numero { font-weight: 800; font-size: 1.8rem; }
+.hora-badge {
+  background: var(--color-slider);
+  color: #000;
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: inline-block;
+  box-shadow: 0 4px 10px rgba(245, 197, 24, 0.2);
+}
+.sala-texto { font-size: 0.9rem; color: var(--color-muted); }
+.precio-texto { font-size: 1.25rem; font-weight: 800; color: var(--color-slider); }
+.btn-select-time { font-weight: 700; }
+
+/* Pantalla y mapa de asientos: viven en <app-seat-map> */
+
+/* Resumen */
+.selection-summary { background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.06); }
+.total-text { font-size: 1.6rem; color: var(--color-slider); font-weight: 800; }
+
+/* Reporte de ocupación (admin) */
+.ocupacion-report {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.report-value { font-size: 2.2rem; font-weight: 800; color: var(--color-slider); line-height: 1.1; }
+.report-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-fuente);
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+/* Método de pago */
+.metodo-pago-card {
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md);
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.01);
+}
+.metodo-pago-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-2px);
+}
+.metodo-pago-card.active {
+  border-color: var(--color-slider);
+  background: rgba(245, 197, 24, 0.08);
+  box-shadow: 0 0 15px rgba(245, 197, 24, 0.15);
+}
+.metodo-icon { font-size: 2.2rem; display: flex; align-items: center; }
+.metodo-icon span { font-size: 2.2rem; }
+.metodo-check { color: var(--color-slider); font-size: 1.35rem; }
+.metodo-nombre { font-weight: 700; font-size: 0.95rem; color: var(--color-fuente); }
+.metodo-desc { font-size: 0.8rem; color: var(--color-muted); margin-top: 1px; }
+
+.font-icon-sm { font-size: 1.1rem; vertical-align: middle; }
