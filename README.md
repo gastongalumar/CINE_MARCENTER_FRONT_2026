@@ -1,6 +1,33 @@
 # CINEMARCENTERFRONT2026
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.3.
+This project uses [Angular](https://angular.dev/) 22.
+
+## Node.js
+
+The project requires a Node.js version compatible with Angular 22: `^22.22.3`, `^24.15.0`, or `>=26.0.0`. With `fnm`, the latest version matching this range is selected automatically when you enter the project directory.
+
+Install `fnm` on Windows if needed:
+
+```powershell
+winget install --id Schniz.fnm --exact --scope user
+```
+
+Add fnm to the PowerShell profile (once):
+
+```powershell
+if (-not (Select-String -Path $PROFILE -Pattern 'fnm env --use-on-cd' -Quiet -ErrorAction SilentlyContinue)) {
+  New-Item -ItemType Directory -Force -Path (Split-Path $PROFILE) | Out-Null
+  Add-Content -Path $PROFILE -Value 'fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression'
+}
+```
+
+Close and reopen PowerShell, then enter the project directory. fnm reads the `engines.node` range in `package.json` and switches to the latest compatible version. To install or refresh that version manually from this directory:
+
+```powershell
+fnm install
+fnm use
+node -v
+```
 
 ## Development server
 
