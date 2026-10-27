@@ -4,7 +4,7 @@ This project uses [Angular](https://angular.dev/) 22.
 
 ## Node.js
 
-The project requires a Node.js version compatible with Angular 22: `^22.22.3`, `^24.15.0`, or `>=26.0.0`. With `fnm`, the latest version matching this range is selected automatically when you enter the project directory.
+The project requires a Node.js version compatible with Angular 22: `^22.22.3`, `^24.15.0`, or `>=26.0.0`. With `fnm`, the project's Node version is selected automatically when you enter the project directory. Run `fnm install` from the project directory to install or refresh the latest version matching this range.
 
 Install `fnm` on Windows if needed:
 
@@ -21,7 +21,7 @@ if (-not (Select-String -Path $PROFILE -Pattern 'fnm env --use-on-cd' -Quiet -Er
 }
 ```
 
-Close and reopen PowerShell, then enter the project directory. fnm reads the `engines.node` range in `package.json` and switches to the latest compatible version. To install or refresh that version manually from this directory:
+Close and reopen PowerShell, then enter the project directory. fnm reads the `engines.node` range in `package.json` and switches to the selected compatible version. To install or refresh the latest compatible release manually from this directory:
 
 ```powershell
 fnm install
