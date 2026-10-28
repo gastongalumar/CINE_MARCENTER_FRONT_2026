@@ -1,0 +1,114 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">
+      <span class="material-icons align-middle me-1">arrow_back</span> Volver
+    </button>
+    <h2 class="mb-0">Mi Perfil</h2>
+  </div>
+
+  <div class="row g-4">
+    <!-- Identidad -->
+    <div class="col-lg-4">
+      <div class="card glass-card h-100">
+        <div class="card-body text-center">
+          <div class="avatar-wrap mb-3">
+            @if (fotoUrl()) {
+              <img [src]="fotoUrl()!" alt="Foto de perfil" class="avatar-img" />
+            } @else {
+              <div class="avatar">{{ (nombreVisible() || '?') | iniciales }}</div>
+            }
+
+            <label class="avatar-edit" [class.disabled]="cargandoFoto()" title="Cambiar foto">
+              <span class="material-icons">photo_camera</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                [disabled]="cargandoFoto()"
+                (change)="onSeleccionarFoto($event)" />
+            </label>
+          </div>
+
+          <h3 class="h5 mb-3">{{ nombreVisible() }}</h3>
+
+          <span class="badge role-badge"
+            [class.badge-admin]="user()?.tipo === 'ADMINISTRADOR'"
+            [class.badge-cliente]="user()?.tipo === 'CLIENTE'">
+            <span class="material-icons align-middle me-1">
+              {{ user()?.tipo === 'ADMINISTRADOR' ? 'admin_panel_settings' : 'person' }}
+            </span>
+            {{ user()?.tipo === 'ADMINISTRADOR' ? 'Administrador' : 'Cliente' }}
+          </span>
+
+          <div class="foto-actions mt-3 d-flex flex-column gap-2">
+            <label class="btn btn-primary btn-sm mb-0" [class.disabled]="cargandoFoto()">
+              <span class="material-icons align-middle me-1 font-icon-sm">upload</span>
+              {{ cargandoFoto() ? 'Subiendo…' : (fotoUrl() ? 'Cambiar foto' : 'Agregar foto') }}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                [disabled]="cargandoFoto()"
+                (change)="onSeleccionarFoto($event)" />
+            </label>
+            @if (fotoUrl()) {
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                [disabled]="cargandoFoto()"
+                (click)="quitarFoto()">
+                <span class="material-icons align-middle me-1 font-icon-sm">delete</span>
+                Quitar foto
+              </button>
+            }
+            @if (errorFoto()) {
+              <div class="text-danger small">{{ errorFoto() }}</div>
+            }
+            <p class="text-muted small mb-0">JPEG, PNG o WEBP · máx. 5 MB</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalle -->
+    <div class="col-lg-8">
+      <div class="card glass-card">
+        <div class="card-header bg-transparent border-bottom">
+          <h3 class="mb-0 h5">
+            <span class="material-icons align-middle me-2">badge</span>
+            Datos de la cuenta
+          </h3>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0 detail-list">
+            <dt class="col-sm-4">Nombre completo</dt>
+            <dd class="col-sm-8">{{ nombreVisible() || '—' }}</dd>
+
+            <dt class="col-sm-4">Correo electrónico</dt>
+            <dd class="col-sm-8 text-break">{{ user()?.email || perfil()?.email || '—' }}</dd>
+
+            <dt class="col-sm-4">Inicio de sesión</dt>
+            <dd class="col-sm-8">{{ loginAt() | fechaApi: 'dd/MM/yyyy HH:mm' }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card glass-card mt-4">
+        <div class="card-header bg-transparent border-bottom">
+          <h3 class="mb-0 h5">
+            <span class="material-icons align-middle me-2">confirmation_number</span>
+            Mis compras
+          </h3>
+        </div>
+        <div class="card-body d-flex flex-wrap gap-2">
+          <a class="btn btn-primary btn-sm" routerLink="/mis-reservas">
+            <span class="material-icons align-middle me-1">history</span> Ver historial
+          </a>
+          <a class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">
+            <span class="material-icons align-middle me-1">movie</span> Ir a la cartelera
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

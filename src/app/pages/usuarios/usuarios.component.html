@@ -1,0 +1,94 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Volver</button>
+    <h2 class="mb-0">Gestión de Usuarios</h2>
+  </div>
+
+  <div class="card shadow-lg glass-card">
+    <div class="card-header bg-transparent border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <h3 class="mb-0 h5">
+        <span class="material-icons align-middle me-2">group</span>
+        Usuarios registrados
+      </h3>
+      <span class="badge bg-secondary">{{ usuarios.length }}</span>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" [(ngModel)]="busqueda"
+            placeholder="Buscar por nombre o apellido..." (keyup.enter)="aplicarBusqueda()">
+        </div>
+        <div class="col-md-6 d-flex gap-2">
+          <button class="btn btn-primary btn-sm" (click)="aplicarBusqueda()" [disabled]="cargando">
+            Buscar
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="limpiarBusqueda()" [disabled]="cargando">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="errorCarga" class="alert alert-danger py-2 small">{{ errorCarga }}</div>
+
+      <div class="alert alert-info py-2 small mb-3">
+        <span class="material-icons align-middle me-1">info</span>
+        Vista de solo lectura: el backend expone únicamente consultas de usuarios
+        (<code>GET /api/usuarios</code>).
+      </div>
+
+      <div *ngIf="cargando" class="text-center py-4">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!cargando">
+        <div class="table-responsive" *ngIf="usuarios.length; else sinUsuarios">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Registro</th>
+                <th class="text-end">Sesión</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usuario of usuarios">
+                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ usuario.telefono || '—' }}</td>
+                <td>
+                  <span class="badge"
+                    [class.bg-info]="usuario.tipo === 'CLIENTE'"
+                    [class.bg-warning]="usuario.tipo === 'ADMINISTRADOR'">
+                    {{ usuario.tipo }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge"
+                    [class.bg-success]="usuario.estado === 'ACTIVO'"
+                    [class.bg-secondary]="usuario.estado !== 'ACTIVO'">
+                    {{ usuario.estado }}
+                  </span>
+                </td>
+                <td>{{ usuario.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-end">
+                  <span *ngIf="esUsuarioActual(usuario)" class="text-muted small">Tu cuenta</span>
+                  <span *ngIf="!esUsuarioActual(usuario)" class="text-muted small">—</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinUsuarios>
+          <p class="empty-hint mb-0">No hay usuarios para mostrar.</p>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

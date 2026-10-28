@@ -1,0 +1,276 @@
+<div class="container-fluid py-4 dashboard">
+  <!-- Encabezado -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div>
+      <h2 class="mb-0">
+        <span class="material-icons align-middle">movie</span>
+        Panel de Administración
+      </h2>
+      <p class="text-muted mb-0 small">Resumen general de Cinemacenter</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarDatos()" [disabled]="cargando()">
+        <span class="material-icons">refresh</span> Actualizar
+      </button>
+      <a routerLink="/cartelera" class="btn btn-outline-secondary btn-sm">
+        <span class="material-icons">local_activity</span> Ver cartelera
+      </a>
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (errorMensaje()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>No se pudieron cargar los datos:</strong> {{ errorMensaje() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorMensaje.set('')"></button>
+    </div>
+  }
+
+  <!-- Cargando -->
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <p class="mt-2 text-muted small mb-0">Cargando indicadores…</p>
+    </div>
+  } @else {
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-icon"><span class="material-icons">receipt_long</span></div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ resumen()?.totalReservas ?? 0 }}</div>
+            <div class="kpi-label">Reservas totales</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+          <div class="kpi-icon"><span class="material-icons">confirmation_number</span></div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ resumen()?.totalEntradas ?? 0 }}</div>
+            <div class="kpi-label">Entradas vendidas</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card destacada">
+          <div class="kpi-icon"><span class="material-icons">payments</span></div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ formatoMoneda(resumen()?.totalVentas) }}</div>
+            <div class="kpi-label">Ingresos totales</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card hoy">
+          <div class="kpi-icon"><span class="material-icons">today</span></div>
+          <div class="kpi-body">
+            <div class="kpi-value">{{ formatoMoneda(resumen()?.ventasHoy) }}</div>
+            <div class="kpi-label">Ventas de hoy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="mini-kpi">
+          <span class="material-icons">movie</span>
+          <div>
+            <div class="mini-value">{{ resumen()?.totalPeliculas ?? 0 }}</div>
+            <div class="mini-label">Películas</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="mini-kpi">
+          <span class="material-icons">schedule</span>
+          <div>
+            <div class="mini-value">{{ resumen()?.totalFunciones ?? 0 }}</div>
+            <div class="mini-label">Funciones</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="mini-kpi">
+          <span class="material-icons">play_circle</span>
+          <div>
+            <div class="mini-value">{{ resumen()?.funcionesVigentes ?? 0 }}</div>
+            <div class="mini-label">Funciones vigentes</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="mini-kpi">
+          <span class="material-icons">meeting_room</span>
+          <div>
+            <div class="mini-value">{{ resumen()?.totalSalas ?? 0 }}</div>
+            <div class="mini-label">Salas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+      <h5 class="section-title mb-0"><span class="material-icons">insights</span> Indicadores de venta</h5>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Período de ingresos">
+        @for (opcion of [7, 14, 30, 60]; track opcion) {
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="dias() === opcion"
+            [class.btn-outline-secondary]="dias() !== opcion"
+            (click)="cambiarPeriodo(opcion)">
+            {{ opcion }}d
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h6 class="mb-0"><span class="material-icons">local_movies</span> Ventas por película</h6>
+            <span class="chart-hint">Top 8 · ingresos</span>
+          </div>
+          <div class="chart-body">
+            @if (ventasPorPelicula().length) {
+              <canvas
+                baseChart
+                [type]="chartPeliculas().type"
+                [data]="chartPeliculas().data"
+                [options]="chartPeliculas().options"></canvas>
+            } @else {
+              <div class="chart-empty">
+                <span class="material-icons">bar_chart</span>
+                <p class="mb-0">Todavía no hay ventas registradas por película.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h6 class="mb-0"><span class="material-icons">meeting_room</span> Ocupación por sala</h6>
+            <span class="chart-hint">promedio histórico</span>
+          </div>
+          <div class="chart-body">
+            @if (ventasPorSala().length) {
+              <canvas
+                baseChart
+                [type]="chartSalas().type"
+                [data]="chartSalas().data"
+                [options]="chartSalas().options"></canvas>
+            } @else {
+              <div class="chart-empty">
+                <span class="material-icons">event_seat</span>
+                <p class="mb-0">Sin datos de ocupación de salas.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h6 class="mb-0"><span class="material-icons">trending_up</span> Ingresos por día</h6>
+            <span class="chart-hint">
+              Últimos {{ dias() }} días · {{ formatoMoneda(ingresosTotalesPeriodo()) }}
+            </span>
+          </div>
+          <div class="chart-body chart-body-wide">
+            @if (ventasPorDia().length) {
+              <canvas
+                baseChart
+                [type]="chartIngresos().type"
+                [data]="chartIngresos().data"
+                [options]="chartIngresos().options"></canvas>
+            } @else {
+              <div class="chart-empty">
+                <span class="material-icons">show_chart</span>
+                <p class="mb-0">No hay ingresos en el período seleccionado.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gestión -->
+    <h5 class="section-title mb-3"><span class="material-icons">settings</span> Gestión</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/peliculas" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">movie</span></div>
+          <div class="menu-num">{{ resumen()?.totalPeliculas ?? 0 }}</div>
+          <div class="menu-label">Películas</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/funciones" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">schedule</span></div>
+          <div class="menu-num">{{ resumen()?.totalFunciones ?? 0 }}</div>
+          <div class="menu-label">Funciones</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/salas" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">meeting_room</span></div>
+          <div class="menu-num">{{ resumen()?.totalSalas ?? 0 }}</div>
+          <div class="menu-label">Salas</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/usuarios" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">group</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Usuarios</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/validar-ticket" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">confirmation_number</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Validar Ticket</div>
+          <div class="menu-action">Ingresar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/crear-admin" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">admin_panel_settings</span></div>
+          <div class="menu-num">+</div>
+          <div class="menu-label">Crear Admin</div>
+          <div class="menu-action">Nuevo →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/tema" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">palette</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Tema Visual</div>
+          <div class="menu-action">Personalizar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/estadisticas" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">analytics</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Estadísticas</div>
+          <div class="menu-action">Ver reportes →</div>
+        </a>
+      </div>
+    </div>
+  }
+</div>
