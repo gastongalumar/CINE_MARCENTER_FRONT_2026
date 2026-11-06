@@ -1,0 +1,60 @@
+<div class="container py-4 contacto-page">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">
+      <span class="material-icons align-middle me-1">arrow_back</span> Volver
+    </button>
+    <h2 class="mb-0">Contacto</h2>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card glass-card">
+        <div class="card-header bg-transparent border-bottom">
+          <h3 class="mb-0 h5">
+            <span class="material-icons align-middle me-2">storefront</span>
+            {{ cine.nombre }}
+          </h3>
+        </div>
+        <div class="card-body">
+          <ul class="contacto-lista list-unstyled mb-0">
+            <li>
+              <span class="material-icons">place</span>
+              <div>
+                <strong>Dirección</strong>
+                <p>{{ cine.direccion }}</p>
+              </div>
+            </li>
+            <li>
+              <span class="material-icons">call</span>
+              <div>
+                <strong>Teléfono</strong>
+                <p><a [href]="'tel:' + cine.telefono.replace(/[^\d+]/g, '')">{{ cine.telefono }}</a></p>
+              </div>
+            </li>
+            <li>
+              <span class="material-icons">mail</span>
+              <div>
+                <strong>Email</strong>
+                <p><a [href]="'mailto:' + cine.email">{{ cine.email }}</a></p>
+              </div>
+            </li>
+            <li>
+              <span class="material-icons">schedule</span>
+              <div>
+                <strong>Horarios de boletería</strong>
+                <p>{{ cine.horarios }}</p>
+              </div>
+            </li>
+            <li>
+              <span class="material-icons">alternate_email</span>
+              <div>
+                <strong>Redes</strong>
+                <p>{{ cine.redes }}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

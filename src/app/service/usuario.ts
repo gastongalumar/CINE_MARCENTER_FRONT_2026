@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Usuario } from '../models/usuario.model';
+import { MensajeResponse, Usuario } from '../models/usuario';
 
 /**
  * Servicio HTTP de usuarios.
- * - Admin: listados y búsqueda.
+ * - Admin: listados, búsqueda, baja/reactivación y borrado de admins.
  * - Cliente/Admin: perfil propio y foto.
  */
 @Injectable({
@@ -31,6 +31,21 @@ export class UsuarioService {
     return this.http.get<Usuario[]>(`${this.apiUrl}/buscar`, {
       params: { nombre },
     });
+  }
+
+  /** PUT /api/usuarios/{id}/baja */
+  darDeBaja(id: number): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.apiUrl}/${id}/baja`, {});
+  }
+
+  /** PUT /api/usuarios/{id}/activar */
+  reactivar(id: number): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.apiUrl}/${id}/activar`, {});
+  }
+
+  /** DELETE /api/usuarios/{id} — solo administradores (no el admin del sistema). */
+  eliminar(id: number): Observable<MensajeResponse> {
+    return this.http.delete<MensajeResponse>(`${this.apiUrl}/${id}`);
   }
 
   /** GET /api/usuarios/me */

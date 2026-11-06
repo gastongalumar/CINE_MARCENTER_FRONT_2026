@@ -2,10 +2,10 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { LoginRequest } from '../../models/auth.model';
-import { CustomizacionService } from '../../services/customizacion.service';
-import { Customizacion } from '../../models/customizacion.model';
+import { AuthService } from '../../services/auth';
+import { LoginRequest } from '../../models/auth';
+import { CustomizacionService } from '../../services/customizacion';
+import { Customizacion } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -13,8 +13,8 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  templateUrl: './login.html',
+  styleUrls: ['./login.css'],
 })
 export class LoginComponent {
   credentials: LoginRequest = {

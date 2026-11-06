@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthResponse, LoginRequest, RegistroRequest, TipoUsuario } from '../models/auth.model';
-import { decodeJwtPayload, isJwtExpired } from '../utils/jwt.util';
+import { AuthResponse, LoginRequest, RegistroRequest, TipoUsuario } from '../models/auth';
+import { decodeJwtPayload, isJwtExpired } from '../utils/jwt';
 
 /** Clave del token en localStorage. */
 export const TOKEN_STORAGE_KEY = 'access_token';

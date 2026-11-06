@@ -29,3 +29,6 @@
   color: var(--color-fuente, white);
 }
 .table { color: var(--color-fuente); }
+.fila-inactiva { opacity: 0.72; }
+.material-icons { font-size: 1.1rem; vertical-align: middle; }
+.paginador .btn:disabled { opacity: 0.55; }

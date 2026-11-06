@@ -4,16 +4,16 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize, Observable } from 'rxjs';
 
-import { EstadisticasService } from '../../services/estadisticas.service';
+import { EstadisticasService } from '../../services/estadisticas';
 import {
   MetodoPagoEstadistica,
   OcupacionFuncion,
   VentaDiaria,
   VentaPelicula,
   VentaSala,
-} from '../../models/estadisticas.model';
-import { getErrorMessage } from '../../utils/api-error.util';
-import { FechaApiPipe } from '../../pipes/fecha-api.pipe';
+} from '../../models/estadisticas';
+import { getErrorMessage } from '../../utils/api-error';
+import { FechaApiPipe } from '../../pipes/fecha-api';
 
 type TabId = 'ventas-diarias' | 'peliculas' | 'salas' | 'funciones' | 'pagos';
 
@@ -26,8 +26,8 @@ type TabId = 'ventas-diarias' | 'peliculas' | 'salas' | 'funciones' | 'pagos';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, FechaApiPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './estadisticas.component.html',
-  styleUrls: ['./estadisticas.component.css'],
+  templateUrl: './estadisticas.html',
+  styleUrls: ['./estadisticas.css'],
 })
 export class EstadisticasComponent implements OnInit {
   private readonly estadisticas = inject(EstadisticasService);
