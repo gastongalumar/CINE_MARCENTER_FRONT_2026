@@ -1,0 +1,119 @@
+<div class="ticket-page-container py-4" *ngIf="!loading; else loadingTpl">
+  
+  <div class="ticket-visual">
+    
+    <!-- CUERPO PRINCIPAL DEL TICKET -->
+    <div class="ticket-main">
+      <div class="ticket-header">
+        <div class="logo-box" *ngIf="logoUrl">
+          <img [src]="logoUrl" alt="Cinemacenter" class="ticket-logo" (error)="logoUrl = ''" />
+        </div>
+        <div class="cine-brand">
+          <h2 class="cine-title">{{ cineNombre || 'CINEMACENTER' }}</h2>
+          <span class="ticket-tagline">TICKET DE ENTRADA OFICIAL</span>
+        </div>
+      </div>
+      
+      <div class="ticket-body-content">
+        <div class="movie-banner-section">
+          <span class="banner-label">PELÍCULA</span>
+          <h3 class="movie-banner-title">
+            {{ reserva?.peliculaNombre || reserva?.funcion?.peliculaNombre || reserva?.funcion?.pelicula?.nombre }}
+          </h3>
+        </div>
+        
+        <div class="ticket-grid">
+          <div class="grid-item">
+            <span class="grid-label">FECHA</span>
+            <span class="grid-value">{{ (reserva?.horarioFuncion || reserva?.funcion?.horario) | fechaApi:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="grid-item">
+            <span class="grid-label">HORARIO</span>
+            <span class="grid-value">{{ (reserva?.horarioFuncion || reserva?.funcion?.horario) | fechaApi:'HH:mm' }} HS</span>
+          </div>
+          <div class="grid-item">
+            <span class="grid-label">SALA</span>
+            <span class="grid-value font-weight-bold">{{ reserva?.salaNombre || reserva?.funcion?.salaNombre || 'SALA A' }}</span>
+          </div>
+          <div class="grid-item">
+            <span class="grid-label">BUTACAS</span>
+            <span class="grid-value highlight-seats">{{ reserva?.asientosSeleccionados?.join(', ') }}</span>
+          </div>
+        </div>
+
+        <div class="ticket-sub-details">
+          <div class="sub-row">
+            <span>Código de Ticket:</span>
+            <span class="mono-text fw-bold">{{ reserva?.numeroTicket }}</span>
+          </div>
+          <div class="sub-row">
+            <span>Fecha Emisión:</span>
+            <span>{{ reserva?.fechaEmision | fechaApi:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="sub-row">
+            <span>Método de Pago:</span>
+            <span class="badge bg-dark-ticket text-uppercase">{{ reserva?.metodoPago }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticket-footer-bar">
+        <span class="material-icons font-icon-xs">error_outline</span>
+        <span>LLEGAR CON 20 MINUTOS DE ANTICIPACIÓN. NO SE REALIZAN REEMBOLSOS.</span>
+      </div>
+    </div>
+    
+    <!-- COLILLA DE TEAR-OFF (TICKET STUB) -->
+    <div class="ticket-stub">
+      <div class="stub-header text-center">
+        <span class="stub-brand">{{ cineNombre || 'CINE' }}</span>
+        <span class="stub-tag">CONTROL</span>
+      </div>
+      
+      <div class="stub-body">
+        <div class="stub-movie-title" [title]="reserva?.peliculaNombre">
+          {{ reserva?.peliculaNombre || reserva?.funcion?.peliculaNombre || 'Película' }}
+        </div>
+        
+        <div class="stub-info-grid">
+          <div>
+            <span class="stub-label">SALA</span>
+            <span class="stub-val">{{ reserva?.salaNombre || 'SALA A' }}</span>
+          </div>
+          <div>
+            <span class="stub-label">BUTACAS</span>
+            <span class="stub-val text-truncate d-block" style="max-width: 120px;">{{ reserva?.asientosSeleccionados?.join(', ') }}</span>
+          </div>
+        </div>
+        
+        <div class="stub-price-section">
+          <span class="price-label">IMPORTE PAGADO</span>
+          <span class="price-value">${{ reserva?.montoTotal | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="stub-barcode-container">
+          <div class="barcode-lines"></div>
+          <span class="barcode-number">{{ reserva?.numeroTicket }}</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div class="ticket-actions mt-4 text-center">
+    <button class="btn btn-primary btn-lg px-4 shadow-sm" (click)="print()">
+      <span class="material-icons">print</span> Imprimir Entrada
+    </button>
+    <button class="btn btn-secondary btn-lg px-4 ms-3 shadow-sm" (click)="volver()">
+      <span class="material-icons">history</span> Volver a Compras
+    </button>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando ticket...</span>
+    </div>
+  </div>
+</ng-template>

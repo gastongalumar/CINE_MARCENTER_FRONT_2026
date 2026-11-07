@@ -1,0 +1,84 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+      <div class="card resultado-card shadow-lg">
+        <div class="card-body p-4 p-md-5 text-center">
+
+          <div class="icon-wrapper mb-4" [class]="'icon-wrapper ' + estado()">
+            <span class="material-icons resultado-icon">{{ icono() }}</span>
+          </div>
+
+          <h2 class="mb-2 page-title-cinematic d-inline-block">{{ titulo() }}</h2>
+          <p class="text-muted mb-4">{{ mensaje() }}</p>
+
+          @if (consultando()) {
+            <div class="d-flex align-items-center justify-content-center gap-2 text-muted mb-3">
+              <span class="spinner-border spinner-border-sm" role="status"></span>
+              Consultando el estado de tu reserva…
+            </div>
+          }
+
+          @if (detalleEstado()) {
+            <div class="alert mb-4" [class.alert-success]="pagada()" [class.alert-warning]="!pagada()">
+              {{ detalleEstado() }}
+            </div>
+          }
+
+          @if (reserva(); as r) {
+            <div class="reserva-resumen text-start mb-4">
+              <div class="d-flex justify-content-between border-bottom py-2">
+                <span class="text-muted">Ticket</span>
+                <strong class="text-accent-gold">{{ r.numeroTicket }}</strong>
+              </div>
+              @if (r.peliculaNombre) {
+                <div class="d-flex justify-content-between border-bottom py-2">
+                  <span class="text-muted">Película</span>
+                  <strong>{{ r.peliculaNombre }}</strong>
+                </div>
+              }
+              @if (r.horarioFuncion) {
+                <div class="d-flex justify-content-between border-bottom py-2">
+                  <span class="text-muted">Función</span>
+                  <strong>{{ r.horarioFuncion | fechaApi:'dd/MM/yyyy HH:mm' }} hs</strong>
+                </div>
+              }
+              @if (r.salaNombre) {
+                <div class="d-flex justify-content-between border-bottom py-2">
+                  <span class="text-muted">Sala</span>
+                  <strong>{{ r.salaNombre }}</strong>
+                </div>
+              }
+              @if (r.asientosSeleccionados.length) {
+                <div class="d-flex justify-content-between border-bottom py-2">
+                  <span class="text-muted">Asientos</span>
+                  <strong>{{ r.asientosSeleccionados.join(', ') }}</strong>
+                </div>
+              }
+              <div class="d-flex justify-content-between py-2">
+                <span class="text-muted">Total</span>
+                <strong class="text-success">$ {{ r.montoTotal | number:'1.0-0' }}</strong>
+              </div>
+            </div>
+          }
+
+          <div class="d-grid gap-2 mt-4">
+            @if (numeroTicket()) {
+              <a class="btn btn-primary" [routerLink]="['/ticket', numeroTicket()]">
+                <span class="material-icons font-icon-sm">confirmation_number</span>
+                Ver mi ticket
+              </a>
+            }
+            <a class="btn btn-outline-light" routerLink="/mis-reservas">
+              <span class="material-icons font-icon-sm">list_alt</span>
+              Ir a mis reservas
+            </a>
+            <a class="btn btn-link text-muted" routerLink="/cartelera">
+              Volver a la cartelera
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
