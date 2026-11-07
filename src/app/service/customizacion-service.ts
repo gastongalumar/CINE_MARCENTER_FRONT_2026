@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 // import { environment } from '../../environments/environment';
-// import { Customizacion } from '../models/customizacion.model';
+import type { Customizacion } from '../models/customizacion.model';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 
 @Injectable({

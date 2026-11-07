@@ -1,8 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { CustomizacionService } from '../../services/customizacion.service';
-import { Customizacion } from '../../models/customizacion.model';
+import { CustomizacionService } from '../../service/customizacion-service';
+import { AuthService } from '../../service/auth.service';
+import type { Customizacion } from '../../models/customizacion.model';
 import { refreshView } from '../../utils/refresh-view.util';
 
 @Component({
@@ -19,10 +20,16 @@ export class WelcomeComponent implements OnInit {
   constructor(
     private router: Router,
     private customizacionService: CustomizacionService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/cartelera']);
+      return;
+    }
+
     // Suscribirse al tema observable (BehaviorSubject emite el valor actual inmediatamente)
     this.customizacionService.tema$.subscribe(tema => {
       if (tema) {
