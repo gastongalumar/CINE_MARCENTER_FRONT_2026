@@ -1,0 +1,43 @@
+.contacto-page {
+  color: var(--color-fuente);
+}
+.glass-card {
+  background: rgba(10, 15, 29, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg, 12px);
+  color: var(--color-fuente);
+}
+.card-header {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.contacto-lista li {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  margin-bottom: 1.15rem;
+}
+.contacto-lista li:last-child {
+  margin-bottom: 0;
+}
+.contacto-lista .material-icons {
+  color: var(--color-slider, #f5c518);
+  font-size: 1.35rem;
+  margin-top: 0.15rem;
+}
+.contacto-lista strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-muted, #9aa3b5);
+  font-weight: 600;
+}
+.contacto-lista p {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+}
+.contacto-lista a {
+  color: var(--color-fuente);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -1,0 +1,59 @@
+<div class="cdp" [class.cdp-open]="abierto()" [class.cdp-invalid]="esInvalido" [class.cdp-disabled]="deshabilitado()">
+  @if (label()) {
+    <span class="cdp-label">{{ label() }}</span>
+  }
+
+  <button
+    type="button"
+    class="cdp-trigger"
+    [disabled]="deshabilitado()"
+    (click)="toggle()"
+    [attr.aria-expanded]="abierto()"
+    aria-haspopup="dialog">
+    <span class="cdp-icon" aria-hidden="true">
+      <span class="material-icons">{{ icon() }}</span>
+    </span>
+    <span class="cdp-value" [class.cdp-placeholder]="!valorIso()">{{ etiquetaVisible() }}</span>
+    <span class="material-icons cdp-chevron">{{ abierto() ? 'expand_less' : 'expand_more' }}</span>
+  </button>
+
+  @if (abierto()) {
+    <div class="cdp-panel" role="dialog" aria-label="Calendario" (click)="$event.stopPropagation()">
+      <div class="cdp-header">
+        <button type="button" class="cdp-nav" (click)="mesAnterior($event)" aria-label="Mes anterior">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <strong class="cdp-month">{{ tituloMes() }}</strong>
+        <button type="button" class="cdp-nav" (click)="mesSiguiente($event)" aria-label="Mes siguiente">
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+
+      <div class="cdp-weekdays">
+        @for (dia of diasSemana; track dia) {
+          <span>{{ dia }}</span>
+        }
+      </div>
+
+      <div class="cdp-grid">
+        @for (celda of celdas(); track celda.iso) {
+          <button
+            type="button"
+            class="cdp-day"
+            [class.cdp-day-out]="celda.fueraMes"
+            [class.cdp-day-today]="esHoy(celda.iso)"
+            [class.cdp-day-selected]="esSeleccionada(celda.iso)"
+            [disabled]="estaDeshabilitada(celda.iso)"
+            (click)="seleccionar(celda, $event)">
+            {{ celda.dia }}
+          </button>
+        }
+      </div>
+
+      <div class="cdp-footer">
+        <button type="button" class="cdp-link" (click)="borrar($event)">Borrar</button>
+        <button type="button" class="cdp-link cdp-link-accent" (click)="irAHoy($event)">Hoy</button>
+      </div>
+    </div>
+  }
+</div>

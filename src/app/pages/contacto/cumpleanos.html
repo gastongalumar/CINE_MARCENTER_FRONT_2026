@@ -1,0 +1,65 @@
+<div class="container py-4 cumple-page">
+  <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/contacto">
+      <span class="material-icons align-middle me-1">arrow_back</span> Contacto
+    </button>
+    <h2 class="mb-0">Cumpleaños en el cine</h2>
+  </div>
+
+  <div class="card glass-card mb-4">
+    <div class="cumple-hero">
+      <img
+        src="assets/images/promos/promo-cumple.jpg"
+        alt="Festejá tu cumple en el cine"
+        loading="lazy" />
+      <div class="cumple-hero-overlay">
+        <h3>Festejá tu cumpleaños en Cine Marcenter</h3>
+      </div>
+    </div>
+    <div class="card-body prose">
+      <p>
+        Si buscás que el próximo festejo sea inolvidable, súper original y sin estrés para los organizadores,
+        la pantalla grande tiene la respuesta. <strong>Cine Marcenter</strong> te invita a vivir una experiencia
+        única donde el cumpleañero y sus invitados son los verdaderos protagonistas de la jornada.
+      </p>
+      <p>
+        Olvidate de las complicaciones de armar todo en casa o en los clásicos salones: vení a disfrutar de la
+        magia del cine con un paquete exclusivo, pensado a medida para que la diversión sea absoluta de
+        principio a fin.
+      </p>
+    </div>
+  </div>
+
+  <h3 class="section-title mb-3">¿Qué incluye el paquete de cumpleaños?</h3>
+  <p class="section-lead mb-4">
+    Para que vos solo te preocupes por pasarla bien, la propuesta viene con todo resuelto:
+  </p>
+
+  <div class="row g-3 mb-4">
+    @for (item of incluye; track item.titulo) {
+      <div class="col-md-6">
+        <article class="include-card">
+          <span class="material-icons include-icon">{{ item.icon }}</span>
+          <div>
+            <h4>{{ item.titulo }}</h4>
+            <p>{{ item.texto }}</p>
+          </div>
+        </article>
+      </div>
+    }
+  </div>
+
+  <div class="card glass-card cierre">
+    <div class="card-body text-center">
+      <p class="lead mb-2">
+        ¡Hacé que tu evento sea un verdadero éxito de taquilla! Consultá por disponibilidad de salas,
+        películas en cartelera y reservá tu fecha para vivir un cumpleaños que todos van a recordar.
+      </p>
+      <p class="mb-3">Escribinos a</p>
+      <a class="btn btn-primary btn-lg" [href]="'mailto:' + email">
+        <span class="material-icons align-middle me-1">mail</span>
+        {{ email }}
+      </a>
+    </div>
+  </div>
+</div>
