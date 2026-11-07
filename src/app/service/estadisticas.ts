@@ -9,7 +9,7 @@ import {
   VentaDiaria,
   VentaPelicula,
   VentaSala,
-} from '../models/estadisticas.model';
+} from '../models/estadisticas';
 
 /**
  * Servicio de estadísticas del panel de administración.

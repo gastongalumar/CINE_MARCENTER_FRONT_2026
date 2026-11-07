@@ -5,14 +5,14 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { catchError, forkJoin, of } from 'rxjs';
 
-import { EstadisticasService } from '../../services/estadisticas.service';
+import { EstadisticasService } from '../../services/estadisticas';
 import {
   DashboardResumen,
   VentaDiaria,
   VentaPelicula,
   VentaSala,
-} from '../../models/estadisticas.model';
-import { getErrorMessage } from '../../utils/api-error.util';
+} from '../../models/estadisticas';
+import { getErrorMessage } from '../../utils/api-error';
 
 /**
  * Panel principal del administrador. Muestra los KPI del resumen y tres
@@ -23,8 +23,8 @@ import { getErrorMessage } from '../../utils/api-error.util';
   standalone: true,
   imports: [CommonModule, RouterModule, BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
+  templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css'],
 })
 export class DashboardComponent implements OnInit {
   private readonly estadisticas = inject(EstadisticasService);

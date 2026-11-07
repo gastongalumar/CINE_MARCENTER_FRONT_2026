@@ -2,15 +2,15 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { RegistroRequest } from '../../models/auth.model';
+import { AuthService } from '../../services/auth';
+import { RegistroRequest } from '../../models/auth';
 
 @Component({
   selector: 'app-registro',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './registro.component.html',
-  styleUrls: ['./registro.component.css'],
+  templateUrl: './registro.html',
+  styleUrls: ['./registro.css'],
 })
 export class RegistroComponent {
   userData: RegistroRequest = {

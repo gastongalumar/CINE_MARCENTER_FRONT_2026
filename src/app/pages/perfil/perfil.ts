@@ -10,23 +10,23 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AuthService } from '../../services/auth.service';
-import { UsuarioService } from '../../services/usuario.service';
-import { ImageService } from '../../services/image.service';
-import { AuthResponse } from '../../models/auth.model';
-import { Usuario } from '../../models/usuario.model';
-import { InicialesPipe } from '../../pipes/iniciales.pipe';
-import { FechaApiPipe } from '../../pipes/fecha-api.pipe';
-import { getErrorMessage } from '../../utils/api-error.util';
-import { refreshView } from '../../utils/refresh-view.util';
+import { AuthService } from '../../services/auth';
+import { UsuarioService } from '../../services/usuario';
+import { ImageService } from '../../services/image';
+import { AuthResponse } from '../../models/auth';
+import { Usuario } from '../../models/usuario';
+import { InicialesPipe } from '../../pipes/iniciales';
+import { FechaApiPipe } from '../../pipes/fecha-api';
+import { getErrorMessage } from '../../utils/api-error';
+import { refreshView } from '../../utils/refresh-view';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
   imports: [CommonModule, RouterModule, InicialesPipe, FechaApiPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.css'],
+  templateUrl: './perfil.html',
+  styleUrls: ['./perfil.css'],
 })
 export class PerfilComponent {
   private readonly authService = inject(AuthService);

@@ -1,0 +1,60 @@
+<div class="ctp" [class.ctp-open]="abierto()" [class.ctp-invalid]="esInvalido" [class.ctp-disabled]="deshabilitado()">
+  @if (label()) {
+    <span class="ctp-label">{{ label() }}</span>
+  }
+
+  <button
+    type="button"
+    class="ctp-trigger"
+    [disabled]="deshabilitado()"
+    (click)="toggle()"
+    [attr.aria-expanded]="abierto()"
+    aria-haspopup="dialog">
+    <span class="ctp-icon" aria-hidden="true">
+      <span class="material-icons">{{ icon() }}</span>
+    </span>
+    <span class="ctp-value" [class.ctp-placeholder]="!tieneValor()">{{ etiquetaVisible() }}</span>
+    <span class="material-icons ctp-chevron">{{ abierto() ? 'expand_less' : 'expand_more' }}</span>
+  </button>
+
+  @if (abierto()) {
+    <div class="ctp-panel" role="dialog" aria-label="Selector de hora" (click)="$event.stopPropagation()">
+      <div class="ctp-columns">
+        <div class="ctp-col">
+          <span class="ctp-col-title">Hora</span>
+          <div class="ctp-list">
+            @for (h of horas; track h) {
+              <button
+                type="button"
+                class="ctp-option"
+                [class.active]="tieneValor() && hora() === h"
+                (click)="elegirHora(h, $event)">
+                {{ h }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="ctp-col">
+          <span class="ctp-col-title">Min</span>
+          <div class="ctp-list">
+            @for (m of minutos(); track m) {
+              <button
+                type="button"
+                class="ctp-option"
+                [class.active]="tieneValor() && minuto() === m"
+                (click)="elegirMinuto(m, $event)">
+                {{ m }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="ctp-footer">
+        <button type="button" class="ctp-link" (click)="borrar($event)">Borrar</button>
+        @if (tieneValor()) {
+          <span class="ctp-preview">{{ hora() }}:{{ minuto() }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>

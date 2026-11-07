@@ -2,20 +2,20 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, afterNextRender 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { UsuarioService } from '../../services/usuario.service';
-import { RegistroRequest } from '../../models/auth.model';
-import { Usuario } from '../../models/usuario.model';
-import { getErrorMessage } from '../../utils/api-error.util';
-import { refreshView } from '../../utils/refresh-view.util';
+import { AuthService } from '../../services/auth';
+import { UsuarioService } from '../../services/usuario';
+import { RegistroRequest } from '../../models/auth';
+import { Usuario } from '../../models/usuario';
+import { getErrorMessage } from '../../utils/api-error';
+import { refreshView } from '../../utils/refresh-view';
 
 @Component({
   selector: 'app-crear-admin',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './crear-admin.component.html',
-  styleUrls: ['./crear-admin.component.css'],
+  templateUrl: './crear-admin.html',
+  styleUrls: ['./crear-admin.css'],
 })
 export class CrearAdminComponent {
 

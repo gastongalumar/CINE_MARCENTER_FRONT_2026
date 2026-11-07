@@ -5,7 +5,7 @@ import { RouterOutlet } from '@angular/router';
 // import { Router, NavigationEnd } from '@angular/router';
 // import { HeaderComponent } from './components/header/header';
 // import { FooterComponent } from './components/footer/footer';
-// import { SplashComponent } from './pages/splash/splash.component';
+// import { SplashComponent } from './pages/shared/components/splash/splash';
 // import { LoadingService } from './services/loading.service';
 // import { filter } from 'rxjs/operators';
 

@@ -1,0 +1,190 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+:host(.ctp-host-open) {
+  z-index: 1400;
+}
+.ctp {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  z-index: 0;
+}
+.ctp-open {
+  z-index: 1400;
+}
+.ctp-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.ctp-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.35rem 0.7rem 0.35rem 0.55rem;
+  border-radius: var(--border-radius-md, 10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-fuente);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  overflow: hidden;
+}
+.ctp-trigger:hover:not(:disabled) {
+  border-color: rgba(245, 197, 24, 0.45);
+}
+.ctp-open .ctp-trigger,
+.ctp-trigger:focus-visible {
+  border-color: var(--color-accent, #f5c518);
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.18);
+  outline: none;
+}
+.ctp-invalid .ctp-trigger {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+.ctp-disabled .ctp-trigger {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ctp-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 197, 24, 0.12);
+  color: var(--color-accent, #f5c518);
+  flex: 0 0 auto;
+}
+.ctp-icon .material-icons { font-size: 1.15rem; }
+.ctp-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 650;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+.ctp-placeholder {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.ctp-chevron {
+  font-size: 1.25rem;
+  opacity: 0.7;
+  flex: 0 0 auto;
+}
+.ctp-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1500;
+  width: min(100%, 240px);
+  padding: 0.75rem;
+  border-radius: 16px;
+  background: #0d1424;
+  border: 1px solid rgba(245, 197, 24, 0.35);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.35);
+  animation: ctpIn 0.18s ease;
+  isolation: isolate;
+}
+@keyframes ctpIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ctp-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+.ctp-col-title {
+  display: block;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.35rem;
+}
+.ctp-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+.ctp-list::-webkit-scrollbar { width: 6px; }
+.ctp-list::-webkit-scrollbar-thumb {
+  background: rgba(245, 197, 24, 0.35);
+  border-radius: 999px;
+}
+.ctp-option {
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.35rem;
+  cursor: pointer;
+}
+.ctp-option:hover {
+  background: rgba(245, 197, 24, 0.14);
+}
+.ctp-option.active {
+  background: linear-gradient(135deg, #e1252a 0%, #c4181f 100%);
+  box-shadow: 0 4px 12px rgba(225, 37, 42, 0.3);
+}
+.ctp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ctp-link {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 650;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.ctp-preview {
+  font-weight: 750;
+  color: var(--color-accent, #f5c518);
+  font-size: 0.9rem;
+}
+
+:host-context(.light-theme) .ctp-trigger {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+:host-context(.light-theme) .ctp-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6fa 100%);
+  border-color: rgba(26, 35, 126, 0.18);
+}
+:host-context(.light-theme) .ctp-option {
+  color: #0d121f;
+}
+:host-context(.light-theme) .ctp-col-title,
+:host-context(.light-theme) .ctp-link {
+  color: rgba(13, 18, 31, 0.55);
+}
