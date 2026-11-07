@@ -1,5 +1,7 @@
-import type { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 
-export function refreshView(cd?: ChangeDetectorRef | null): void {
-  cd?.detectChanges();
+/** Fuerza refresco de la UI tras actualizaciones async (zoneless + OnPush). */
+export function refreshView(cdr: ChangeDetectorRef): void {
+  cdr.markForCheck();
+  setTimeout(() => cdr.detectChanges());
 }
