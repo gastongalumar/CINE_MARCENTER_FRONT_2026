@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { CustomizacionService } from '../../services/customizacion.service';
-import { Observable, map } from 'rxjs';
-import { Customizacion } from '../../models/customizacion.model';
+import { AuthService } from '../../service/auth.service';
+import { CustomizacionService } from '../../service/customizacion-service';
+import { ImageService } from '../../service/image.service';
+import { Observable } from 'rxjs';
+import type { Customizacion } from '../../models/customizacion.model';
 
 @Component({
   selector: 'app-header',
@@ -14,9 +15,19 @@ import { Customizacion } from '../../models/customizacion.model';
   styleUrls: ['./header.css'],
 })
 export class HeaderComponent implements OnInit {
+  private readonly imageService = inject(ImageService);
+
   tema$: Observable<Customizacion | null>;
   isLightTheme = false;
   logoUnavailable = false;
+
+  /** URL absoluta de la foto de perfil, o null. */
+  readonly fotoPerfilUrl = computed(() => {
+    const ruta = this.authService.currentUser()?.fotoPerfilUrl;
+    if (!ruta) return null;
+    const url = this.imageService.getImageUrl(ruta, '');
+    return url || null;
+  });
 
   constructor(
     public authService: AuthService,  // Cambiado a public para usar en template
