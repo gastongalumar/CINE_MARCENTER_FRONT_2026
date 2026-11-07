@@ -1,0 +1,81 @@
+.app-card {
+  background-color: var(--color-contenedor);
+  color: var(--color-fuente);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md, 12px);
+  overflow: visible !important;
+  position: relative;
+  z-index: 2;
+}
+.app-card .card-body {
+  overflow: visible;
+  position: relative;
+}
+.app-card .cine-picker-panel {
+  position: relative;
+  z-index: 1;
+}
+.app-card .cine-picker-panel:has(.cdp-open),
+.app-card .cine-picker-panel:has(.ctp-open) {
+  z-index: 20;
+}
+.app-card .card-header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.form-label { font-size: 0.85rem; font-weight: 600; }
+.form-control, .form-select {
+  color: var(--color-fuente);
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.form-control:focus, .form-select:focus {
+  color: var(--color-fuente);
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: var(--color-slider);
+  box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
+}
+.form-control::placeholder { color: var(--color-muted); }
+.form-select option { color: #000; background-color: #fff; }
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: #f87171;
+  background-image: none;
+}
+.form-text { color: var(--color-muted); }
+
+.btn-primary {
+  background-color: var(--color-slider);
+  border-color: var(--color-slider);
+  color: #0d121f;
+  font-weight: 700;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+
+.tabla-peliculas { color: var(--color-fuente); }
+.tabla-peliculas thead th {
+  color: var(--color-slider);
+  border-bottom: 2px solid var(--color-slider);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.tabla-peliculas tbody td { border-color: rgba(255, 255, 255, 0.08); }
+.tabla-peliculas tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
+.tabla-peliculas .fila-activa { background: rgba(245, 197, 24, 0.1); }
+
+.poster-mini {
+  width: 42px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.poster-preview {
+  max-height: 150px;
+  object-fit: cover;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.buscador { max-width: 190px; }
+.material-icons { font-size: 1.1rem; vertical-align: middle; }
+.text-muted { color: var(--color-muted) !important; }

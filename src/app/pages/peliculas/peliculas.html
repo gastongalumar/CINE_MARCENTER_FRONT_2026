@@ -1,0 +1,354 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0">
+      <span class="material-icons align-middle me-1">movie</span>
+      Gestión de Películas
+    </h2>
+    <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Alta -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="card app-card">
+        <div class="card-header">
+          <h5 class="mb-0">Nueva película</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="nombre">Nombre *</label>
+              <input
+                id="nombre"
+                type="text"
+                class="form-control"
+                formControlName="nombre"
+                placeholder="Ej.: Interstellar"
+                [class.is-invalid]="esInvalido('nombre')" />
+              @if (esInvalido('nombre')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.nombre.errors?.['required']) {
+                    El nombre es obligatorio.
+                  } @else if (form.controls.nombre.errors?.['maxlength']) {
+                    El nombre no puede superar 200 caracteres.
+                  } @else {
+                    {{ form.controls.nombre.errors?.['backend'] }}
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="genero">Género *</label>
+              <select
+                id="genero"
+                class="form-select"
+                formControlName="genero"
+                [class.is-invalid]="esInvalido('genero')">
+                <option value="">Seleccionar…</option>
+                @for (genero of generos; track genero) {
+                  <option [value]="genero">{{ etiquetaGenero(genero) }}</option>
+                }
+              </select>
+              @if (esInvalido('genero')) {
+                <div class="invalid-feedback d-block">
+                  {{ form.controls.genero.errors?.['backend'] || 'Seleccioná un género.' }}
+                </div>
+              }
+            </div>
+
+            <div class="cine-picker-panel">
+              <p class="cine-picker-panel-title">
+                <span class="material-icons">date_range</span>
+                Período en cartelera
+              </p>
+
+              <div class="cine-picker-grid">
+                <div class="cine-picker-field">
+                  <app-cine-date-picker
+                    label="Fecha de estreno *"
+                    icon="event"
+                    placeholder="Elegir fecha"
+                    formControlName="fechaEstreno" />
+                  @if (esInvalido('fechaEstreno')) {
+                    <div class="invalid-feedback d-block">
+                      @if (form.controls.fechaEstreno.errors?.['required']) {
+                        La fecha de estreno es obligatoria.
+                      } @else if (form.controls.fechaEstreno.errors?.['fechaFutura']) {
+                        La fecha de estreno debe ser futura.
+                      } @else {
+                        {{ form.controls.fechaEstreno.errors?.['backend'] }}
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="cine-picker-field">
+                  <app-cine-date-picker
+                    label="Fecha de salida *"
+                    icon="event_busy"
+                    placeholder="Elegir fecha"
+                    formControlName="fechaSalida" />
+                  @if (esInvalido('fechaSalida') || form.errors?.['rangoFechas']) {
+                    <div class="invalid-feedback d-block">
+                      @if (form.controls.fechaSalida.errors?.['required']) {
+                        La fecha de salida es obligatoria.
+                      } @else if (form.controls.fechaSalida.errors?.['fechaFutura']) {
+                        La fecha de salida debe ser futura.
+                      } @else if (form.errors?.['rangoFechas']) {
+                        La fecha de salida debe ser posterior a la de estreno.
+                      } @else {
+                        {{ form.controls.fechaSalida.errors?.['backend'] }}
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              @if (resumenCartelera(); as resumen) {
+                <div class="cine-picker-summary">
+                  <span class="material-icons" style="font-size:1.1rem">info</span>
+                  En cartelera del
+                  <strong>{{ resumen.desde }}</strong>
+                  al
+                  <strong>{{ resumen.hasta }}</strong>
+                  <span class="cine-picker-chip">{{ resumen.dias }} día{{ resumen.dias === 1 ? '' : 's' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="duracionMinutos">Duración (minutos) *</label>
+              <input
+                id="duracionMinutos"
+                type="number"
+                class="form-control"
+                formControlName="duracionMinutos"
+                min="1"
+                max="600"
+                [class.is-invalid]="esInvalido('duracionMinutos')" />
+              @if (esInvalido('duracionMinutos')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.duracionMinutos.errors?.['required']) {
+                    La duración es obligatoria.
+                  } @else if (form.controls.duracionMinutos.errors?.['min']) {
+                    La duración debe ser mayor a 0.
+                  } @else if (form.controls.duracionMinutos.errors?.['max']) {
+                    La duración no puede superar 600 minutos.
+                  } @else {
+                    {{ form.controls.duracionMinutos.errors?.['backend'] }}
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="sinopsis">Sinopsis corta</label>
+              <textarea
+                id="sinopsis"
+                class="form-control"
+                formControlName="sinopsis"
+                rows="3"
+                maxlength="2000"
+                placeholder="Texto breve para la cartelera"
+                [class.is-invalid]="esInvalido('sinopsis')"></textarea>
+              <div class="form-text">Se muestra en las cards de cartelera.</div>
+              @if (esInvalido('sinopsis')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.sinopsis.errors?.['maxlength']) {
+                    La sinopsis no puede superar 2000 caracteres.
+                  } @else {
+                    {{ form.controls.sinopsis.errors?.['backend'] }}
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="descripcion">Descripción detallada</label>
+              <textarea
+                id="descripcion"
+                class="form-control"
+                formControlName="descripcion"
+                rows="4"
+                maxlength="5000"
+                placeholder="Texto largo para la ficha de la película"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="director">Director</label>
+              <input id="director" type="text" class="form-control" formControlName="director" maxlength="200" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="elenco">Elenco</label>
+              <input
+                id="elenco"
+                type="text"
+                class="form-control"
+                formControlName="elenco"
+                maxlength="500"
+                placeholder="Actor 1, Actor 2, Actor 3" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="clasificacion">Clasificación</label>
+              <input
+                id="clasificacion"
+                type="text"
+                class="form-control"
+                formControlName="clasificacion"
+                maxlength="100"
+                placeholder="ATP, +13, +16…" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="nominaciones">Nominaciones / premios</label>
+              <textarea
+                id="nominaciones"
+                class="form-control"
+                formControlName="nominaciones"
+                rows="2"
+                maxlength="1000"
+                placeholder="Ej.: Nominada a Mejor Película…"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="urlTrailer">URL del tráiler (YouTube)</label>
+              <input
+                id="urlTrailer"
+                type="url"
+                class="form-control"
+                formControlName="urlTrailer"
+                maxlength="500"
+                placeholder="https://www.youtube.com/watch?v=..." />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="rutaImagen">URL de la imagen (opcional)</label>
+              <input
+                id="rutaImagen"
+                type="url"
+                class="form-control"
+                formControlName="rutaImagen"
+                inputmode="url"
+                placeholder="https://ejemplo.com/poster.jpg" />
+              <div class="form-text">
+                Al crear, podés pegar una URL o subir el póster después en la pantalla de edición.
+              </div>
+            </div>
+
+            @if (form.controls.rutaImagen.value) {
+              <div class="text-center mb-3">
+                <img
+                  [src]="imageService.getImageUrl(form.controls.rutaImagen.value)"
+                  alt="Vista previa de la película"
+                  class="img-thumbnail poster-preview"
+                  (error)="onPreviewError()" />
+                @if (errorPreview()) {
+                  <div class="text-danger small mt-1">
+                    No se pudo cargar la vista previa. Igual podés intentar guardar.
+                  </div>
+                }
+              </div>
+            }
+
+            @if (errorMensaje()) {
+              <div class="alert alert-danger py-2 small mb-3">{{ errorMensaje() }}</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando…' : 'Crear película' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listado -->
+    <div class="col-lg-7 col-xl-8">
+      <div class="card app-card">
+        <div class="card-header d-flex flex-wrap align-items-center gap-2">
+          <h5 class="mb-0 me-auto">Listado de películas</h5>
+          <span class="badge text-bg-secondary">{{ peliculas().length }}</span>
+          <input
+            type="search"
+            class="form-control form-control-sm buscador"
+            placeholder="Buscar…"
+            [value]="filtro()"
+            (input)="filtro.set($any($event.target).value)" />
+        </div>
+        <div class="card-body">
+          @if (errorCarga()) {
+            <div class="alert alert-danger py-2 small">{{ errorCarga() }}</div>
+          }
+
+          @if (cargando()) {
+            <div class="text-center py-4">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando…</span>
+              </div>
+            </div>
+          } @else if (peliculasFiltradas().length === 0) {
+            <div class="alert alert-info mb-0">
+              No hay películas que coincidan con la búsqueda.
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table align-middle tabla-peliculas mb-0">
+                <thead>
+                  <tr>
+                    <th>Póster</th>
+                    <th>Nombre</th>
+                    <th>Género</th>
+                    <th>Cartelera</th>
+                    <th class="text-end">Duración</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (pelicula of peliculasFiltradas(); track pelicula.id) {
+                    <tr>
+                      <td>
+                        <img
+                          [src]="imageService.getImageUrl(pelicula.rutaImagen)"
+                          [alt]="pelicula.nombre"
+                          class="poster-mini" />
+                      </td>
+                      <td>
+                        <div class="fw-semibold">{{ pelicula.nombre }}</div>
+                        <small class="text-muted">#{{ pelicula.id }}</small>
+                      </td>
+                      <td>{{ etiquetaGenero(pelicula.genero) }}</td>
+                      <td>
+                        <small class="d-block">{{ pelicula.fechaEstreno | date: 'dd/MM/yyyy' }}</small>
+                        <small class="text-muted">al {{ pelicula.fechaSalida | date: 'dd/MM/yyyy' }}</small>
+                      </td>
+                      <td class="text-end">{{ pelicula.duracionMinutos }} min</td>
+                      <td class="text-end text-nowrap">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary me-1"
+                          (click)="editar(pelicula)"
+                          title="Editar">
+                          <span class="material-icons">edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="eliminar(pelicula)"
+                          title="Eliminar">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
