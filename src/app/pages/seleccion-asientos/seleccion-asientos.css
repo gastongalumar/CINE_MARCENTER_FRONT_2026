@@ -1,0 +1,239 @@
+.page-title-cinematic {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border-left: 4px solid var(--color-accent);
+  padding-left: 12px;
+}
+.text-accent-gold {
+  color: var(--color-accent) !important;
+}
+.border-accent-left {
+  border-left: 4px solid var(--color-accent) !important;
+}
+.rgba-white-light {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* Listado de horarios: hoy primero + elegir otro día */
+.horarios-panel {
+  max-width: 720px;
+}
+.pelicula-titulo {
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 800;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+.horarios-ayuda {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+}
+.dia-activo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md);
+}
+.dia-activo-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.75rem;
+}
+.dia-activo-etiqueta {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slider);
+}
+.dia-activo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.dia-activo-acciones .btn {
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.otros-dias-panel {
+  margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: var(--border-radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+.otros-dias-titulo {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+.dias-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+.dia-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-width: 4.5rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+  color: var(--color-fuente);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.dia-chip:hover {
+  border-color: var(--color-slider);
+}
+.dia-chip.active {
+  border-color: var(--color-slider);
+  background: rgba(245, 197, 24, 0.12);
+}
+.dia-chip-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+.dia-chip-fecha {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+.dia-chip-count {
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.dia-grupo {
+  margin-top: 0.5rem;
+}
+.dia-nombre {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  text-transform: capitalize;
+}
+.dia-fecha {
+  font-size: 0.92rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+.horarios-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.horario-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.7rem;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+  color: var(--color-fuente);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  text-align: left;
+}
+.horario-chip:hover {
+  border-color: var(--color-slider);
+  background: rgba(245, 197, 24, 0.08);
+  transform: translateY(-2px);
+}
+.chip-hora {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--color-slider);
+}
+.chip-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+.chip-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+.chip-precio {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-fuente);
+}
+.chip-accion {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  margin-left: 0.15rem;
+}
+
+/* Pantalla y mapa de asientos: viven en <app-seat-map> */
+
+/* Resumen */
+.selection-summary { background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.06); }
+.total-text { font-size: 1.6rem; color: var(--color-slider); font-weight: 800; }
+
+/* Reporte de ocupación (admin) */
+.ocupacion-report {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.report-value { font-size: 2.2rem; font-weight: 800; color: var(--color-slider); line-height: 1.1; }
+.report-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-fuente);
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+/* Método de pago */
+.metodo-pago-card {
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-md);
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.01);
+}
+.metodo-pago-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-2px);
+}
+.metodo-pago-card.active {
+  border-color: var(--color-slider);
+  background: rgba(245, 197, 24, 0.08);
+  box-shadow: 0 0 15px rgba(245, 197, 24, 0.15);
+}
+.metodo-icon { font-size: 2.2rem; display: flex; align-items: center; }
+.metodo-icon span { font-size: 2.2rem; }
+.metodo-check { color: var(--color-slider); font-size: 1.35rem; }
+.metodo-nombre { font-weight: 700; font-size: 0.95rem; color: var(--color-fuente); }
+.metodo-desc { font-size: 0.8rem; color: var(--color-muted); margin-top: 1px; }
+
+.font-icon-sm { font-size: 1.1rem; vertical-align: middle; }

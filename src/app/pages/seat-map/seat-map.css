@@ -1,0 +1,130 @@
+:host { display: block; }
+
+/* Pantalla */
+.screen-container {
+  perspective: 400px;
+  margin: 2.5rem auto 1.5rem auto;
+  text-align: center;
+  max-width: 450px;
+}
+.screen-glow {
+  height: 8px;
+  width: 100%;
+  background: linear-gradient(to bottom, var(--color-slider, #f5c518), transparent);
+  border-radius: 50%;
+  filter: blur(3px);
+  box-shadow: 0 4px 25px rgba(245, 197, 24, 0.85);
+  transform: rotateX(-30deg);
+  margin-bottom: 8px;
+}
+.screen-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+/* Leyenda */
+.legend { margin-bottom: 1.5rem; }
+.legend-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-fuente);
+  letter-spacing: 0.02em;
+}
+.seat-preview {
+  width: 20px;
+  height: 18px;
+  border-radius: 4px 4px 2px 2px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.seat-preview.disponible { background: rgba(255, 255, 255, 0.22); }
+.seat-preview.seleccionado {
+  background: var(--color-slider);
+  border-color: var(--color-slider);
+  box-shadow: 0 0 8px var(--color-slider);
+}
+.seat-preview.ocupado { background: rgba(239, 68, 68, 0.55); border-color: rgba(239, 68, 68, 0.75); }
+
+/* Grid de asientos */
+.seats-grid-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 2.5rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius-lg);
+  box-shadow: inset 0 2px 24px rgba(0, 0, 0, 0.45);
+  overflow-x: auto;
+}
+.seats-row { display: flex; gap: 5px; align-items: center; }
+.seat-label {
+  width: 28px;
+  min-width: 28px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+.seats-row-content { display: flex; gap: 6px; align-items: center; }
+.seats-section { display: flex; gap: 6px; }
+.aisle { width: 18px; }
+.col-number {
+  width: 24px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Botón de asiento */
+.seat-btn {
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px 6px 3px 3px;
+  background-color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.seat-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  right: 2px;
+  height: 3px;
+  border-radius: 1.5px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.seat-btn:hover:not(:disabled) {
+  transform: scale(1.2) translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+.seat-btn:focus-visible {
+  outline: 2px solid var(--color-slider);
+  outline-offset: 2px;
+}
+.seat-btn.selected {
+  background-color: var(--color-slider) !important;
+  border-color: var(--color-slider) !important;
+  box-shadow: 0 0 12px var(--color-slider);
+}
+.seat-btn.selected::after { background: rgba(0, 0, 0, 0.25); }
+.seat-btn.occupied {
+  background-color: rgba(239, 68, 68, 0.45) !important;
+  border-color: rgba(239, 68, 68, 0.65) !important;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+.seat-btn.occupied::after { background: rgba(239, 68, 68, 0.1); }
