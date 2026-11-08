@@ -40,8 +40,7 @@ export function parseErrorResponse(error: HttpErrorResponse): ErrorResponse {
 
 export function getDisplayMessage(err: ErrorResponse): string {
   if (err.fieldErrors?.length) {
-    const detalle = err.fieldErrors.map(f => `${f.field}: ${f.message}`).join('; ');
-    return err.message ? `${err.message} (${detalle})` : detalle;
+    return err.fieldErrors.map(f => f.message).join('; ');
   }
   if (err.message) return err.message;
   if (err.error) return err.error;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CustomizacionService } from '../../services/customizacion';
+import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { ImageService } from '../../services/image';
 import { Observable } from 'rxjs';
 import type { Customizacion } from '../../models/customizacion';
@@ -16,6 +17,7 @@ import type { Customizacion } from '../../models/customizacion';
 })
 export class HeaderComponent implements OnInit {
   private readonly imageService = inject(ImageService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   tema$: Observable<Customizacion | null>;
   isLightTheme = false;
@@ -59,8 +61,20 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/cartelera']);
+    this.confirmDialog
+      .confirm({
+        title: 'Cerrar sesión',
+        message: '¿Seguro que querés cerrar sesión? Vas a tener que volver a iniciar sesión para reservar o administrar el cine.',
+        confirmText: 'Sí, salir',
+        cancelText: 'Cancelar',
+        icon: 'logout',
+        danger: true,
+      })
+      .subscribe((confirmado) => {
+        if (!confirmado) return;
+        this.authService.logout();
+        this.router.navigate(['/cartelera']);
+      });
   }
 
   toggleTheme(): void {

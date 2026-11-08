@@ -1,6 +1,12 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, afterNextRender } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, afterNextRender, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { UsuarioService } from '../../services/usuario';
@@ -9,25 +15,37 @@ import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
+function passwordsIguales(group: AbstractControl): ValidationErrors | null {
+  const password = group.get('password')?.value;
+  const confirm = group.get('confirmPassword')?.value;
+  if (!password || !confirm) return null;
+  return password === confirm ? null : { passwordsNoCoinciden: true };
+}
+
 @Component({
   selector: 'app-crear-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './crear-admin.html',
   styleUrls: ['./crear-admin.css'],
 })
 export class CrearAdminComponent {
-
+  private readonly fb = inject(FormBuilder);
   private readonly initLoad = afterNextRender(() => this.cargarAdministradores());
-  adminData: RegistroRequest = {
-    nombre: '',
-    apellido: '',
-    email: '',
-    password: '',
-    telefono: ''
-  };
-  confirmPassword = '';
+
+  readonly form = this.fb.nonNullable.group(
+    {
+      nombre: ['', Validators.required],
+      apellido: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telefono: [''],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required],
+    },
+    { validators: passwordsIguales }
+  );
+
   loading = false;
   cargandoLista = true;
   errorMessage = '';
@@ -36,6 +54,8 @@ export class CrearAdminComponent {
   administradores: Usuario[] = [];
   pagina = 1;
   readonly pageSize = 6;
+  mostrarPassword = false;
+  mostrarConfirmPassword = false;
 
   constructor(
     private authService: AuthService,
@@ -59,6 +79,29 @@ export class CrearAdminComponent {
 
   get rangoHasta(): number {
     return Math.min(this.pagina * this.pageSize, this.administradores.length);
+  }
+
+  esInvalido(campo: string): boolean {
+    const control = this.form.get(campo);
+    return !!control && control.invalid && control.touched;
+  }
+
+  passwordsNoCoinciden(): boolean {
+    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+  }
+
+  onCampoBlur(): void {
+    refreshView(this.cdr);
+  }
+
+  alternarPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+    refreshView(this.cdr);
+  }
+
+  alternarConfirmPassword(): void {
+    this.mostrarConfirmPassword = !this.mostrarConfirmPassword;
+    refreshView(this.cdr);
   }
 
   cargarAdministradores(): void {
@@ -88,23 +131,35 @@ export class CrearAdminComponent {
   }
 
   onSubmit(): void {
+    if (this.form.invalid) {
+      return;
+    }
+
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
     refreshView(this.cdr);
 
-    this.authService.registrarAdmin(this.adminData).subscribe({
+    const { confirmPassword: _, ...valores } = this.form.getRawValue();
+    const adminData: RegistroRequest = {
+      ...valores,
+      telefono: valores.telefono?.trim() || undefined,
+    };
+
+    this.authService.registrarAdmin(adminData).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = `Administrador ${this.adminData.nombre} ${this.adminData.apellido} creado exitosamente.`;
-        this.adminData = {
+        this.successMessage = `Administrador ${adminData.nombre} ${adminData.apellido} creado exitosamente.`;
+        this.form.reset({
           nombre: '',
           apellido: '',
           email: '',
+          telefono: '',
           password: '',
-          telefono: ''
-        };
-        this.confirmPassword = '';
+          confirmPassword: '',
+        });
+        this.mostrarPassword = false;
+        this.mostrarConfirmPassword = false;
         this.cargarAdministradores();
         refreshView(this.cdr);
       },

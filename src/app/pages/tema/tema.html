@@ -1,5 +1,35 @@
 <div class="container">
-  <h2 class="mb-4">Personalizar Tema Visual</h2>
+  <div class="tema-toolbar">
+    <h2 class="mb-0">Personalizar Tema Visual</h2>
+    <div class="tema-acciones">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        (click)="guardarTema()"
+        [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar Tema' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        (click)="eliminarLogo()"
+        *ngIf="tema.logoUrl">
+        Eliminar Logo
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        (click)="eliminarFondo()"
+        *ngIf="fondoUrlValido">
+        Eliminar Fondo
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMensaje" class="alert alert-danger py-2 small mb-3">{{ errorMensaje }}</div>
 
   <div class="row">
     <!-- COLUMNA IZQUIERDA - CONFIGURACIÓN -->
@@ -233,7 +263,7 @@
 
     <!-- COLUMNA DERECHA - VISTA PREVIA -->
     <div class="col-md-6">
-      <div class="card sticky-top" style="top: 20px;">
+      <div class="card preview-sticky">
         <div class="card-header">
           <h5>Vista Previa</h5>
         </div>
@@ -321,29 +351,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Botones de acción -->
-  <div class="row mt-3">
-    <div class="col-12">
-      <div *ngIf="errorMensaje" class="alert alert-danger py-2 small mb-2">{{ errorMensaje }}</div>
-      <div class="d-flex gap-2 justify-content-end">
-        <button class="btn btn-secondary" (click)="cancelar()">
-          Cancelar
-        </button>
-        <button class="btn btn-primary" (click)="guardarTema()" [disabled]="guardando">
-          {{ guardando ? 'Guardando...' : 'Guardar Tema' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Añadir botones para eliminar logo/fondo -->
-  <div class="row mt-2">
-    <div class="col-12 d-flex justify-content-end gap-2">
-      <button class="btn btn-danger" (click)="eliminarLogo()" *ngIf="tema.logoUrl">Eliminar Logo</button>
-      <button class="btn btn-danger" (click)="eliminarFondo()" *ngIf="fondoUrlValido">Eliminar Fondo</button>
     </div>
   </div>
 </div>

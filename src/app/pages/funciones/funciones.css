@@ -50,7 +50,14 @@
   box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
 }
 .form-control::placeholder { color: var(--color-muted); }
-.form-select option { color: #000; background-color: #fff; }
+.form-select option {
+  background-color: #101827;
+  color: var(--color-fuente, #fff);
+}
+:host-context(.light-theme) .form-select option {
+  background-color: #ffffff;
+  color: #0d121f;
+}
 .form-control.is-invalid, .form-select.is-invalid { border-color: #f87171; background-image: none; }
 .form-text { color: var(--color-muted); }
 
