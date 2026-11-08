@@ -1,0 +1,154 @@
+<div class="container py-4 ficha-page">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="volver()">
+      <span class="material-icons font-icon-sm">arrow_back</span> Cartelera
+    </button>
+    <h2 class="mb-0 page-title">Ficha de la película</h2>
+  </div>
+
+  @if (cargando) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-3 text-muted">Cargando ficha…</p>
+    </div>
+  } @else if (errorCarga) {
+    <div class="alert alert-warning d-inline-block">
+      {{ errorCarga }}
+      <br />
+      <button type="button" class="btn btn-primary btn-sm mt-3" (click)="volver()">
+        Volver a Cartelera
+      </button>
+    </div>
+  } @else if (pelicula) {
+    <article class="ficha-card">
+      <div class="ficha-poster">
+        @if (pelicula.rutaImagen && !imageError) {
+          <img
+            [src]="imageService.getImageUrl(pelicula.rutaImagen)"
+            [alt]="pelicula.nombre"
+            (error)="onImageError()" />
+        } @else {
+          <div class="poster-fallback">
+            <span class="material-icons">movie</span>
+            <span>Sin póster</span>
+          </div>
+        }
+      </div>
+
+      <div class="ficha-body">
+        <div class="ficha-main">
+          @if (esProximamente) {
+            <span class="ficha-badge">Próximo estreno</span>
+          } @else if (estaEnCartelera) {
+            <span class="ficha-badge ficha-badge-now">En cartelera</span>
+          }
+
+          <h1 class="ficha-titulo">{{ pelicula.nombre }}</h1>
+
+          <p class="ficha-sinopsis">
+            {{ pelicula.sinopsis?.trim() || 'Sinopsis pendiente.' }}
+          </p>
+
+          <div class="ficha-meta">
+            @if (pelicula.genero) {
+              <div class="meta-item">
+                <span class="meta-label">Género</span>
+                <span class="meta-value">{{ etiquetaGenero(pelicula.genero) }}</span>
+              </div>
+            }
+            <div class="meta-item">
+              <span class="meta-label">Duración</span>
+              <span class="meta-value">{{ pelicula.duracionMinutos }} min</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Estreno</span>
+              <span class="meta-value">{{ pelicula.fechaEstreno | date:'dd/MM/yyyy' }}</span>
+            </div>
+            @if (pelicula.clasificacion) {
+              <div class="meta-item">
+                <span class="meta-label">Clasificación</span>
+                <span class="meta-value">{{ pelicula.clasificacion }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <aside class="ficha-side">
+          @if (pelicula.director) {
+            <div class="side-row">
+              <span class="material-icons side-icon">movie_creation</span>
+              <div>
+                <span class="side-label">Director</span>
+                <strong>{{ pelicula.director }}</strong>
+              </div>
+            </div>
+          }
+
+          @if (pelicula.elenco) {
+            <div class="side-row">
+              <span class="material-icons side-icon">star</span>
+              <div>
+                <span class="side-label">Elenco</span>
+                <p>{{ pelicula.elenco }}</p>
+              </div>
+            </div>
+          }
+
+          @if (pelicula.nominaciones) {
+            <div class="side-row">
+              <span class="material-icons side-icon">emoji_events</span>
+              <div>
+                <span class="side-label">Nominaciones</span>
+                <p>{{ pelicula.nominaciones }}</p>
+              </div>
+            </div>
+          }
+
+          @if (estaEnCartelera) {
+            <button type="button" class="btn btn-primary w-100 ficha-cta" (click)="irAFunciones()">
+              Ver funciones
+              <span class="material-icons font-icon-sm">confirmation_number</span>
+            </button>
+          } @else if (esProximamente) {
+            <p class="ficha-soon">Pronto disponible en boletería</p>
+          }
+        </aside>
+      </div>
+    </article>
+
+    @if (pelicula.descripcion?.trim()) {
+      <section class="ficha-section">
+        <h3>Descripción</h3>
+        <p class="ficha-descripcion">{{ pelicula.descripcion }}</p>
+      </section>
+    }
+
+    @if (trailerYoutubeId) {
+      <section class="ficha-section">
+        <h3>Tráiler</h3>
+        <p class="trailer-hint">Pasá el mouse para reproducir</p>
+        <div
+          class="trailer-frame"
+          (mouseenter)="iniciarTrailer()"
+          (mouseleave)="detenerTrailer()">
+          @if (trailerReproduciendo && trailerUrl) {
+            <iframe
+              [src]="trailerUrl"
+              title="Tráiler de {{ pelicula.nombre }}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          } @else {
+            <button type="button" class="trailer-preview" (click)="iniciarTrailer()" aria-label="Reproducir tráiler">
+              @if (trailerThumbnailUrl) {
+                <img [src]="trailerThumbnailUrl" [alt]="'Tráiler de ' + pelicula.nombre" />
+              }
+              <span class="trailer-play">
+                <span class="material-icons">play_circle</span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

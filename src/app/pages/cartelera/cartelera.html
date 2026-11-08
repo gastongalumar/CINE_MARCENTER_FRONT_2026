@@ -1,0 +1,332 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
+    <h2 class="mb-0 page-title-cinematic">Cartelera de Películas</h2>
+    <button (click)="volver()" class="btn btn-secondary btn-sm">
+      <span class="material-icons font-icon-sm">arrow_back</span> Volver
+    </button>
+  </div>
+
+  <nav class="seccion-nav mb-4" aria-label="Secciones de la página" *ngIf="!loading && !hayFiltrosActivos()">
+    <button type="button" class="seccion-nav-btn" [class.active]="seccionActiva === 'proximos'"
+      (click)="irASeccion('proximos')">
+      <span class="material-icons font-icon-sm">upcoming</span> Próximos estrenos
+    </button>
+    <button type="button" class="seccion-nav-btn" [class.active]="seccionActiva === 'cartelera'"
+      (click)="irASeccion('cartelera')">
+      <span class="material-icons font-icon-sm">movie</span> Cartelera
+    </button>
+    <button type="button" class="seccion-nav-btn" [class.active]="seccionActiva === 'candy'"
+      (click)="irASeccion('candy')">
+      <span class="material-icons font-icon-sm">fastfood</span> Candy
+    </button>
+  </nav>
+
+  <div *ngIf="authService.isAuthenticated()" class="card filter-bar mb-4" [class.filter-bar-open]="generoAbierto">
+    <div class="card-body">
+      <form class="row g-2 align-items-end" (ngSubmit)="aplicarFiltrosLocales(); $event.preventDefault()">
+        <div class="col-md-5">
+          <label class="form-label small mb-1" for="filtroNombre">Buscar por nombre</label>
+          <input id="filtroNombre" type="text" class="form-control filter-input" name="filtroNombre"
+            [(ngModel)]="filtroNombre" placeholder="Nombre de la película..."
+            (input)="aplicarFiltrosLocales()" autocomplete="off">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small mb-1">Género</label>
+          <div class="genero-dropdown" [class.open]="generoAbierto">
+            <button type="button" class="genero-toggle w-100" (click)="toggleGeneroDropdown($event)">
+              <span>{{ filtroGenero ? etiquetaGenero(filtroGenero) : 'Todos los géneros' }}</span>
+              <span class="material-icons genero-chevron">expand_more</span>
+            </button>
+            <ul class="genero-menu shadow-lg" *ngIf="generoAbierto" (click)="$event.stopPropagation()">
+              <li>
+                <button type="button" class="genero-option" [class.active]="!filtroGenero"
+                  (click)="seleccionarGenero('')">Todos los géneros</button>
+              </li>
+              <li *ngFor="let genero of generos">
+                <button type="button" class="genero-option" [class.active]="filtroGenero === genero"
+                  (click)="seleccionarGenero(genero)">{{ etiquetaGenero(genero) }}</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm flex-grow-1" [disabled]="loading">
+            Buscar
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm flex-grow-1" (click)="limpiarFiltros()"
+            [disabled]="loading || !hayFiltrosActivos()">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4" *ngIf="!loading; else loadingTemplate">
+    <ng-container *ngIf="!hayFiltrosActivos()">
+      <!-- Próximos estrenos (carrusel) arriba -->
+      <div class="col-12 seccion-ancla" id="seccion-proximos">
+        <h3 class="section-heading">Próximos estrenos</h3>
+        <p class="section-subtitle">Llegan en los próximos {{ diasProximamente }} días</p>
+
+        <div *ngIf="proximosHero.length && heroActual as hero; else sinProximos">
+          <div class="estrenos-hero" (mouseenter)="detenerHeroAutoplay()" (mouseleave)="iniciarHeroAutoplay()">
+            <div
+              class="estrenos-hero-bg"
+              *ngIf="hero.rutaImagen && !imageErrorMap[hero.id!]"
+              [style.backgroundImage]="'url(' + imageService.getImageUrl(hero.rutaImagen) + ')'"></div>
+            <div class="estrenos-hero-overlay"></div>
+
+            <button type="button" class="hero-nav hero-nav-prev" (click)="heroAnterior()" aria-label="Anterior"
+              *ngIf="proximosHero.length > 1">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <button type="button" class="hero-nav hero-nav-next" (click)="heroSiguiente()" aria-label="Siguiente"
+              *ngIf="proximosHero.length > 1">
+              <span class="material-icons">chevron_right</span>
+            </button>
+
+            <div class="estrenos-hero-content">
+              <div class="hero-poster">
+                <img
+                  *ngIf="hero.rutaImagen && !imageErrorMap[hero.id!]"
+                  [src]="imageService.getImageUrl(hero.rutaImagen)"
+                  [alt]="hero.nombre"
+                  (error)="onMovieImageError(hero.id!)" />
+                <div *ngIf="!hero.rutaImagen || imageErrorMap[hero.id!]" class="hero-poster-fallback">
+                  <span class="material-icons">movie</span>
+                </div>
+              </div>
+
+              <div class="hero-info">
+                <span class="hero-badge hero-badge-upcoming">
+                  <span class="material-icons font-icon-xs">upcoming</span> Próximamente
+                </span>
+                <h2 class="hero-title">{{ hero.nombre }}</h2>
+                <p class="hero-meta">
+                  <span *ngIf="hero.genero">{{ etiquetaGenero(hero.genero) }}</span>
+                  <span *ngIf="hero.genero">·</span>
+                  <span>{{ hero.duracionMinutos }} min</span>
+                  <span>·</span>
+                  <span>Estreno {{ hero.fechaEstreno | date:'dd/MM/yyyy' }}</span>
+                </p>
+                <p class="hero-synopsis">{{ textoSinopsis(hero) }}</p>
+                <p class="hero-soon-note">Pronto disponible en boletería</p>
+                <button
+                  type="button"
+                  class="btn btn-outline-light btn-sm mt-3"
+                  (click)="irADetalle(hero.id!)">
+                  Ver detalle
+                </button>
+              </div>
+            </div>
+
+            <div class="hero-dots" *ngIf="proximosHero.length > 1">
+              <button
+                type="button"
+                class="hero-dot"
+                *ngFor="let p of proximosHero; let i = index"
+                [class.active]="i === heroIndex"
+                (click)="irAHero(i)"
+                [attr.aria-label]="'Próximo estreno ' + (i + 1)"></button>
+            </div>
+          </div>
+        </div>
+        <ng-template #sinProximos>
+          <div class="alert alert-info d-inline-block mb-0">
+            No hay próximos estrenos cargados por ahora.
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Cartelera (grilla) -->
+      <div class="col-12 seccion-ancla mt-3" id="seccion-cartelera">
+        <h3 class="section-heading">En cartelera</h3>
+        <p class="section-subtitle">Películas disponibles ahora</p>
+      </div>
+
+      <ng-container *ngFor="let pelicula of peliculas">
+        <ng-container *ngTemplateOutlet="peliculaCard; context: { pelicula: pelicula, proximamente: false }"></ng-container>
+      </ng-container>
+
+      <div class="col-12 text-center mt-2" *ngIf="hasMore()">
+        <button (click)="cargarMas()" class="btn btn-secondary btn-lg px-5" [disabled]="loadingMore">
+          <span *ngIf="loadingMore" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Cargar Más
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="hayFiltrosActivos()">
+      <div class="col-12" *ngIf="peliculasFiltradas.length">
+        <h3 class="section-heading">Resultados ({{ peliculasFiltradas.length }})</h3>
+      </div>
+
+      <ng-container *ngFor="let pelicula of peliculasFiltradas">
+        <ng-container *ngTemplateOutlet="peliculaCard; context: { pelicula: pelicula, proximamente: esPeliculaProximamente(pelicula) }"></ng-container>
+      </ng-container>
+    </ng-container>
+
+    <div class="col-12 text-center py-5"
+      *ngIf="!loading && hayFiltrosActivos() && peliculasFiltradas.length === 0">
+      <div class="alert alert-info d-inline-block">
+        No hay películas que coincidan con el filtro.
+      </div>
+    </div>
+
+    <div class="col-12 text-center py-5"
+      *ngIf="!loading && !hayFiltrosActivos() && peliculas.length === 0 && peliculasProximamente.length === 0">
+      <div class="alert alert-info d-inline-block">
+        No hay películas disponibles en este momento.
+      </div>
+    </div>
+
+  </div>
+
+  <ng-template #peliculaCard let-pelicula="pelicula" let-proximamente="proximamente">
+    <div class="col-xl-3 col-lg-4 col-sm-6 mb-2 pelicula-card">
+      <div class="card h-100 movie-card-premium" [class.movie-card-upcoming]="proximamente">
+        <div class="poster-wrapper">
+          <img
+            *ngIf="pelicula.rutaImagen && !imageErrorMap[pelicula.id!]"
+            [src]="imageService.getImageUrl(pelicula.rutaImagen)"
+            class="card-img-top movie-poster"
+            alt="{{ pelicula.nombre }}"
+            (error)="onMovieImageError(pelicula.id!)">
+          <div *ngIf="!pelicula.rutaImagen || imageErrorMap[pelicula.id!]" class="poster-fallback">
+            <span class="material-icons fallback-icon">movie</span>
+            <span class="fallback-text">Sin Póster</span>
+          </div>
+          <div class="upcoming-badge-float" *ngIf="proximamente">
+            <span class="material-icons font-icon-xs">upcoming</span> Próximamente
+          </div>
+          <div class="duration-badge-float">
+            <span class="material-icons font-icon-xs">schedule</span> {{ pelicula.duracionMinutos }} min
+          </div>
+        </div>
+        <div class="card-body movie-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title movie-title-text" [title]="pelicula.nombre">{{ pelicula.nombre }}</h5>
+            <p class="card-text movie-synopsis" [title]="textoSinopsis(pelicula)">
+              {{ textoSinopsis(pelicula) }}
+            </p>
+            <p class="card-text release-date-text">
+              <span class="material-icons font-icon-xs text-muted">calendar_today</span>
+              Estreno: {{ pelicula.fechaEstreno | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+          <div class="mt-3 d-grid gap-2">
+            <button
+              type="button"
+              class="btn btn-outline-light w-100 btn-movie-detail"
+              (click)="irADetalle(pelicula.id!)">
+              Ver detalle <span class="material-icons font-icon-sm">info</span>
+            </button>
+            <button
+              *ngIf="!proximamente"
+              type="button"
+              (click)="irAFunciones(pelicula.id!)"
+              class="btn btn-primary w-100 btn-buy-ticket">
+              Ver Funciones <span class="material-icons font-icon-sm">confirmation_number</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #loadingTemplate>
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Candy + publicidad emulada (contenido estático de TP) -->
+  <section class="marketing-zone mt-5 seccion-ancla" id="seccion-candy" *ngIf="!loading && !hayFiltrosActivos()"
+    aria-label="Promociones y candy bar">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <h3 class="section-heading">Candy Bar</h3>
+        <p class="section-subtitle">Snacks y combos · material promocional simulado</p>
+
+        <div class="candy-carousel">
+          <button type="button" class="candy-nav candy-nav-prev" (click)="candyAnterior()" aria-label="Anterior">
+            <span class="material-icons">chevron_left</span>
+          </button>
+
+          <div class="candy-slide" *ngFor="let slide of candySlides; let i = index" [class.active]="i === candyIndex">
+            <img [src]="slide.src" [alt]="slide.titulo" loading="lazy" />
+            <div class="candy-caption">
+              <strong>{{ slide.titulo }}</strong>
+              <span>{{ slide.subtitulo }}</span>
+            </div>
+          </div>
+
+          <button type="button" class="candy-nav candy-nav-next" (click)="candySiguiente()" aria-label="Siguiente">
+            <span class="material-icons">chevron_right</span>
+          </button>
+
+          <div class="candy-dots">
+            <button
+              type="button"
+              class="candy-dot"
+              *ngFor="let slide of candySlides; let i = index"
+              [class.active]="i === candyIndex"
+              (click)="irACandy(i)"
+              [attr.aria-label]="'Slide ' + (i + 1)"></button>
+          </div>
+        </div>
+
+        <h3 class="section-heading mt-4">Noticias y eventos</h3>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6" *ngFor="let evento of promoEventos">
+            <article class="evento-card">
+              <div class="evento-media">
+                <img [src]="evento.src" [alt]="evento.titulo" loading="lazy" />
+              </div>
+              <div class="evento-body">
+                <h4>{{ evento.titulo }}</h4>
+                <p>{{ evento.texto }}</p>
+                @if (evento.link) {
+                  <a class="btn btn-promo-info" [routerLink]="evento.link">Más info</a>
+                } @else {
+                  <button type="button" class="btn btn-promo-info" disabled>Más info</button>
+                }
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <aside class="col-lg-4">
+        <h3 class="section-heading">Beneficios · Promociones</h3>
+        <p class="section-subtitle">Publicidad simulada para el TP</p>
+
+        <article class="sidebar-promo">
+          <img [src]="promoSidebar.src" [alt]="promoSidebar.titulo" loading="lazy" />
+          <div class="sidebar-promo-body">
+            <h4>{{ promoSidebar.titulo }}</h4>
+            <p>{{ promoSidebar.detalle }}</p>
+            <button type="button" class="btn btn-promo-info" disabled>Más info</button>
+          </div>
+        </article>
+
+        <div class="newsletter-box mt-3">
+          <span class="material-icons newsletter-icon">mail</span>
+          <p>Suscribite a nuestro newsletter</p>
+          <span class="newsletter-hint">Próximamente disponible</span>
+        </div>
+
+        <div class="brand-chip mt-3">
+          <img src="assets/images/logo-marcenter.png" alt="Cine Marcenter" class="brand-chip-logo" />
+          <div>
+            <strong>Cine Marcenter</strong>
+            <span>Mar del Plata</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
