@@ -1,0 +1,302 @@
+<div class="container-fluid py-4">
+  <!-- Encabezado -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <div>
+      <h2 class="mb-0">
+        <span class="material-icons align-middle">analytics</span>
+        Estadísticas y Reportes
+      </h2>
+      <p class="text-muted mb-0 small">Detalle de ventas, ocupación y medios de pago</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="recargarTab()">
+        <span class="material-icons">refresh</span> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    @for (tab of tabs; track tab.id) {
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="tabActivo() === tab.id" (click)="cambiarTab(tab.id)">
+          <span class="material-icons">{{ tab.icono }}</span>
+          {{ tab.label }}
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <p class="mt-2 text-muted small mb-0">Cargando datos…</p>
+    </div>
+  } @else {
+    <!-- ===================== Ventas diarias ===================== -->
+    @if (tabActivo() === 'ventas-diarias') {
+      <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+        <label class="mb-0 small text-muted" for="dias">Período:</label>
+        <select
+          id="dias"
+          class="form-select form-select-sm w-auto"
+          [ngModel]="diasSeleccionados()"
+          (ngModelChange)="cambiarPeriodo($event)">
+          @for (opcion of [7, 14, 30, 60, 90]; track opcion) {
+            <option [ngValue]="opcion">Últimos {{ opcion }} días</option>
+          }
+        </select>
+        <span class="ms-auto small text-muted">
+          Total del período: <strong>{{ totalPeriodo() | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</strong>
+        </span>
+      </div>
+
+      @if (ventasDiarias().length) {
+        <div class="table-responsive">
+          <table class="table table-striped tabla-reporte">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th class="text-end">Reservas</th>
+                <th class="text-end">Entradas</th>
+                <th class="text-end">Ventas</th>
+                <th class="barra-col">Participación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dia of ventasDiarias(); track dia.fecha) {
+                <tr>
+                  <td>{{ dia.fecha | fechaApi: 'dd/MM/yyyy' }}</td>
+                  <td class="text-end">{{ dia.reservas }}</td>
+                  <td class="text-end">{{ dia.entradas }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ dia.ventas | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+                  </td>
+                  <td>
+                    <div class="barra-container">
+                      <div class="barra-fill" [style.width.%]="anchoBarra(dia.ventas, maxVentaDia())"></div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="fw-bold">
+                <td>TOTAL</td>
+                <td class="text-end">{{ sumar('reservas') }}</td>
+                <td class="text-end">{{ sumar('entradas') }}</td>
+                <td class="text-end">{{ totalPeriodo() | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      } @else {
+        <div class="alert alert-info">Sin datos de ventas diarias.</div>
+      }
+    }
+
+    <!-- ===================== Por película ===================== -->
+    @if (tabActivo() === 'peliculas') {
+      @if (ventasPelicula().length) {
+        <div class="table-responsive">
+          <table class="table table-striped tabla-reporte">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Película</th>
+                <th class="text-end">Reservas</th>
+                <th class="text-end">Entradas</th>
+                <th class="text-end">Ventas</th>
+                <th class="barra-col">Popularidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of ventasPelicula(); track item.peliculaId; let i = $index) {
+                <tr>
+                  <td><span class="badge-rank" [class.oro]="i === 0" [class.plata]="i === 1" [class.bronce]="i === 2">{{ i + 1 }}</span></td>
+                  <td class="fw-semibold">{{ item.peliculaNombre }}</td>
+                  <td class="text-end">{{ item.totalReservas }}</td>
+                  <td class="text-end">{{ item.totalEntradas }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ item.totalVentas | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+                  </td>
+                  <td>
+                    <div class="barra-container">
+                      <div class="barra-fill" [style.width.%]="anchoBarra(item.totalVentas, maxVentaPelicula())"></div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="alert alert-info">Sin datos de películas.</div>
+      }
+    }
+
+    <!-- ===================== Por sala ===================== -->
+    @if (tabActivo() === 'salas') {
+      @if (ventasSala().length) {
+        <div class="row g-3">
+          @for (sala of ventasSala(); track sala.salaId) {
+            <div class="col-md-6 col-xl-4">
+              <div class="card sala-card">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <span class="material-icons">meeting_room</span>
+                    {{ sala.salaNombre }}
+                  </h5>
+                  <div class="row text-center mb-3">
+                    <div class="col-4">
+                      <div class="sala-stat-num">{{ sala.capacidad }}</div>
+                      <div class="sala-stat-label">Capacidad</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="sala-stat-num">{{ sala.totalFunciones }}</div>
+                      <div class="sala-stat-label">Funciones</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="sala-stat-num">{{ sala.totalEntradas }}</div>
+                      <div class="sala-stat-label">Entradas</div>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1 small">
+                      <span>Ocupación promedio</span>
+                      <strong>{{ sala.pctOcupacion }}%</strong>
+                    </div>
+                    <div class="progress" style="height: 10px">
+                      <div
+                        class="progress-bar"
+                        [style.width.%]="sala.pctOcupacion"
+                        [class.bg-success]="sala.pctOcupacion >= 70"
+                        [class.bg-warning]="sala.pctOcupacion >= 40 && sala.pctOcupacion < 70"
+                        [class.bg-danger]="sala.pctOcupacion < 40"></div>
+                    </div>
+                  </div>
+                  <div class="text-end mt-2">
+                    <span class="ventas-total">{{ sala.totalVentas | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</span>
+                    <small class="text-muted ms-1">ingresos</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="alert alert-info">Sin datos de salas.</div>
+      }
+    }
+
+    <!-- ===================== Funciones ===================== -->
+    @if (tabActivo() === 'funciones') {
+      <div class="form-check form-switch mb-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="soloVigentes"
+          [ngModel]="soloVigentes()"
+          (ngModelChange)="cambiarSoloVigentes($event)" />
+        <label class="form-check-label" for="soloVigentes">Sólo funciones vigentes</label>
+      </div>
+
+      @if (ocupacionFunciones().length) {
+        <div class="table-responsive">
+          <table class="table table-striped tabla-reporte">
+            <thead>
+              <tr>
+                <th>Película</th>
+                <th>Sala</th>
+                <th>Horario</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Ocupación</th>
+                <th class="barra-col">Nivel</th>
+                <th class="text-end">Ventas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (funcion of ocupacionFunciones(); track funcion.funcionId) {
+                <tr>
+                  <td class="fw-semibold">{{ funcion.peliculaNombre }}</td>
+                  <td>{{ funcion.salaNombre }}</td>
+                  <td>{{ funcion.horario | fechaApi: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="text-end">{{ funcion.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                  <td class="text-end">{{ funcion.asientosOcupados }}/{{ funcion.capacidad }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="barra-container flex-fill">
+                        <div
+                          class="barra-fill"
+                          [style.width.%]="funcion.pctOcupacion"
+                          [class.barra-llena]="funcion.pctOcupacion >= 80"
+                          [class.barra-media]="funcion.pctOcupacion >= 40 && funcion.pctOcupacion < 80"></div>
+                      </div>
+                      <small class="text-nowrap">{{ funcion.pctOcupacion }}%</small>
+                    </div>
+                  </td>
+                  <td class="text-end fw-semibold">
+                    {{ funcion.totalVentas | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="alert alert-info">Sin funciones para mostrar.</div>
+      }
+    }
+
+    <!-- ===================== Métodos de pago ===================== -->
+    @if (tabActivo() === 'pagos') {
+      @if (metodosPago().length) {
+        <div class="row g-3 justify-content-center">
+          <div class="col-lg-8">
+            <div class="card sala-card">
+              <div class="card-body">
+                <h5 class="card-title mb-4">
+                  <span class="material-icons">payments</span>
+                  Distribución de métodos de pago
+                </h5>
+                @for (metodo of metodosPago(); track metodo.metodo) {
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                      <span>
+                        <span class="material-icons align-middle me-1">{{ iconoPago(metodo.metodo) }}</span>
+                        {{ etiquetaPago(metodo.metodo) }}
+                      </span>
+                      <span><strong>{{ metodo.cantidad }}</strong> ({{ metodo.porcentaje }}%)</span>
+                    </div>
+                    <div class="progress" style="height: 18px; border-radius: 10px">
+                      <div
+                        class="progress-bar"
+                        role="progressbar"
+                        [style.width.%]="metodo.porcentaje"
+                        [class.bg-success]="metodo.metodo === 'EFECTIVO'"
+                        [class.bg-primary]="metodo.metodo === 'TARJETA'"
+                        [class.bg-warning]="metodo.metodo === 'MERCADO_PAGO'"
+                        [class.bg-info]="metodo.metodo === 'TRANSFERENCIA'">
+                        {{ metodo.porcentaje }}%
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="alert alert-info">Sin datos de pagos.</div>
+      }
+    }
+  }
+</div>

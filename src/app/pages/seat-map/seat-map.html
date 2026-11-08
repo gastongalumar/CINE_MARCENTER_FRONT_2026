@@ -1,0 +1,74 @@
+<!-- Pantalla del cine -->
+<div class="screen-container">
+  <div class="screen-glow"></div>
+  <div class="screen-label">Escenario / Pantalla</div>
+</div>
+
+<!-- Leyenda -->
+<div class="legend d-flex justify-content-center gap-4 flex-wrap">
+  <div class="d-flex align-items-center gap-2">
+    <div class="seat-preview disponible"></div>
+    <span class="legend-label">Disponible</span>
+  </div>
+  <div class="d-flex align-items-center gap-2" *ngIf="!soloLectura">
+    <div class="seat-preview seleccionado"></div>
+    <span class="legend-label">Tu Selección</span>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <div class="seat-preview ocupado"></div>
+    <span class="legend-label">Ocupado</span>
+  </div>
+</div>
+
+<!-- Grid de asientos -->
+<div class="seats-grid-container">
+  <!-- Header de columnas -->
+  <div class="seats-row header-row">
+    <div class="seat-label"></div>
+    <div class="seats-row-content">
+      <div class="seats-section">
+        <div class="col-number" *ngFor="let col of columnasIzquierda()">{{ col }}</div>
+      </div>
+      <div class="aisle"></div>
+      <div class="seats-section">
+        <div class="col-number" *ngFor="let col of columnasDerecha()">{{ col }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filas de asientos -->
+  <div class="seats-row" *ngFor="let fila of filasMapa()">
+    <div class="seat-label">{{ fila.letra }}</div>
+    <div class="seats-row-content">
+      <div class="seats-section">
+        <button
+          *ngFor="let asiento of fila.izquierda"
+          type="button"
+          class="seat-btn"
+          [class.selected]="asiento.estado === 'seleccionada'"
+          [class.occupied]="asiento.estado === 'ocupada'"
+          [disabled]="asiento.estado === 'ocupada' || soloLectura"
+          [attr.aria-pressed]="asiento.estado === 'seleccionada'"
+          [attr.aria-label]="asiento.etiqueta"
+          [title]="asiento.etiqueta"
+          (click)="alternar(asiento.etiqueta)">
+        </button>
+      </div>
+      <div class="aisle"></div>
+      <div class="seats-section">
+        <button
+          *ngFor="let asiento of fila.derecha"
+          type="button"
+          class="seat-btn"
+          [class.selected]="asiento.estado === 'seleccionada'"
+          [class.occupied]="asiento.estado === 'ocupada'"
+          [disabled]="asiento.estado === 'ocupada' || soloLectura"
+          [attr.aria-pressed]="asiento.estado === 'seleccionada'"
+          [attr.aria-label]="asiento.etiqueta"
+          [title]="asiento.etiqueta"
+          (click)="alternar(asiento.etiqueta)">
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

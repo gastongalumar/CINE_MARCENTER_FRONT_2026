@@ -1,0 +1,134 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Volver</button>
+    <h2 class="mb-0">Administradores</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card shadow-lg glass-card">
+        <div class="card-header bg-transparent border-bottom">
+          <h3 class="mb-0 h5">
+            <span class="material-icons align-middle me-2">admin_panel_settings</span>
+            Crear Nuevo Administrador
+          </h3>
+          <p class="card-subtitle mt-2 mb-0">La sesión actual se mantiene activa al crear otro admin</p>
+        </div>
+
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()" #adminForm="ngForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre *</label>
+                <input type="text" class="form-control" [(ngModel)]="adminData.nombre" name="nombre" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Apellido *</label>
+                <input type="text" class="form-control" [(ngModel)]="adminData.apellido" name="apellido" required>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" [(ngModel)]="adminData.email" name="email" required email>
+                <small class="form-hint">El administrador usará este email para iniciar sesión</small>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" [(ngModel)]="adminData.telefono" name="telefono"
+                  placeholder="+54 9 11 1234-5678">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Contraseña *</label>
+                <input type="password" class="form-control" [(ngModel)]="adminData.password" name="password" required minlength="6">
+                <small class="form-hint">Mínimo 6 caracteres</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Confirmar Contraseña *</label>
+                <input type="password" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+              </div>
+            </div>
+
+            <div *ngIf="adminData.password !== confirmPassword && confirmPassword"
+                 class="alert alert-danger mt-3 py-2">
+              <span class="material-icons small me-1">error</span>
+              Las contraseñas no coinciden
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+            <div *ngIf="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary"
+                [disabled]="!adminForm.form.valid || adminData.password !== confirmPassword || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Creando...' : 'Crear Administrador' }}
+                <span class="material-icons ms-2">person_add</span>
+              </button>
+              <button type="button" class="btn btn-secondary" routerLink="/admin">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card shadow-lg glass-card h-100">
+        <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+          <h3 class="mb-0 h5">
+            <span class="material-icons align-middle me-2">group</span>
+            Administradores registrados
+          </h3>
+          <span class="badge bg-secondary">{{ administradores.length }}</span>
+        </div>
+
+        <div class="card-body">
+          <div *ngIf="errorCarga" class="alert alert-danger py-2 small">{{ errorCarga }}</div>
+
+          <div *ngIf="cargandoLista" class="text-center py-4">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!cargandoLista">
+            <div class="table-responsive" *ngIf="administradores.length; else sinAdmins">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Registro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let admin of administradores">
+                    <td>{{ admin.nombre }} {{ admin.apellido }}</td>
+                    <td>{{ admin.email }}</td>
+                    <td>{{ admin.telefono || '—' }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.bg-success]="admin.estado === 'ACTIVO'"
+                        [class.bg-secondary]="admin.estado !== 'ACTIVO'">
+                        {{ admin.estado }}
+                      </span>
+                    </td>
+                    <td>{{ admin.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #sinAdmins>
+              <p class="empty-hint mb-0">No hay administradores registrados.</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

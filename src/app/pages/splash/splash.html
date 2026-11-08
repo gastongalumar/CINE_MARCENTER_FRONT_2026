@@ -1,0 +1,17 @@
+<div class="splash-card" role="status" aria-live="polite">
+  <img
+    *ngIf="logoUrl; else iconFallback"
+    [src]="logoUrl"
+    alt="Logo"
+    class="splash-logo"
+    (error)="logoUrl = null"
+  />
+  <ng-template #iconFallback>
+    <div class="splash-icon"><span class="material-icons">movie</span></div>
+  </ng-template>
+  <h1 class="splash-title">{{ nombreCine }}</h1>
+  <p class="splash-sub">Cargando cartelera, por favor espere...</p>
+  <div class="splash-spinner">
+    <div class="spinner-border" role="status"><span class="visually-hidden">Cargando...</span></div>
+  </div>
+</div>

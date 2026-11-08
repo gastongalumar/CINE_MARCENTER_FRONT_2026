@@ -1,0 +1,126 @@
+/* Tabs */
+.nav-tabs { border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+.nav-tabs .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  color: var(--color-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px 8px 0 0;
+  padding: 0.55rem 1rem;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.nav-tabs .nav-link .material-icons { font-size: 1.1rem; }
+.nav-tabs .nav-link:hover {
+  color: var(--color-fuente);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+.nav-tabs .nav-link.active {
+  color: #0d121f !important;
+  background-color: var(--color-slider) !important;
+  border-color: var(--color-slider) !important;
+  font-weight: 700;
+}
+
+/* Tabla */
+.tabla-reporte { color: var(--color-fuente); }
+.tabla-reporte thead th {
+  color: var(--color-slider);
+  border-bottom: 2px solid var(--color-slider);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.tabla-reporte tbody tr:nth-of-type(odd) { background: rgba(255, 255, 255, 0.025); }
+.tabla-reporte tbody tr:hover { background: rgba(255, 255, 255, 0.07); }
+.tabla-reporte tbody td { border-color: rgba(255, 255, 255, 0.07); }
+.tabla-reporte tfoot td {
+  border-top: 2px solid var(--color-slider);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-fuente);
+}
+
+/* Barras */
+.barra-col { min-width: 130px; }
+.barra-container {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+  min-width: 60px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.barra-fill { height: 100%; background: var(--color-slider); border-radius: 4px; transition: width 0.46s; }
+.barra-fill.barra-llena { background: #22c55e; }
+.barra-fill.barra-media { background: #f5c518; }
+
+/* Ranking */
+.badge-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-fuente);
+}
+.badge-rank.oro { background: #ffd700; color: #000; }
+.badge-rank.plata { background: #c0c0c0; color: #000; }
+.badge-rank.bronce { background: #cd7f32; color: #fff; }
+
+/* Tarjetas */
+.sala-card {
+  background: var(--color-contenedor);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-fuente);
+  height: 100%;
+  border-radius: 12px;
+}
+.sala-card .card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-fuente);
+  font-weight: 700;
+}
+.sala-card .card-title .material-icons { color: var(--color-slider); }
+.sala-stat-num { font-size: 1.35rem; font-weight: 800; color: var(--color-slider); }
+.sala-stat-label { font-size: 0.72rem; color: var(--color-muted); font-weight: 600; text-transform: uppercase; }
+.ventas-total { font-size: 1.15rem; font-weight: 800; color: var(--color-slider); }
+
+/* Controles */
+.form-select, .form-control {
+  color: var(--color-fuente);
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.form-select:focus, .form-control:focus {
+  color: var(--color-fuente);
+  background-color: rgba(0, 0, 0, 0.25);
+  border-color: var(--color-slider);
+  box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
+}
+.form-select option { color: #000; background: #fff; }
+.form-check-label { color: var(--color-fuente); }
+.form-check-input:checked { background-color: var(--color-slider); border-color: var(--color-slider); }
+.progress {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.alert-info {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: rgba(34, 211, 238, 0.3);
+  color: var(--color-fuente);
+}
+.btn-outline-secondary { color: var(--color-fuente); border-color: rgba(255, 255, 255, 0.2); }
+.btn-outline-secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--color-fuente); }
+.btn .material-icons { font-size: 1rem; vertical-align: middle; }
+.text-muted { color: var(--color-muted) !important; }

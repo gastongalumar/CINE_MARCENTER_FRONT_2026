@@ -1,0 +1,388 @@
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0">
+      <span class="material-icons align-middle me-1">schedule</span>
+      Gestión de Funciones
+    </h2>
+    <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Alta -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="card app-card">
+        <div class="card-header p-0">
+          <ul class="nav nav-tabs card-header-tabs m-0">
+            <li class="nav-item">
+              <button
+                type="button"
+                class="nav-link"
+                [class.active]="modo() === 'individual'"
+                (click)="cambiarModo('individual')">
+                Individual
+              </button>
+            </li>
+            <li class="nav-item">
+              <button
+                type="button"
+                class="nav-link"
+                [class.active]="modo() === 'rango'"
+                (click)="cambiarModo('rango')">
+                Por rango
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-body">
+          <!-- ---------------- Individual ---------------- -->
+          @if (modo() === 'individual') {
+            <form [formGroup]="formIndividual" (ngSubmit)="crearFuncion()" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="peliculaId">Película *</label>
+                <select
+                  id="peliculaId"
+                  class="form-select"
+                  formControlName="peliculaId"
+                  [class.is-invalid]="esInvalido(formIndividual, 'peliculaId')">
+                  <option [ngValue]="null">Seleccionar…</option>
+                  @for (pelicula of peliculas(); track pelicula.id) {
+                    <option [ngValue]="pelicula.id">{{ pelicula.nombre }}</option>
+                  }
+                </select>
+                @if (esInvalido(formIndividual, 'peliculaId')) {
+                  <div class="invalid-feedback d-block">Seleccioná una película.</div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="salaId">Sala *</label>
+                <select
+                  id="salaId"
+                  class="form-select"
+                  formControlName="salaId"
+                  [class.is-invalid]="esInvalido(formIndividual, 'salaId')">
+                  <option [ngValue]="null">Seleccionar…</option>
+                  @for (sala of salas(); track sala.id) {
+                    <option [ngValue]="sala.id">{{ sala.nombre }} ({{ sala.filas }}×{{ sala.columnas }})</option>
+                  }
+                </select>
+                @if (esInvalido(formIndividual, 'salaId')) {
+                  <div class="invalid-feedback d-block">Seleccioná una sala.</div>
+                }
+              </div>
+
+              <div class="cine-picker-panel">
+                <p class="cine-picker-panel-title">
+                  <span class="material-icons">event_available</span>
+                  Fecha y horario
+                </p>
+                <div class="cine-picker-dual">
+                  <div class="cine-picker-field">
+                    <app-cine-date-picker
+                      label="Fecha *"
+                      icon="calendar_today"
+                      placeholder="Elegir fecha"
+                      formControlName="fecha" />
+                    @if (esInvalido(formIndividual, 'fecha')) {
+                      <div class="invalid-feedback d-block">Indicá la fecha de la función.</div>
+                    }
+                  </div>
+                  <div class="cine-picker-field">
+                    <app-cine-time-picker
+                      label="Hora *"
+                      icon="schedule"
+                      placeholder="Elegir hora"
+                      [stepMinutos]="5"
+                      formControlName="hora" />
+                    @if (esInvalido(formIndividual, 'hora')) {
+                      <div class="invalid-feedback d-block">Indicá la hora de la función.</div>
+                    }
+                  </div>
+                </div>
+                @if (resumenFuncionIndividual(); as resumen) {
+                  <div class="cine-picker-summary">
+                    <span class="material-icons" style="font-size:1.1rem">movie</span>
+                    Función programada:
+                    <strong>{{ resumen }}</strong>
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="precio">Precio de la entrada *</label>
+                <input
+                  id="precio"
+                  type="number"
+                  class="form-control"
+                  formControlName="precio"
+                  min="1"
+                  step="0.01"
+                  [class.is-invalid]="esInvalido(formIndividual, 'precio')" />
+                @if (esInvalido(formIndividual, 'precio')) {
+                  <div class="invalid-feedback d-block">
+                    El precio debe ser mayor a 0.
+                  </div>
+                }
+              </div>
+
+              @if (salas().length === 0 && !cargando()) {
+                <div class="alert alert-warning py-2 small">
+                  No hay salas cargadas. Creá una en Administración → Salas.
+                </div>
+              }
+
+              @if (errorIndividual()) {
+                <div class="alert alert-danger py-2 small">{{ errorIndividual() }}</div>
+              }
+
+              <button type="submit" class="btn btn-primary w-100" [disabled]="creando()">
+                {{ creando() ? 'Creando…' : 'Crear función' }}
+              </button>
+            </form>
+          }
+
+          <!-- ---------------- Por rango ---------------- -->
+          @if (modo() === 'rango') {
+            <form [formGroup]="formRango" (ngSubmit)="crearPorRango()" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="rangoPelicula">Película *</label>
+                <select
+                  id="rangoPelicula"
+                  class="form-select"
+                  formControlName="peliculaId"
+                  [class.is-invalid]="esInvalido(formRango, 'peliculaId')">
+                  <option [ngValue]="null">Seleccionar…</option>
+                  @for (pelicula of peliculas(); track pelicula.id) {
+                    <option [ngValue]="pelicula.id">{{ pelicula.nombre }}</option>
+                  }
+                </select>
+                @if (peliculaRangoSeleccionada(); as pelicula) {
+                  <div class="form-text">
+                    Cartelera: {{ pelicula.fechaEstreno | date: 'dd/MM/yyyy' }} –
+                    {{ pelicula.fechaSalida | date: 'dd/MM/yyyy' }} · Duración:
+                    {{ pelicula.duracionMinutos }} min
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="rangoSala">Sala *</label>
+                <select
+                  id="rangoSala"
+                  class="form-select"
+                  formControlName="salaId"
+                  [class.is-invalid]="esInvalido(formRango, 'salaId')">
+                  <option [ngValue]="null">Seleccionar…</option>
+                  @for (sala of salas(); track sala.id) {
+                    <option [ngValue]="sala.id">{{ sala.nombre }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="cine-picker-panel">
+                <p class="cine-picker-panel-title">
+                  <span class="material-icons">date_range</span>
+                  Rango de fechas
+                </p>
+                <div class="cine-picker-grid">
+                  <div class="cine-picker-field">
+                    <app-cine-date-picker
+                      label="Desde *"
+                      icon="event"
+                      placeholder="Elegir fecha"
+                      formControlName="fechaDesde" />
+                    @if (esInvalido(formRango, 'fechaDesde')) {
+                      <div class="invalid-feedback d-block">
+                        La fecha desde no puede ser pasada.
+                      </div>
+                    }
+                  </div>
+                  <div class="cine-picker-field">
+                    <app-cine-date-picker
+                      label="Hasta *"
+                      icon="event_busy"
+                      placeholder="Elegir fecha"
+                      formControlName="fechaHasta" />
+                    @if (esInvalido(formRango, 'fechaHasta') || formRango.errors?.['fechasInvertidas']) {
+                      <div class="invalid-feedback d-block">
+                        La fecha hasta debe ser igual o posterior a la fecha desde.
+                      </div>
+                    }
+                  </div>
+                </div>
+                @if (resumenRangoFechas(); as resumen) {
+                  <div class="cine-picker-summary">
+                    <span class="material-icons" style="font-size:1.1rem">info</span>
+                    Del <strong>{{ resumen.desde }}</strong> al <strong>{{ resumen.hasta }}</strong>
+                    <span class="cine-picker-chip">{{ resumen.dias }} día{{ resumen.dias === 1 ? '' : 's' }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="cine-picker-panel">
+                <p class="cine-picker-panel-title">
+                  <span class="material-icons">schedule</span>
+                  Ventana horaria diaria
+                </p>
+                <div class="cine-picker-dual">
+                  <div class="cine-picker-field">
+                    <app-cine-time-picker
+                      label="Inicio *"
+                      icon="play_arrow"
+                      placeholder="Hora inicio"
+                      [stepMinutos]="5"
+                      formControlName="horaInicio" />
+                    @if (esInvalido(formRango, 'horaInicio')) {
+                      <div class="invalid-feedback d-block">La hora de inicio es obligatoria.</div>
+                    }
+                  </div>
+                  <div class="cine-picker-field">
+                    <app-cine-time-picker
+                      label="Fin *"
+                      icon="stop"
+                      placeholder="Hora fin"
+                      [stepMinutos]="5"
+                      formControlName="horaFin" />
+                    @if (esInvalido(formRango, 'horaFin') || formRango.errors?.['horasInvertidas']) {
+                      <div class="invalid-feedback d-block">
+                        La hora de fin debe ser posterior a la hora de inicio.
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="rangoPrecio">Precio de la entrada *</label>
+                <input
+                  id="rangoPrecio"
+                  type="number"
+                  class="form-control"
+                  formControlName="precio"
+                  min="1"
+                  step="0.01"
+                  [class.is-invalid]="esInvalido(formRango, 'precio')" />
+                @if (esInvalido(formRango, 'precio')) {
+                  <div class="invalid-feedback d-block">El precio debe ser mayor a 0.</div>
+                }
+              </div>
+
+              <p class="small text-muted mb-2">
+                Se generan funciones consecutivas por día (sin intervalo de limpieza). La
+                <strong>hora fin</strong> es el límite del día: cada función debe
+                <strong>terminar</strong> a esa hora o antes.
+              </p>
+
+              @if (previewRango().inicios.length) {
+                <div class="alert alert-info py-2 small mb-3">
+                  <strong>Vista previa por día:</strong>
+                  {{ previewRango().inicios.join(' · ') }}
+                  <span class="text-muted">({{ previewRango().inicios.length }} función/es)</span>
+                  @if (previewRango().ultimoRechazado; as rechazado) {
+                    <div class="mt-1 text-muted">
+                      No se incluye la de las {{ rechazado.inicio }}: terminaría a las
+                      {{ rechazado.fin }}, después del límite {{ formRango.controls.horaFin.value }}.
+                    </div>
+                  }
+                </div>
+              } @else if (peliculaRangoSeleccionada() && formRango.controls.horaInicio.value && formRango.controls.horaFin.value) {
+                <div class="alert alert-warning py-2 small mb-3">
+                  Con la duración actual ({{ peliculaRangoSeleccionada()!.duracionMinutos }} min) no
+                  entra ninguna función en ese horario diario.
+                </div>
+              }
+
+              <p class="small text-muted">
+                Operación atómica: si falla una validación, no se crea ninguna función.
+              </p>
+
+              @if (errorRango()) {
+                <div class="alert alert-danger py-2 small">{{ errorRango() }}</div>
+              }
+
+              <button type="submit" class="btn btn-primary w-100" [disabled]="creandoRango()">
+                {{ creandoRango() ? 'Generando…' : 'Crear por rango' }}
+              </button>
+            </form>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Listado -->
+    <div class="col-lg-7 col-xl-8">
+      <div class="card app-card">
+        <div class="card-header d-flex flex-wrap align-items-center gap-2">
+          <h5 class="mb-0 me-auto">Listado de funciones</h5>
+          <div class="form-check form-switch mb-0">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="soloVigentes"
+              [checked]="soloVigentes()"
+              (change)="soloVigentes.set($any($event.target).checked)" />
+            <label class="form-check-label small" for="soloVigentes">Sólo vigentes</label>
+          </div>
+          <span class="badge text-bg-secondary">{{ funcionesFiltradas().length }}</span>
+        </div>
+        <div class="card-body">
+          @if (errorCarga()) {
+            <div class="alert alert-danger py-2 small">{{ errorCarga() }}</div>
+          }
+
+          @if (cargando()) {
+            <div class="text-center py-4">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando…</span>
+              </div>
+            </div>
+          } @else if (funcionesFiltradas().length === 0) {
+            <div class="alert alert-info mb-0">No hay funciones para mostrar.</div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table align-middle tabla-funciones mb-0">
+                <thead>
+                  <tr>
+                    <th>Película</th>
+                    <th>Sala</th>
+                    <th>Horario</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (funcion of funcionesFiltradas(); track funcion.id) {
+                    <tr>
+                      <td class="fw-semibold">{{ funcion.peliculaNombre }}</td>
+                      <td>{{ funcion.salaNombre }}</td>
+                      <td>
+                        <span class="d-block">{{ funcion.horario | fechaApi: 'dd/MM/yyyy' }}</span>
+                        <small class="text-muted">{{ funcion.horario | fechaApi: 'HH:mm' }} hs</small>
+                      </td>
+                      <td class="text-end">{{ funcion.precio | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
+                      <td class="text-end text-nowrap">
+                        @if (esVigente(funcion)) {
+                          <span class="badge badge-vigente me-1">Vigente</span>
+                        } @else {
+                          <span class="badge badge-pasada me-1">Finalizada</span>
+                        }
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="eliminarFuncion(funcion)"
+                          title="Eliminar">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

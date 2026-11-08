@@ -1,0 +1,42 @@
+.glass-card {
+  background: rgba(10, 15, 29, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg, 12px);
+  color: var(--color-fuente);
+}
+.card-header {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.card-subtitle,
+.form-hint,
+.empty-hint {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.82);
+}
+.form-hint {
+  margin-top: 0.35rem;
+}
+:host-context(.light-theme) .card-subtitle,
+:host-context(.light-theme) .form-hint,
+:host-context(.light-theme) .empty-hint {
+  color: rgba(13, 18, 31, 0.75);
+}
+.form-control {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-fuente, white);
+}
+.form-control:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--color-accent, #f5c518);
+  box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.25);
+  color: var(--color-fuente, white);
+}
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+.table { color: var(--color-fuente); }

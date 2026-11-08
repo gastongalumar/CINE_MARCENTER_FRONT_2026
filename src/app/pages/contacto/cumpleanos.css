@@ -1,0 +1,91 @@
+.cumple-page {
+  color: var(--color-fuente);
+  max-width: 920px;
+}
+.glass-card {
+  background: rgba(10, 15, 29, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg, 12px);
+  color: var(--color-fuente);
+  overflow: hidden;
+}
+.cumple-hero {
+  position: relative;
+  aspect-ratio: 21 / 9;
+  min-height: 160px;
+  background: #0a0f1d;
+}
+.cumple-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0.85;
+}
+.cumple-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.75));
+}
+.cumple-hero-overlay h3 {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.5vw, 1.6rem);
+  font-weight: 700;
+}
+.prose p {
+  line-height: 1.65;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.section-lead {
+  color: var(--color-muted, #9aa3b5);
+  margin: 0;
+}
+.include-card {
+  display: flex;
+  gap: 0.9rem;
+  height: 100%;
+  padding: 1.1rem 1.15rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 15, 29, 0.4);
+}
+.include-icon {
+  color: var(--color-slider, #f5c518);
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.include-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+.include-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+.cierre .lead {
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+.btn-primary {
+  background-color: var(--color-slider, #f5c518);
+  border-color: var(--color-slider, #f5c518);
+  color: #111;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  filter: brightness(1.05);
+  color: #111;
+}
