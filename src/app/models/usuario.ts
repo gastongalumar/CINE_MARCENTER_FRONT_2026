@@ -1,4 +1,4 @@
-import { TipoUsuario } from './auth.model';
+import { TipoUsuario } from './auth';
 
 export type EstadoUsuario = 'ACTIVO' | 'INACTIVO' | 'BLOQUEADO';
 
