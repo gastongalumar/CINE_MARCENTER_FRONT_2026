@@ -1,0 +1,111 @@
+@use '@angular/material' as mat;
+
+/* ==========================================================================
+   Tema Material 3 (M3) — Cinemacenter
+   --------------------------------------------------------------------------
+   El tema base es oscuro y se apoya en las mismas variables CSS que usa
+   `styles.css` (--color-fondo, --color-accent, --color-fuente...), de modo
+   que Angular Material y el resto de la UI comparten la paleta.
+
+   Cuando el backend cambia la customización a modo claro, el servicio
+   `CustomizacionService` agrega la clase `.light-theme` al <body> y este
+   bloque vuelve a emitir los tokens M3 en modo claro.
+   ========================================================================== */
+
+html {
+  color-scheme: dark;
+
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$yellow-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+    typography: (
+      plain-family: 'Outfit, Inter, system-ui, -apple-system, sans-serif',
+      brand-family: 'Outfit, Inter, system-ui, -apple-system, sans-serif',
+      bold-weight: 700,
+      medium-weight: 600,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+}
+
+/* Variante clara (`.light-theme` la aplica CustomizacionService) */
+.light-theme {
+  color-scheme: light;
+
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+    typography: (
+      plain-family: 'Outfit, Inter, system-ui, -apple-system, sans-serif',
+      brand-family: 'Outfit, Inter, system-ui, -apple-system, sans-serif',
+      bold-weight: 700,
+      medium-weight: 600,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+}
+
+/* --------------------------------------------------------------------------
+   Ajustes finos: los componentes Material deben integrarse con el fondo
+   translúcido (glassmorphism) del layout en lugar de bloquearlo.
+   -------------------------------------------------------------------------- */
+
+.mat-mdc-dialog-surface,
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel,
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: #101827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-lg, 16px) !important;
+  color: #ffffff !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Confirm dialog: anula paddings/offsets del contenedor MDC */
+.cinemacenter-dialog .mat-mdc-dialog-container,
+.cinemacenter-dialog .mdc-dialog__container {
+  padding: 0 !important;
+}
+
+.cinemacenter-dialog .mat-mdc-dialog-surface,
+.cinemacenter-dialog .mdc-dialog__surface {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.cinemacenter-dialog .mat-mdc-dialog-component-host {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.light-theme .mat-mdc-dialog-surface,
+.light-theme .mat-mdc-menu-panel,
+.light-theme .mat-mdc-select-panel,
+.light-theme .mat-mdc-autocomplete-panel,
+.light-theme .mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: #ffffff !important;
+  border-color: rgba(13, 18, 31, 0.1);
+  color: #0d121f !important;
+}
+
+.cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  background: rgba(3, 6, 14, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface,
+.mat-mdc-snack-bar-container .mat-mdc-button,
+.mat-mdc-snack-bar-container .mat-mdc-button .mat-mdc-button-persistent-ripple::before {
+  background: transparent !important;
+}

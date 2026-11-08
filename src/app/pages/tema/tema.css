@@ -1,0 +1,112 @@
+.card {
+  background-color: var(--color-contenedor);
+  color: var(--color-fuente);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.card-header {
+  background-color: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.btn-primary {
+  background-color: var(--color-slider);
+  border-color: var(--color-slider);
+  color: #000;
+}
+.btn-primary:hover {
+  filter: brightness(0.9);
+}
+.btn-outline-light {
+  color: var(--color-fuente);
+  border-color: var(--color-fuente);
+}
+.btn-outline-light:hover {
+  background-color: var(--color-fuente);
+  color: var(--color-contenedor);
+}
+.preview-container {
+  min-height: 500px;
+  border-radius: 0 0 8px 8px;
+  position: relative;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+.preview-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  background: #000;
+  pointer-events: none;
+}
+.preview-overlay {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+.preview-content {
+  position: relative;
+  z-index: 2;
+}
+.preview-sticky {
+  position: sticky;
+  top: calc(4.5rem + 4.25rem);
+  z-index: 10;
+}
+.tema-toolbar {
+  position: sticky;
+  top: 4.5rem;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 -0.75rem 1.25rem;
+  padding: 0.75rem;
+  background: rgba(10, 15, 29, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+:host-context(.light-theme) .tema-toolbar {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.tema-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.form-control, .form-select {
+  background-color: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--color-fuente);
+}
+.form-control:focus {
+  background-color: rgba(255,255,255,0.15);
+  color: var(--color-fuente);
+}
+.form-control-color {
+  width: 50px;
+  height: 38px;
+  padding: 4px;
+}
+.text-muted {
+  color: rgba(255,255,255,0.6) !important;
+}
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+}

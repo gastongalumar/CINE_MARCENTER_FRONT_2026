@@ -123,4 +123,5 @@
 .btn-outline-secondary { color: var(--color-fuente); border-color: rgba(255, 255, 255, 0.2); }
 .btn-outline-secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--color-fuente); }
 .btn .material-icons { font-size: 1rem; vertical-align: middle; }
+.paginador .btn:disabled { opacity: 0.55; }
 .text-muted { color: var(--color-muted) !important; }

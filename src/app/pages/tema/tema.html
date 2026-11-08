@@ -1,0 +1,356 @@
+<div class="container">
+  <div class="tema-toolbar">
+    <h2 class="mb-0">Personalizar Tema Visual</h2>
+    <div class="tema-acciones">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        (click)="guardarTema()"
+        [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar Tema' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        (click)="eliminarLogo()"
+        *ngIf="tema.logoUrl">
+        Eliminar Logo
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        (click)="eliminarFondo()"
+        *ngIf="fondoUrlValido">
+        Eliminar Fondo
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMensaje" class="alert alert-danger py-2 small mb-3">{{ errorMensaje }}</div>
+
+  <div class="row">
+    <!-- COLUMNA IZQUIERDA - CONFIGURACIÓN -->
+    <div class="col-md-6">
+      <!-- Colores -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5>Colores</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Color de Fondo General</label>
+            <div class="d-flex align-items-center gap-2">
+              <input
+                type="color"
+                class="form-control form-control-color w-25"
+                [(ngModel)]="tema.colorFondo"
+                (input)="aplicarVistaPrevia()">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="tema.colorFondo"
+                (input)="aplicarVistaPrevia()"
+                placeholder="#6E0A17">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Color de Contenedores</label>
+            <div class="d-flex align-items-center gap-2">
+              <input
+                type="color"
+                class="form-control form-control-color w-25"
+                [(ngModel)]="tema.colorContenedor"
+                (input)="aplicarVistaPrevia()">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="tema.colorContenedor"
+                (input)="aplicarVistaPrevia()"
+                placeholder="#0A6E61">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Color de Texto</label>
+            <div class="d-flex align-items-center gap-2">
+              <input
+                type="color"
+                class="form-control form-control-color w-25"
+                [(ngModel)]="tema.colorFuente"
+                (input)="aplicarVistaPrevia()">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="tema.colorFuente"
+                (input)="aplicarVistaPrevia()"
+                placeholder="#FFFFFF">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Color de Botones/Acentos</label>
+            <div class="d-flex align-items-center gap-2">
+              <input
+                type="color"
+                class="form-control form-control-color w-25"
+                [(ngModel)]="tema.colorSlider"
+                (input)="aplicarVistaPrevia()">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="tema.colorSlider"
+                (input)="aplicarVistaPrevia()"
+                placeholder="#ffcc00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tamaños de Fuente -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5>Tamaños de Texto</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Tamaño de Títulos (px)</label>
+            <input
+              type="range"
+              class="form-range"
+              [(ngModel)]="tema.tamanoFuenteTitulosPx"
+              (input)="actualizarTitulos()"
+              min="12"
+              max="48">
+            <div class="d-flex justify-content-between">
+              <span>12px</span>
+              <span>{{ tema.tamanoFuenteTitulosPx }}px</span>
+              <span>48px</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tamaño de Texto Normal (px)</label>
+            <input
+              type="range"
+              class="form-range"
+              [(ngModel)]="tema.tamanoFuenteTextoPx"
+              (input)="actualizarTexto()"
+              min="10"
+              max="24">
+            <div class="d-flex justify-content-between">
+              <span>10px</span>
+              <span>{{ tema.tamanoFuenteTextoPx }}px</span>
+              <span>24px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logo -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5>Logo</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">URL pública o ruta del logo</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="tema.logoUrl"
+              (input)="aplicarVistaPrevia()"
+              inputmode="url"
+              placeholder="assets/images/logo.png o https://ejemplo.com/logo.jpg">
+            <small class="text-muted">Podés pegar un enlace público o usar una imagen local. Guardá el tema para conservarlo.</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tamaño del Logo (px)</label>
+            <input
+              type="range"
+              class="form-range"
+              [(ngModel)]="tema.logoTamanoPx"
+              (input)="actualizarLogoTamano()"
+              min="40"
+              max="200">
+            <div class="d-flex justify-content-between">
+              <span>40px</span>
+              <span>{{ tema.logoTamanoPx }}px</span>
+              <span>200px</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Transparencia del Logo</label>
+            <input
+              type="range"
+              class="form-range"
+              [(ngModel)]="tema.logoOpacityPercent"
+              (input)="actualizarLogoOpacity()"
+              min="0"
+              max="100">
+            <div class="d-flex justify-content-between">
+              <span>0%</span>
+              <span>{{ tema.logoOpacityPercent }}%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">O subir archivo</label>
+            <input
+              type="file"
+              class="form-control"
+              (change)="onLogoSelected($event)"
+              accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <!-- Fondo -->
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5>Fondo y opacidad global</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Opacidad global del sistema</label>
+            <input
+              type="range"
+              class="form-range"
+              [(ngModel)]="tema.globalOpacityPercent"
+              (input)="actualizarGlobalOpacity()"
+              min="20"
+              max="100">
+            <div class="d-flex justify-content-between">
+              <span>20%</span>
+              <span>{{ tema.globalOpacityPercent }}%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">URL pública o ruta de la imagen o video de fondo</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="tema.fondoUrl"
+              (input)="aplicarVistaPrevia()"
+              inputmode="url"
+              placeholder="assets/images/fondo.jpg, https://ejemplo.com/fondo.mp4 o /uploads/fondos/video.mp4">
+            <small class="text-muted">
+              Acepta imágenes (JPG, PNG, WEBP) o videos (MP4, WEBM). El video se reproduce en loop automáticamente.
+              Guardá el tema para conservarlo.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">O subir archivo</label>
+            <input
+              type="file"
+              class="form-control"
+              (change)="onFondoSelected($event)"
+              accept="image/jpeg,image/png,image/webp,video/mp4,video/webm">
+            <small class="text-muted">Imágenes hasta 5 MB · Videos MP4/WEBM hasta 50 MB.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA - VISTA PREVIA -->
+    <div class="col-md-6">
+      <div class="card preview-sticky">
+        <div class="card-header">
+          <h5>Vista Previa</h5>
+        </div>
+        <div class="card-body p-0">
+          <!-- Contenedor de vista previa con fondo y color combinados -->
+          <div
+            class="preview-container"
+            [style.backgroundImage]="tema.fondoUrl && !esVideoFondo() ? 'url(' + getAssetPath(tema.fondoUrl) + ')' : 'none'"
+            [style.backgroundColor]="'rgba(' + hexToRgbStr(tema.colorFondo) + ', ' + tema.globalOpacity + ')'"
+            [style.backgroundBlendMode]="'normal'"
+
+            [style.backgroundSize]="'cover'"
+            [style.backgroundPosition]="'center'">
+
+            <!-- Video de fondo en loop (si el fondo es MP4/WEBM) -->
+            <video
+              *ngIf="tema.fondoUrl && esVideoFondo()"
+              class="preview-video"
+              [src]="getAssetPath(tema.fondoUrl)"
+              autoplay
+              [muted]="true"
+              loop
+              playsinline
+              preload="auto"></video>
+
+            <!-- Capa de color semitransparente para mejorar legibilidad -->
+            <div class="preview-overlay"
+                 [style.backgroundColor]="'rgba(' + hexToRgbStr(tema.colorFondo) + ', ' + opacidadPreview() + ')'"
+                 [style.opacity]="'1'">
+
+
+              <!-- Contenido de la vista previa -->
+              <div class="preview-content p-4">
+                <!-- Logo -->
+                <div class="text-center mb-4" *ngIf="tema.logoUrl">
+                  <img
+                    [src]="getAssetPath(tema.logoUrl)"
+                    alt="Logo preview"
+                    [style.width.px]="tema.logoTamanoPx"
+                    [style.maxHeight.px]="tema.logoTamanoPx"
+                    class="img-fluid"
+                    [style.opacity]="tema.logoOpacity"
+                    (load)="onImageLoad($event)"
+                    (error)="onImageError($event)">
+                </div>
+
+                <h4 [style.color]="tema.colorFuente" class="mb-3">
+                  {{ tema.logoUrl ? 'Título de Ejemplo' : 'Logo no configurado' }}
+                </h4>
+
+                <p [style.color]="tema.colorFuente" class="mb-4">
+                  Este es un texto de ejemplo para mostrar cómo se verá la aplicación con la configuración actual.
+                </p>
+
+                <div class="d-flex gap-2">
+                  <button class="btn"
+                          [style.backgroundColor]="tema.colorSlider"
+                          [style.color]="'#000'"
+                          [style.border]="'none'">
+                    Botón Primario
+                  </button>
+                  <button class="btn btn-outline-light">
+                    Botón Secundario
+                  </button>
+                </div>
+
+                <!-- Información de la imagen de fondo -->
+                <div class="mt-3 small" *ngIf="fondoUrlValido">
+                  <span class="badge"
+                        [style.backgroundColor]="tema.colorSlider"
+                        [style.color]="'#000'">
+                    Fondo activo
+                  </span>
+                  <span class="ms-2 text-muted" *ngIf="esVideoFondo()">Video en loop</span>
+                </div>
+
+                <!-- Botón para vista previa pública / continuar -->
+                <div class="mt-3">
+                  <button class="btn btn-lg btn-success" (click)="irALogin()">
+                    Presione para continuar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

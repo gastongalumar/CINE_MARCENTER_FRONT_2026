@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600" role="img" aria-label="Imagen no disponible">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2438"/>
+      <stop offset="100%" stop-color="#0a0f1d"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#bg)"/>
+  <g fill="none" stroke="#f5c518" stroke-opacity="0.55" stroke-width="6" stroke-linejoin="round">
+    <rect x="120" y="200" width="160" height="120" rx="10"/>
+    <path d="M120 260l40-30 30 24 25-20 65 46"/>
+  </g>
+  <circle cx="170" cy="232" r="12" fill="#f5c518" fill-opacity="0.55"/>
+  <text x="200" y="370" font-family="Outfit, Segoe UI, sans-serif" font-size="26" fill="#f5c518" fill-opacity="0.8" text-anchor="middle">Sin imagen</text>
+</svg>

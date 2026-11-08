@@ -44,6 +44,8 @@ export class EstadisticasComponent implements OnInit {
   readonly tabActivo = signal<TabId>('ventas-diarias');
   readonly cargando = signal(false);
   readonly error = signal('');
+  readonly pagina = signal(1);
+  readonly pageSize = 8;
 
   readonly ventasDiarias = signal<VentaDiaria[]>([]);
   readonly ventasPelicula = signal<VentaPelicula[]>([]);
@@ -64,6 +66,40 @@ export class EstadisticasComponent implements OnInit {
     Math.max(...this.ventasPelicula().map((item) => Number(item.totalVentas) || 0), 1)
   );
 
+  readonly datasetActivo = computed(() => {
+    switch (this.tabActivo()) {
+      case 'ventas-diarias':
+        return this.ventasDiarias().length;
+      case 'peliculas':
+        return this.ventasPelicula().length;
+      case 'salas':
+        return this.ventasSala().length;
+      case 'funciones':
+        return this.ocupacionFunciones().length;
+      case 'pagos':
+        return this.metodosPago().length;
+    }
+  });
+
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.datasetActivo() / this.pageSize))
+  );
+
+  readonly rangoDesde = computed(() => {
+    if (!this.datasetActivo()) return 0;
+    return (this.pagina() - 1) * this.pageSize + 1;
+  });
+
+  readonly rangoHasta = computed(() =>
+    Math.min(this.pagina() * this.pageSize, this.datasetActivo())
+  );
+
+  readonly ventasDiariasPagina = computed(() => this.slicePagina(this.ventasDiarias()));
+  readonly ventasPeliculaPagina = computed(() => this.slicePagina(this.ventasPelicula()));
+  readonly ventasSalaPagina = computed(() => this.slicePagina(this.ventasSala()));
+  readonly ocupacionFuncionesPagina = computed(() => this.slicePagina(this.ocupacionFunciones()));
+  readonly metodosPagoPagina = computed(() => this.slicePagina(this.metodosPago()));
+
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParamMap.get('tab') as TabId | null;
     const valido = !!tab && this.tabs.some((t) => t.id === tab);
@@ -73,6 +109,7 @@ export class EstadisticasComponent implements OnInit {
 
   cambiarTab(id: TabId): void {
     this.tabActivo.set(id);
+    this.pagina.set(1);
     this.cargarTab(id);
   }
 
@@ -82,12 +119,24 @@ export class EstadisticasComponent implements OnInit {
 
   cambiarPeriodo(dias: number): void {
     this.diasSeleccionados.set(dias);
+    this.pagina.set(1);
     this.cargarVentasDiarias();
   }
 
   cambiarSoloVigentes(valor: boolean): void {
     this.soloVigentes.set(valor);
+    this.pagina.set(1);
     this.cargarOcupacionFunciones();
+  }
+
+  irAPagina(page: number): void {
+    const total = this.totalPaginas();
+    if (page < 1 || page > total) return;
+    this.pagina.set(page);
+  }
+
+  indiceAbsoluto(indiceLocal: number): number {
+    return (this.pagina() - 1) * this.pageSize + indiceLocal + 1;
   }
 
   anchoBarra(valor: number, maximo: number): number {
@@ -116,6 +165,11 @@ export class EstadisticasComponent implements OnInit {
   }
 
   // ------------------------------------------------------------------ privados
+
+  private slicePagina<T>(items: T[]): T[] {
+    const start = (this.pagina() - 1) * this.pageSize;
+    return items.slice(start, start + this.pageSize);
+  }
 
   private cargarTab(id: TabId): void {
     switch (id) {
@@ -154,8 +208,18 @@ export class EstadisticasComponent implements OnInit {
     origen()
       .pipe(finalize(() => this.cargando.set(false)))
       .subscribe({
-        next: (datos) => destino.set(datos ?? []),
+        next: (datos) => {
+          destino.set(datos ?? []);
+          this.ajustarPagina();
+        },
         error: (error) => this.error.set(getErrorMessage(error, 'No se pudieron cargar los datos.')),
       });
+  }
+
+  private ajustarPagina(): void {
+    const total = this.totalPaginas();
+    if (this.pagina() > total) {
+      this.pagina.set(total);
+    }
   }
 }

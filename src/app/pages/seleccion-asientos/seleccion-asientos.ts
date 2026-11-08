@@ -15,6 +15,7 @@ import { refreshView } from '../../utils/refresh-view';
 import { fechaLocalIso, parseApiDateTime } from '../../utils/datetime';
 import { FechaApiPipe } from '../../pipes/fecha-api';
 import { SeatMapComponent } from '../seat-map/seat-map';
+import { autorizarButacas } from '../../utils/butacas-access';
 
 export interface FuncionesPorDia {
   clave: string;
@@ -214,6 +215,7 @@ export class SeleccionAsientosComponent {
     const tipo = this.authService.getTipoUsuario();
 
     if (!clienteId || !this.authService.isAuthenticated()) {
+      autorizarButacas(this.peliculaId);
       this.router.navigate(['/login'], {
         queryParams: { returnUrl: `/butacas/${this.peliculaId}` },
       });

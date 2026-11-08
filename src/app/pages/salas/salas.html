@@ -183,7 +183,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (sala of salas(); track sala.id) {
+                  @for (sala of salasPagina(); track sala.id) {
                     <tr [class.fila-activa]="salaSeleccionada()?.id === sala.id">
                       <td class="text-muted">#{{ sala.id }}</td>
                       <td class="fw-semibold">{{ sala.nombre }}</td>
@@ -212,6 +212,31 @@
                   }
                 </tbody>
               </table>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+              <span class="text-muted small">
+                Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ salas().length }}
+              </span>
+              <div class="btn-group btn-group-sm">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="pagina() <= 1"
+                  (click)="irAPagina(pagina() - 1)">
+                  Anterior
+                </button>
+                <button type="button" class="btn btn-outline-secondary" disabled>
+                  {{ pagina() }} / {{ totalPaginas() }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="pagina() >= totalPaginas()"
+                  (click)="irAPagina(pagina() + 1)">
+                  Siguiente
+                </button>
+              </div>
             </div>
           }
         </div>

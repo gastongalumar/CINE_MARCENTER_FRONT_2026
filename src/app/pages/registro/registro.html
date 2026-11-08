@@ -9,22 +9,40 @@
     </div>
 
     <div class="card-body p-0">
-      <form (ngSubmit)="onSubmit()" #registroForm="ngForm">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="row g-3">
           <div class="col-md-6">
             <label for="nombre" class="form-label small">Nombre</label>
             <div class="input-group">
               <span class="input-group-text"><span class="material-icons font-icon-sm">person</span></span>
-              <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="userData.nombre" required placeholder="Juan">
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                formControlName="nombre"
+                placeholder="Juan"
+                [class.is-invalid]="esInvalido('nombre')" />
             </div>
+            @if (esInvalido('nombre')) {
+              <div class="invalid-feedback d-block">El nombre es obligatorio.</div>
+            }
           </div>
 
           <div class="col-md-6">
             <label for="apellido" class="form-label small">Apellido</label>
             <div class="input-group">
               <span class="input-group-text"><span class="material-icons font-icon-sm">person</span></span>
-              <input type="text" class="form-control" id="apellido" name="apellido" [(ngModel)]="userData.apellido" required placeholder="Pérez">
+              <input
+                type="text"
+                class="form-control"
+                id="apellido"
+                formControlName="apellido"
+                placeholder="Pérez"
+                [class.is-invalid]="esInvalido('apellido')" />
             </div>
+            @if (esInvalido('apellido')) {
+              <div class="invalid-feedback d-block">El apellido es obligatorio.</div>
+            }
           </div>
         </div>
 
@@ -32,15 +50,35 @@
           <label for="email" class="form-label small">Correo electrónico</label>
           <div class="input-group">
             <span class="input-group-text"><span class="material-icons font-icon-sm">email</span></span>
-            <input type="email" class="form-control" id="email" name="email" [(ngModel)]="userData.email" required email placeholder="juan.perez@ejemplo.com">
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              formControlName="email"
+              placeholder="juan.perez@ejemplo.com"
+              [class.is-invalid]="esInvalido('email')" />
           </div>
+          @if (esInvalido('email')) {
+            <div class="invalid-feedback d-block">
+              @if (form.controls.email.errors?.['required']) {
+                El correo es obligatorio.
+              } @else if (form.controls.email.errors?.['email']) {
+                Ingresá un correo válido.
+              }
+            </div>
+          }
         </div>
 
         <div class="mb-3">
           <label for="telefono" class="form-label small">Teléfono (Opcional)</label>
           <div class="input-group">
             <span class="input-group-text"><span class="material-icons font-icon-sm">phone</span></span>
-            <input type="tel" class="form-control" id="telefono" name="telefono" [(ngModel)]="userData.telefono" placeholder="+54 9 11 1234-5678">
+            <input
+              type="tel"
+              class="form-control"
+              id="telefono"
+              formControlName="telefono"
+              placeholder="+54 9 11 1234-5678" />
           </div>
         </div>
 
@@ -49,19 +87,56 @@
             <label for="password" class="form-label small">Contraseña</label>
             <div class="input-group">
               <span class="input-group-text"><span class="material-icons font-icon-sm">lock</span></span>
-              <input type="password" class="form-control" id="password" name="password" [(ngModel)]="userData.password" required minlength="6" placeholder="Mín. 6 caracteres">
+              <input
+                [type]="mostrarPassword ? 'text' : 'password'"
+                class="form-control"
+                id="password"
+                formControlName="password"
+                placeholder="Mín. 6 caracteres"
+                [class.is-invalid]="esInvalido('password')" />
+              <button
+                type="button"
+                class="input-group-text btn-toggle-password"
+                (click)="alternarPassword()"
+                [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <span class="material-icons font-icon-sm">{{ mostrarPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
             </div>
+            @if (esInvalido('password')) {
+              <div class="invalid-feedback d-block">
+                @if (form.controls.password.errors?.['required']) {
+                  La contraseña es obligatoria.
+                } @else if (form.controls.password.errors?.['minlength']) {
+                  Mínimo 6 caracteres.
+                }
+              </div>
+            }
           </div>
 
           <div class="col-md-6">
             <label for="confirmPassword" class="form-label small">Confirmar Contraseña</label>
             <div class="input-group">
               <span class="input-group-text"><span class="material-icons font-icon-sm">lock_reset</span></span>
-              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" required placeholder="Repetir contraseña">
+              <input
+                [type]="mostrarConfirmPassword ? 'text' : 'password'"
+                class="form-control"
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                placeholder="Repetir contraseña"
+                [class.is-invalid]="esInvalido('confirmPassword') || passwordsNoCoinciden()" />
+              <button
+                type="button"
+                class="input-group-text btn-toggle-password"
+                (click)="alternarConfirmPassword()"
+                [attr.aria-label]="mostrarConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'">
+                <span class="material-icons font-icon-sm">{{ mostrarConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
             </div>
-            <div *ngIf="userData.password !== confirmPassword && confirmPassword" class="text-danger small mt-1">
-              Las contraseñas no coinciden
-            </div>
+            @if (esInvalido('confirmPassword')) {
+              <div class="invalid-feedback d-block">Confirmá la contraseña.</div>
+            } @else if (passwordsNoCoinciden()) {
+              <div class="invalid-feedback d-block">Las contraseñas no coinciden.</div>
+            }
           </div>
         </div>
 
@@ -69,7 +144,7 @@
           <button
             type="submit"
             class="btn btn-primary py-2 btn-register-submit"
-            [disabled]="!registroForm.form.valid || userData.password !== confirmPassword || loading">
+            [disabled]="form.invalid || loading">
             {{ loading ? 'Registrando...' : 'Registrarse' }} <span class="material-icons font-icon-sm">how_to_reg</span>
           </button>
 

@@ -23,7 +23,7 @@ export class ConfirmDialogService {
     return this.dialog
       .open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
         data,
-        width: '460px',
+        width: '400px',
         maxWidth: '94vw',
         autoFocus: false,
         restoreFocus: true,

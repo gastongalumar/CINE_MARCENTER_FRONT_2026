@@ -1,6 +1,6 @@
-<!-- <app-splash [class.show]="showSplash"></app-splash> -->
-<!-- <app-header></app-header> -->
-<main class="container mt-4">
+<app-splash [class.show]="showSplash"></app-splash>
+<app-header></app-header>
+<main class="container mt-4" [class.blurred]="showSplash">
   <router-outlet></router-outlet>
 </main>
-<!-- <app-footer></app-footer> -->
+<app-footer></app-footer>

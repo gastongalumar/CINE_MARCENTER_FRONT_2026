@@ -12,27 +12,62 @@
     </div>
 
     <div class="card-body p-0">
-      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="mb-3">
           <label for="email" class="form-label small">Correo electrónico</label>
           <div class="input-group">
             <span class="input-group-text"><span class="material-icons font-icon-sm">email</span></span>
-            <input type="email" class="form-control" id="email" name="email" [(ngModel)]="credentials.email" required placeholder="correo@ejemplo.com" />
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              formControlName="email"
+              placeholder="correo@ejemplo.com"
+              (blur)="onCampoBlur()"
+              [class.is-invalid]="esInvalido('email')" />
           </div>
+          @if (esInvalido('email')) {
+            <div class="invalid-feedback d-block">
+              @if (form.controls.email.errors?.['required']) {
+                El correo es obligatorio.
+              } @else if (form.controls.email.errors?.['email']) {
+                Ingresá un correo válido.
+              }
+            </div>
+          }
         </div>
 
         <div class="mb-4">
           <label for="password" class="form-label small">Contraseña</label>
           <div class="input-group">
             <span class="input-group-text"><span class="material-icons font-icon-sm">lock</span></span>
-            <input type="password" class="form-control" id="password" name="password" [(ngModel)]="credentials.password" required placeholder="••••••••" />
+            <input
+              [type]="mostrarPassword ? 'text' : 'password'"
+              class="form-control"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              (blur)="onCampoBlur()"
+              [class.is-invalid]="esInvalido('password')" />
+            <button
+              type="button"
+              class="input-group-text btn-toggle-password"
+              (click)="alternarPassword()"
+              [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <span class="material-icons font-icon-sm">{{ mostrarPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
           </div>
+          @if (esInvalido('password')) {
+            <div class="invalid-feedback d-block">
+              La contraseña es obligatoria.
+            </div>
+          }
         </div>
 
         <div *ngIf="loginError" class="alert alert-danger py-2 small mb-3">{{ loginError }}</div>
 
         <div class="d-grid mb-3">
-          <button type="submit" class="btn btn-primary py-2 btn-login-submit" [disabled]="!loginForm.form.valid || loading">
+          <button type="submit" class="btn btn-primary py-2 btn-login-submit" [disabled]="form.invalid || loading">
             {{ loading ? 'Iniciando...' : 'Ingresar' }} <span class="material-icons font-icon-sm">login</span>
           </button>
         </div>
