@@ -133,13 +133,6 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
     },
     {
-        path: 'admin/peliculas/:id/editar',
-        title: 'Editar película | Cinemacenter',
-        loadComponent: () =>
-            import('./pages/peliculas/pelicula-editar').then((m) => m.PeliculaEditarComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
-    },
-    {
         path: 'admin/funciones',
         title: 'Gestión de funciones | Cinemacenter',
         loadComponent: () =>

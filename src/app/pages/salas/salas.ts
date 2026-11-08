@@ -51,6 +51,8 @@ export class SalasComponent {
   readonly guardando = signal(false);
   readonly errorCarga = signal('');
   readonly errorMensaje = signal('');
+  readonly pagina = signal(1);
+  readonly pageSize = 6;
 
   private readonly valores = signal<{
     nombre: string | null;
@@ -73,6 +75,24 @@ export class SalasComponent {
   readonly filasPreview = computed(() => Array.from({ length: Math.min(this.filas(), 20) }, (_, i) => i));
   readonly columnasPreview = computed(() => Array.from({ length: Math.min(this.columnas(), 16) }, (_, i) => i));
 
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.salas().length / this.pageSize))
+  );
+
+  readonly salasPagina = computed(() => {
+    const start = (this.pagina() - 1) * this.pageSize;
+    return this.salas().slice(start, start + this.pageSize);
+  });
+
+  readonly rangoDesde = computed(() => {
+    if (!this.salas().length) return 0;
+    return (this.pagina() - 1) * this.pageSize + 1;
+  });
+
+  readonly rangoHasta = computed(() =>
+    Math.min(this.pagina() * this.pageSize, this.salas().length)
+  );
+
   private readonly initLoad = afterNextRender(() => this.cargarSalas());
 
   constructor() {
@@ -84,6 +104,7 @@ export class SalasComponent {
     this.salaService.listarTodas().subscribe({
       next: (salas) => {
         this.salas.set(salas);
+        this.ajustarPagina();
         this.cargando.set(false);
       },
       error: (error) => {
@@ -91,6 +112,19 @@ export class SalasComponent {
         this.cargando.set(false);
       },
     });
+  }
+
+  irAPagina(page: number): void {
+    const total = this.totalPaginas();
+    if (page < 1 || page > total) return;
+    this.pagina.set(page);
+  }
+
+  private ajustarPagina(): void {
+    const total = this.totalPaginas();
+    if (this.pagina() > total) {
+      this.pagina.set(total);
+    }
   }
 
   guardar(): void {

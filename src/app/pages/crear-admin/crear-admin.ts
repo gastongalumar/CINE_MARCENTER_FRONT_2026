@@ -34,12 +34,32 @@ export class CrearAdminComponent {
   successMessage = '';
   errorCarga = '';
   administradores: Usuario[] = [];
+  pagina = 1;
+  readonly pageSize = 6;
 
   constructor(
     private authService: AuthService,
     private usuarioService: UsuarioService,
     private cdr: ChangeDetectorRef
   ) {}
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.administradores.length / this.pageSize));
+  }
+
+  get administradoresPagina(): Usuario[] {
+    const start = (this.pagina - 1) * this.pageSize;
+    return this.administradores.slice(start, start + this.pageSize);
+  }
+
+  get rangoDesde(): number {
+    if (!this.administradores.length) return 0;
+    return (this.pagina - 1) * this.pageSize + 1;
+  }
+
+  get rangoHasta(): number {
+    return Math.min(this.pagina * this.pageSize, this.administradores.length);
+  }
 
   cargarAdministradores(): void {
     this.cargandoLista = true;
@@ -49,6 +69,7 @@ export class CrearAdminComponent {
     this.usuarioService.listarPorRol('ADMINISTRADOR').subscribe({
       next: (data) => {
         this.administradores = data;
+        this.pagina = 1;
         this.cargandoLista = false;
         refreshView(this.cdr);
       },
@@ -58,6 +79,12 @@ export class CrearAdminComponent {
         refreshView(this.cdr);
       }
     });
+  }
+
+  irAPagina(page: number): void {
+    if (page < 1 || page > this.totalPaginas) return;
+    this.pagina = page;
+    refreshView(this.cdr);
   }
 
   onSubmit(): void {

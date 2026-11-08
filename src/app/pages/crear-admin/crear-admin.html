@@ -96,7 +96,7 @@
 
           <div *ngIf="!cargandoLista">
             <div class="table-responsive" *ngIf="administradores.length; else sinAdmins">
-              <table class="table table-hover align-middle mb-0">
+              <table class="table table-hover align-middle tabla-admins mb-0">
                 <thead>
                   <tr>
                     <th>Nombre</th>
@@ -107,7 +107,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let admin of administradores">
+                  <tr *ngFor="let admin of administradoresPagina">
                     <td>{{ admin.nombre }} {{ admin.apellido }}</td>
                     <td>{{ admin.email }}</td>
                     <td>{{ admin.telefono || '—' }}</td>
@@ -122,6 +122,31 @@
                   </tr>
                 </tbody>
               </table>
+
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+                <span class="text-muted small">
+                  Mostrando {{ rangoDesde }}–{{ rangoHasta }} de {{ administradores.length }}
+                </span>
+                <div class="btn-group btn-group-sm">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    [disabled]="pagina <= 1"
+                    (click)="irAPagina(pagina - 1)">
+                    Anterior
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" disabled>
+                    {{ pagina }} / {{ totalPaginas }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    [disabled]="pagina >= totalPaginas"
+                    (click)="irAPagina(pagina + 1)">
+                    Siguiente
+                  </button>
+                </div>
+              </div>
             </div>
             <ng-template #sinAdmins>
               <p class="empty-hint mb-0">No hay administradores registrados.</p>

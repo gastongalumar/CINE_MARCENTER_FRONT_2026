@@ -321,7 +321,7 @@
               type="checkbox"
               id="soloVigentes"
               [checked]="soloVigentes()"
-              (change)="soloVigentes.set($any($event.target).checked)" />
+              (change)="actualizarSoloVigentes($any($event.target).checked)" />
             <label class="form-check-label small" for="soloVigentes">Sólo vigentes</label>
           </div>
           <span class="badge text-bg-secondary">{{ funcionesFiltradas().length }}</span>
@@ -352,7 +352,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (funcion of funcionesFiltradas(); track funcion.id) {
+                  @for (funcion of funcionesPagina(); track funcion.id) {
                     <tr>
                       <td class="fw-semibold">{{ funcion.peliculaNombre }}</td>
                       <td>{{ funcion.salaNombre }}</td>
@@ -379,6 +379,31 @@
                   }
                 </tbody>
               </table>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+              <span class="text-muted small">
+                Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ funcionesFiltradas().length }}
+              </span>
+              <div class="btn-group btn-group-sm">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="pagina() <= 1"
+                  (click)="irAPagina(pagina() - 1)">
+                  Anterior
+                </button>
+                <button type="button" class="btn btn-outline-secondary" disabled>
+                  {{ pagina() }} / {{ totalPaginas() }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="pagina() >= totalPaginas()"
+                  (click)="irAPagina(pagina() + 1)">
+                  Siguiente
+                </button>
+              </div>
             </div>
           }
         </div>

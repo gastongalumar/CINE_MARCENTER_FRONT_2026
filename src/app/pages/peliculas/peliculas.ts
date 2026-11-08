@@ -14,7 +14,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { HttpEventType } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 
@@ -56,7 +56,6 @@ export class PeliculasComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
 
   readonly imageService = inject(ImageService);
 
@@ -64,12 +63,20 @@ export class PeliculasComponent {
   readonly etiquetaGenero = etiquetaGenero;
 
   readonly peliculas = signal<Pelicula[]>([]);
+  readonly peliculaSeleccionada = signal<Pelicula | null>(null);
   readonly cargando = signal(true);
   readonly guardando = signal(false);
   readonly errorCarga = signal('');
   readonly errorMensaje = signal('');
   readonly filtro = signal('');
+  readonly pagina = signal(1);
+  readonly pageSize = 6;
   readonly errorPreview = signal(false);
+  readonly archivoSeleccionado = signal<File | null>(null);
+  readonly subiendo = signal(false);
+  readonly progreso = signal(0);
+  readonly errorImagen = signal('');
+  readonly resumenCartelera = signal<{ desde: string; hasta: string; dias: number } | null>(null);
 
   readonly peliculasFiltradas = computed(() => {
     const termino = this.filtro().trim().toLowerCase();
@@ -80,6 +87,24 @@ export class PeliculasComponent {
         etiquetaGenero(p.genero).toLowerCase().includes(termino)
     );
   });
+
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.peliculasFiltradas().length / this.pageSize))
+  );
+
+  readonly peliculasPagina = computed(() => {
+    const start = (this.pagina() - 1) * this.pageSize;
+    return this.peliculasFiltradas().slice(start, start + this.pageSize);
+  });
+
+  readonly rangoDesde = computed(() => {
+    if (!this.peliculasFiltradas().length) return 0;
+    return (this.pagina() - 1) * this.pageSize + 1;
+  });
+
+  readonly rangoHasta = computed(() =>
+    Math.min(this.pagina() * this.pageSize, this.peliculasFiltradas().length)
+  );
 
   readonly sinopsisPorDefecto =
     'Sinopsis pendiente. Próximamente se publicará la descripción oficial de la película.';
@@ -105,12 +130,169 @@ export class PeliculasComponent {
 
   private readonly initLoad = afterNextRender(() => this.cargarPeliculas());
 
-  readonly resumenCartelera = signal<{ desde: string; hasta: string; dias: number } | null>(null);
-
   constructor() {
     this.form.controls.rutaImagen.valueChanges.subscribe(() => this.errorPreview.set(false));
     this.form.valueChanges.subscribe(() => this.actualizarResumenCartelera());
     this.actualizarResumenCartelera();
+  }
+
+  cargarPeliculas(): void {
+    this.cargando.set(true);
+    this.peliculaService.listarTodas().subscribe({
+      next: (peliculas) => {
+        this.peliculas.set(peliculas);
+        this.ajustarPagina();
+        this.cargando.set(false);
+      },
+      error: (error) => {
+        this.errorCarga.set(getErrorMessage(error, 'No se pudieron cargar las películas.'));
+        this.cargando.set(false);
+      },
+    });
+  }
+
+  actualizarFiltro(valor: string): void {
+    this.filtro.set(valor);
+    this.pagina.set(1);
+  }
+
+  irAPagina(page: number): void {
+    const total = this.totalPaginas();
+    if (page < 1 || page > total) return;
+    this.pagina.set(page);
+  }
+
+  private ajustarPagina(): void {
+    const total = this.totalPaginas();
+    if (this.pagina() > total) {
+      this.pagina.set(total);
+    }
+  }
+
+  guardar(): void {
+    this.limpiarErrores();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const seleccionada = this.peliculaSeleccionada();
+    const payload = this.construirPayload();
+    const url = (this.form.controls.rutaImagen.value ?? '').trim();
+
+    this.guardando.set(true);
+    const peticion$ = seleccionada?.id
+      ? this.peliculaService.actualizar(seleccionada.id, payload)
+      : this.peliculaService.crear(payload);
+
+    peticion$.subscribe({
+      next: (guardada) => {
+        this.guardando.set(false);
+        this.toastr.success(
+          seleccionada ? 'Película actualizada' : 'Película creada correctamente',
+          'Éxito'
+        );
+
+        const id = guardada.id ?? seleccionada?.id;
+        this.cancelarEdicion();
+        this.cargarPeliculas();
+
+        if (id && this.esUrlHttp(url)) {
+          this.importarImagenDesdeUrl(id, url);
+        }
+      },
+      error: (error) => {
+        this.guardando.set(false);
+        const mapeados = aplicarErroresDeCampos(this.form, error);
+        this.errorMensaje.set(
+          mapeados
+            ? 'Revisá los campos marcados.'
+            : getErrorMessage(error, 'No se pudo guardar la película.')
+        );
+      },
+    });
+  }
+
+  editar(pelicula: Pelicula): void {
+    if (!pelicula.id) return;
+
+    this.peliculaSeleccionada.set(pelicula);
+    this.aplicarValidadoresFechas(false);
+    this.form.patchValue({
+      nombre: pelicula.nombre,
+      genero: pelicula.genero,
+      fechaEstreno: pelicula.fechaEstreno,
+      fechaSalida: pelicula.fechaSalida,
+      duracionMinutos: pelicula.duracionMinutos,
+      sinopsis: pelicula.sinopsis?.trim() || this.sinopsisPorDefecto,
+      descripcion: pelicula.descripcion ?? '',
+      director: pelicula.director ?? '',
+      elenco: pelicula.elenco ?? '',
+      clasificacion: pelicula.clasificacion ?? '',
+      nominaciones: pelicula.nominaciones ?? '',
+      urlTrailer: pelicula.urlTrailer ?? '',
+      rutaImagen: pelicula.rutaImagen ?? '',
+    });
+    this.archivoSeleccionado.set(null);
+    this.errorImagen.set('');
+    this.progreso.set(0);
+    this.errorPreview.set(false);
+    this.limpiarErrores();
+    this.actualizarResumenCartelera();
+  }
+
+  cancelarEdicion(): void {
+    this.peliculaSeleccionada.set(null);
+    this.archivoSeleccionado.set(null);
+    this.errorImagen.set('');
+    this.progreso.set(0);
+    this.subiendo.set(false);
+    this.resetFormulario();
+  }
+
+  eliminar(pelicula: Pelicula): void {
+    if (!pelicula.id) return;
+
+    this.confirmDialog
+      .confirmDanger(
+        'Eliminar película',
+        `¿Seguro que querés eliminar «${pelicula.nombre}»? Esta acción no se puede deshacer.`
+      )
+      .subscribe((confirmado) => {
+        if (!confirmado) return;
+
+        this.peliculaService.eliminar(pelicula.id!).subscribe({
+          next: () => {
+            this.toastr.success('Película eliminada', 'Éxito');
+            if (this.peliculaSeleccionada()?.id === pelicula.id) {
+              this.cancelarEdicion();
+            }
+            this.cargarPeliculas();
+          },
+        });
+      });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.archivoSeleccionado.set(input.files?.[0] ?? null);
+    this.errorImagen.set('');
+  }
+
+  subirImagen(): void {
+    const archivo = this.archivoSeleccionado();
+    const pelicula = this.peliculaSeleccionada();
+    if (!archivo || !pelicula?.id) return;
+    this.subirArchivo(pelicula.id, archivo);
+  }
+
+  onPreviewError(): void {
+    this.errorPreview.set(true);
+  }
+
+  esInvalido(campo: string): boolean {
+    const control = this.form.get(campo);
+    return !!control && control.invalid && (control.touched || control.dirty);
   }
 
   private actualizarResumenCartelera(): void {
@@ -128,90 +310,49 @@ export class PeliculasComponent {
     });
   }
 
-  cargarPeliculas(): void {
-    this.cargando.set(true);
-    this.peliculaService.listarTodas().subscribe({
-      next: (peliculas) => {
-        this.peliculas.set(peliculas);
-        this.cargando.set(false);
-      },
-      error: (error) => {
-        this.errorCarga.set(getErrorMessage(error, 'No se pudieron cargar las películas.'));
-        this.cargando.set(false);
-      },
-    });
+  private aplicarValidadoresFechas(requiereFutura: boolean): void {
+    const estreno = this.form.controls.fechaEstreno;
+    const salida = this.form.controls.fechaSalida;
+    const base = [Validators.required];
+    estreno.setValidators(requiereFutura ? [...base, fechaFutura] : base);
+    salida.setValidators(requiereFutura ? [...base, fechaFutura] : base);
+    estreno.updateValueAndValidity({ emitEvent: false });
+    salida.updateValueAndValidity({ emitEvent: false });
   }
 
-  guardar(): void {
-    this.limpiarErrores();
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  private subirArchivo(id: number, archivo: File): void {
+    this.subiendo.set(true);
+    this.progreso.set(0);
+    this.errorImagen.set('');
 
-    this.guardando.set(true);
-    this.peliculaService.crear(this.construirPayload()).subscribe({
-      next: (guardada) => {
-        this.guardando.set(false);
-        this.toastr.success('Película creada correctamente', 'Éxito');
-
-        const url = (this.form.controls.rutaImagen.value ?? '').trim();
-        this.resetFormulario();
-        this.cargarPeliculas();
-
-        if (guardada.id && this.esUrlHttp(url)) {
-          this.importarImagenDesdeUrl(guardada.id, url, true);
-        } else if (guardada.id) {
-          this.router.navigate(['/admin/peliculas', guardada.id, 'editar']);
+    this.peliculaService.subirImagen(id, archivo).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const total = event.total ?? event.loaded;
+          this.progreso.set(total ? Math.round((100 * event.loaded) / total) : 0);
+        } else if (event.type === HttpEventType.Response) {
+          this.subiendo.set(false);
+          this.progreso.set(0);
+          this.archivoSeleccionado.set(null);
+          this.toastr.success('Póster guardado correctamente', 'Éxito');
+          this.peliculaService.obtenerPorId(id).subscribe({
+            next: (pelicula) => {
+              this.peliculaSeleccionada.set(pelicula);
+              this.form.patchValue({ rutaImagen: pelicula.rutaImagen ?? '' });
+              this.cargarPeliculas();
+            },
+          });
         }
       },
       error: (error) => {
-        this.guardando.set(false);
-        const mapeados = aplicarErroresDeCampos(this.form, error);
-        this.errorMensaje.set(
-          mapeados
-            ? 'Revisá los campos marcados.'
-            : getErrorMessage(error, 'No se pudo guardar la película.')
-        );
+        this.subiendo.set(false);
+        this.progreso.set(0);
+        this.errorImagen.set(getErrorMessage(error, 'No se pudo subir la imagen.'));
       },
     });
   }
 
-  editar(pelicula: Pelicula): void {
-    if (!pelicula.id) return;
-    this.router.navigate(['/admin/peliculas', pelicula.id, 'editar']);
-  }
-
-  eliminar(pelicula: Pelicula): void {
-    if (!pelicula.id) return;
-
-    this.confirmDialog
-      .confirmDanger(
-        'Eliminar película',
-        `¿Seguro que querés eliminar «${pelicula.nombre}»? Esta acción no se puede deshacer.`
-      )
-      .subscribe((confirmado) => {
-        if (!confirmado) return;
-
-        this.peliculaService.eliminar(pelicula.id!).subscribe({
-          next: () => {
-            this.toastr.success('Película eliminada', 'Éxito');
-            this.cargarPeliculas();
-          },
-        });
-      });
-  }
-
-  onPreviewError(): void {
-    this.errorPreview.set(true);
-  }
-
-  esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && (control.touched || control.dirty);
-  }
-
-  private importarImagenDesdeUrl(id: number, url: string, irAEditar: boolean): void {
+  private importarImagenDesdeUrl(id: number, url: string): void {
     this.toastr.info('Descargando la imagen de la URL…', 'Póster');
 
     fetch(url, { mode: 'cors' })
@@ -243,6 +384,7 @@ export class PeliculasComponent {
               next: (event) => {
                 if (event.type === HttpEventType.Response) {
                   this.toastr.success('Póster guardado correctamente', 'Éxito');
+                  this.cargarPeliculas();
                   resolve();
                 }
               },
@@ -252,14 +394,9 @@ export class PeliculasComponent {
       )
       .catch(() => {
         this.toastr.warning(
-          'La película se creó, pero la imagen no. Podés subirla en la edición.',
+          'La película se guardó, pero la imagen no. Podés subirla editando la película.',
           'Póster'
         );
-      })
-      .finally(() => {
-        if (irAEditar) {
-          this.router.navigate(['/admin/peliculas', id, 'editar']);
-        }
       });
   }
 
@@ -303,6 +440,7 @@ export class PeliculasComponent {
   private resetFormulario(): void {
     this.errorPreview.set(false);
     this.errorMensaje.set('');
+    this.aplicarValidadoresFechas(true);
     this.form.reset({
       nombre: '',
       genero: '',
@@ -319,6 +457,7 @@ export class PeliculasComponent {
       rutaImagen: '',
     });
     this.limpiarErrores();
+    this.actualizarResumenCartelera();
   }
 
   private limpiarErrores(): void {
