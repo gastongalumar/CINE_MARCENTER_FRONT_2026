@@ -93,6 +93,8 @@ export class FuncionesComponent {
   readonly creando = signal(false);
   readonly creandoRango = signal(false);
   readonly soloVigentes = signal(false);
+  readonly pagina = signal(1);
+  readonly pageSize = 6;
   readonly errorIndividual = signal('');
   readonly errorRango = signal('');
   readonly errorCarga = signal('');
@@ -150,6 +152,24 @@ export class FuncionesComponent {
     return this.funciones().filter((f) => this.esVigente(f));
   });
 
+  readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.funcionesFiltradas().length / this.pageSize))
+  );
+
+  readonly funcionesPagina = computed(() => {
+    const start = (this.pagina() - 1) * this.pageSize;
+    return this.funcionesFiltradas().slice(start, start + this.pageSize);
+  });
+
+  readonly rangoDesde = computed(() => {
+    if (!this.funcionesFiltradas().length) return 0;
+    return (this.pagina() - 1) * this.pageSize + 1;
+  });
+
+  readonly rangoHasta = computed(() =>
+    Math.min(this.pagina() * this.pageSize, this.funcionesFiltradas().length)
+  );
+
   private readonly initLoad = afterNextRender(() => this.cargarDatos());
 
   constructor() {
@@ -193,6 +213,24 @@ export class FuncionesComponent {
     this.errorRango.set('');
   }
 
+  actualizarSoloVigentes(valor: boolean): void {
+    this.soloVigentes.set(valor);
+    this.pagina.set(1);
+  }
+
+  irAPagina(page: number): void {
+    const total = this.totalPaginas();
+    if (page < 1 || page > total) return;
+    this.pagina.set(page);
+  }
+
+  private ajustarPagina(): void {
+    const total = this.totalPaginas();
+    if (this.pagina() > total) {
+      this.pagina.set(total);
+    }
+  }
+
   cargarDatos(): void {
     this.cargando.set(true);
     this.errorCarga.set('');
@@ -202,6 +240,7 @@ export class FuncionesComponent {
     this.funcionService.listarTodas().subscribe({
       next: (funciones) => {
         this.funciones.set(funciones);
+        this.ajustarPagina();
         this.cargando.set(false);
       },
       error: (error) => {

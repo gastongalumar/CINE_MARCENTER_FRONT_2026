@@ -1,12 +1,24 @@
 .glass-card {
-  background: rgba(10, 15, 29, 0.45) !important;
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 15, 29, 0.88) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: var(--border-radius-lg, 12px);
   color: var(--color-fuente);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
-.card-header {
-  border-color: rgba(255, 255, 255, 0.1) !important;
+:host-context(.light-theme) .glass-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.glass-card .card-header {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+:host-context(.light-theme) .glass-card .card-header {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
 }
 .card-subtitle,
 .form-hint,
@@ -39,4 +51,41 @@
   font-weight: 500;
   margin-bottom: 0.3rem;
 }
-.table { color: var(--color-fuente); }
+.tabla-admins {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--color-fuente);
+  color: var(--color-fuente) !important;
+  width: 100%;
+  background-color: transparent !important;
+}
+.tabla-admins thead th {
+  color: var(--color-slider) !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-bottom: 2px solid var(--color-slider) !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  padding: 0.65rem 0.5rem;
+}
+.tabla-admins tbody td {
+  color: var(--color-fuente) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  padding: 0.65rem 0.5rem;
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+.tabla-admins tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+:host-context(.light-theme) .tabla-admins thead th {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+:host-context(.light-theme) .tabla-admins tbody td {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+:host-context(.light-theme) .tabla-admins tbody tr:hover td {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+.paginador .btn:disabled { opacity: 0.55; }
