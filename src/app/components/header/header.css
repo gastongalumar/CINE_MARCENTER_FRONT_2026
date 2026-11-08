@@ -5,6 +5,14 @@
 .navbar { background-color: var(--color-contenedor) !important; }
 .nav-link { color: var(--color-fuente) !important; }
 .user-greet { color: var(--color-fuente); }
+.header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(245, 197, 24, 0.55);
+  flex-shrink: 0;
+}
 .btn-primary { background-color: var(--color-slider); border-color: var(--color-slider); color: #000; }
 .btn-outline-light { border-color: rgba(255,255,255,0.2); color: var(--color-fuente); }
 .theme-toggle { background: transparent; border: 1px solid rgba(255,255,255,0.04); color: var(--color-fuente); }

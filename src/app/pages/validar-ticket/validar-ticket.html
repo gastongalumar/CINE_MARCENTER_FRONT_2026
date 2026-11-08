@@ -1,0 +1,77 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Volver</button>
+    <h2 class="mb-0">Validar Ticket</h2>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-muted small mb-3">
+            Ingresá el número de ticket (formato <code>TK</code> seguido de dígitos) para validar el ingreso.
+          </p>
+
+          <form (ngSubmit)="validar()" #ticketForm="ngForm">
+            <div class="mb-3">
+              <label for="numeroTicket" class="form-label">Número de ticket</label>
+              <input
+                type="text"
+                class="form-control"
+                id="numeroTicket"
+                name="numeroTicket"
+                [(ngModel)]="numeroTicket"
+                required
+                pattern="^TK\d+$"
+                placeholder="TK1748039201234"
+                [disabled]="validando"
+                autocomplete="off" />
+              <div class="form-text">Ejemplo: TK1748039201234</div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="marcarUsado"
+                name="marcarUsado"
+                [(ngModel)]="marcarUsado"
+                [disabled]="validando" />
+              <label class="form-check-label" for="marcarUsado">
+                Marcar como usado al validar
+              </label>
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger py-2 small">{{ error }}</div>
+
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
+              [disabled]="!ticketForm.form.valid || validando">
+              {{ validando ? 'Validando...' : 'Validar ticket' }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mt-3" *ngIf="resultado">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Resultado</span>
+          <span class="badge" [ngClass]="estadoBadgeClass(resultado.estado)">
+            {{ estadoLabel(resultado.estado) }}
+          </span>
+        </div>
+        <div class="card-body">
+          <p class="mb-2"><strong>Ticket:</strong> {{ resultado.numeroTicket }}</p>
+          <p class="mb-2">{{ resultado.mensaje }}</p>
+          <p class="mb-2" *ngIf="resultado.montoTotal != null">
+            <strong>Monto:</strong> $ {{ resultado.montoTotal | number:'1.0-0' }}
+          </p>
+           <p class="mb-0" *ngIf="resultado.asientos.length">
+            <strong>Asientos:</strong> {{ resultado.asientos.join(', ') }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
