@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth';
 import { Pelicula } from '../../models/pelicula';
 import { GENEROS_PELICULA, etiquetaGenero } from '../../models/genero-pelicula';
 import { refreshView } from '../../utils/refresh-view';
+import { autorizarButacas } from '../../utils/butacas-access';
 
 @Component({
   selector: 'app-cartelera',
@@ -355,6 +356,7 @@ export class CarteleraComponent implements OnDestroy {
   }
 
   irAFunciones(peliculaId: number): void {
+    autorizarButacas(peliculaId);
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/butacas', peliculaId]);
     } else {

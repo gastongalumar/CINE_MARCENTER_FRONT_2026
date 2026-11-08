@@ -70,6 +70,25 @@ html {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55) !important;
 }
 
+/* Confirm dialog: anula paddings/offsets del contenedor MDC */
+.cinemacenter-dialog .mat-mdc-dialog-container,
+.cinemacenter-dialog .mdc-dialog__container {
+  padding: 0 !important;
+}
+
+.cinemacenter-dialog .mat-mdc-dialog-surface,
+.cinemacenter-dialog .mdc-dialog__surface {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.cinemacenter-dialog .mat-mdc-dialog-component-host {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .light-theme .mat-mdc-dialog-surface,
 .light-theme .mat-mdc-menu-panel,
 .light-theme .mat-mdc-select-panel,

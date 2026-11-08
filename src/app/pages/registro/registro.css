@@ -29,15 +29,34 @@
   background-color: rgba(255, 255, 255, 0.02) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: var(--color-muted) !important;
-  border-radius: var(--border-radius-md) 0 0 var(--border-radius-md) !important;
+  border-radius: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 0.8rem;
 }
-.input-group .form-control {
+.input-group > .input-group-text:first-child {
+  border-radius: var(--border-radius-md) 0 0 var(--border-radius-md) !important;
+}
+.input-group > .input-group-text:last-child {
   border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0 !important;
+}
+.input-group .form-control {
+  border-radius: 0 !important;
   border-left: none !important;
+}
+.input-group .form-control:last-child {
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0 !important;
+}
+.input-group .form-control:not(:last-child) {
+  border-right: none !important;
+}
+.btn-toggle-password {
+  cursor: pointer;
+  user-select: none;
+}
+.btn-toggle-password:hover {
+  color: var(--color-accent, #f5c518) !important;
 }
 .form-control:focus {
   border-color: var(--color-accent) !important;

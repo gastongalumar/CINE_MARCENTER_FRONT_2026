@@ -12,21 +12,28 @@
             Ingresá el número de ticket (formato <code>TK</code> seguido de dígitos) para validar el ingreso.
           </p>
 
-          <form (ngSubmit)="validar()" #ticketForm="ngForm">
+          <form [formGroup]="form" (ngSubmit)="validar()" novalidate>
             <div class="mb-3">
               <label for="numeroTicket" class="form-label">Número de ticket</label>
               <input
                 type="text"
                 class="form-control"
                 id="numeroTicket"
-                name="numeroTicket"
-                [(ngModel)]="numeroTicket"
-                required
-                pattern="^TK\d+$"
+                formControlName="numeroTicket"
                 placeholder="TK1748039201234"
-                [disabled]="validando"
-                autocomplete="off" />
+                autocomplete="off"
+                (blur)="onCampoBlur()"
+                [class.is-invalid]="esInvalido('numeroTicket')" />
               <div class="form-text">Ejemplo: TK1748039201234</div>
+              @if (esInvalido('numeroTicket')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.numeroTicket.errors?.['required']) {
+                    Ingresá el número de ticket.
+                  } @else if (form.controls.numeroTicket.errors?.['pattern']) {
+                    Debe ser TK seguido de números (ej. TK1748…).
+                  }
+                </div>
+              }
             </div>
 
             <div class="form-check mb-3">
@@ -34,9 +41,7 @@
                 class="form-check-input"
                 type="checkbox"
                 id="marcarUsado"
-                name="marcarUsado"
-                [(ngModel)]="marcarUsado"
-                [disabled]="validando" />
+                formControlName="marcarUsado" />
               <label class="form-check-label" for="marcarUsado">
                 Marcar como usado al validar
               </label>
@@ -47,7 +52,7 @@
             <button
               type="submit"
               class="btn btn-primary w-100"
-              [disabled]="!ticketForm.form.valid || validando">
+              [disabled]="form.invalid || validando">
               {{ validando ? 'Validando...' : 'Validar ticket' }}
             </button>
           </form>

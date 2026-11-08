@@ -18,6 +18,7 @@ import { etiquetaGenero } from '../../models/genero-pelicula';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 import { fechaLocalIso, parseApiDateTime } from '../../utils/datetime';
+import { autorizarButacas } from '../../utils/butacas-access';
 
 @Component({
   selector: 'app-pelicula-detalle',
@@ -122,6 +123,7 @@ export class PeliculaDetalleComponent {
 
   irAFunciones(): void {
     if (!this.pelicula?.id) return;
+    autorizarButacas(this.pelicula.id);
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/butacas', this.pelicula.id]);
     } else {

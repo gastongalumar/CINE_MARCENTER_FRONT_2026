@@ -1,33 +1,36 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
-import { LoginRequest } from '../../models/auth';
 import { CustomizacionService } from '../../services/customizacion';
 import { Customizacion } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
+import { autorizarButacas, peliculaIdDesdeButacasUrl } from '../../utils/butacas-access';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-  credentials: LoginRequest = {
-    email: '',
-    password: ''
-  };
+  private readonly fb = inject(FormBuilder);
+
+  readonly form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
+  });
+
   loading = false;
   loginError = '';
+  mostrarPassword = false;
 
-  // Preview controls
   logoUrl: string = '';
   logoSizePx: number = 120;
-  logoOpacityPercent: number = 100; // 0-100
+  logoOpacityPercent: number = 100;
   temaActual: Customizacion | null = null;
 
   returnUrl: string = '/cartelera';
@@ -48,23 +51,21 @@ export class LoginComponent {
     }
 
     if (this.authService.isAuthenticated()) {
+      this.autorizarSiReturnButacas();
       this.router.navigateByUrl(this.returnUrl);
       return;
     }
 
-    // Cargar tema para vista previa
     this.customizacionService.obtenerTema().subscribe({
       next: (tema) => {
         this.temaActual = tema;
         if (tema.logoUrl) {
           this.logoUrl = tema.logoUrl;
         }
-        // extraer tamanio si existe
         if (tema.logoTamano) {
           const m = tema.logoTamano.match(/(\d+)/);
           if (m) this.logoSizePx = parseInt(m[0], 10);
         }
-        // extraer opacidad si existe (valor entre '0' y '1')
         if (tema.logoOpacity) {
           const val = parseFloat(tema.logoOpacity);
           if (!isNaN(val)) this.logoOpacityPercent = Math.round(val * 100);
@@ -77,8 +78,21 @@ export class LoginComponent {
     });
   }
 
+  esInvalido(campo: string): boolean {
+    const control = this.form.get(campo);
+    return !!control && control.invalid && control.touched;
+  }
+
+  onCampoBlur(): void {
+    this.cdr.markForCheck();
+  }
+
+  alternarPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+    this.cdr.markForCheck();
+  }
+
   aplicarPreviewGlobal(): void {
-    // Aplica logoTamano en variables root usando el servicio
     const temaPreview: Customizacion = {
       colorFondo: this.temaActual?.colorFondo || '#6E0A17',
       colorContenedor: this.temaActual?.colorContenedor || '#0A6E61',
@@ -95,23 +109,35 @@ export class LoginComponent {
     this.customizacionService.aplicarTema(temaPreview);
   }
 
-  /** Redirige al endpoint de Spring Security que inicia el flujo con Google. */
   continuarConGoogle(): void {
     window.location.href = `${environment.baseUrl}/oauth2/authorization/google`;
   }
 
+  private autorizarSiReturnButacas(): void {
+    const peliculaId = peliculaIdDesdeButacasUrl(this.returnUrl);
+    if (peliculaId != null) {
+      autorizarButacas(peliculaId);
+    }
+  }
+
   onSubmit(): void {
+    if (this.form.invalid) {
+      return;
+    }
+
     this.loading = true;
     this.loginError = '';
     this.cdr.markForCheck();
-    this.authService.login(this.credentials).subscribe({
+
+    const credentials = this.form.getRawValue();
+    this.authService.login(credentials).subscribe({
       next: (response) => {
         this.loading = false;
         this.cdr.markForCheck();
         if (response.tipo === 'ADMINISTRADOR') {
           this.router.navigate(['/admin']);
         } else {
-          // Redirigir a returnUrl si existe (ej: compra de entradas), o a cartelera
+          this.autorizarSiReturnButacas();
           this.router.navigateByUrl(this.returnUrl);
         }
       },

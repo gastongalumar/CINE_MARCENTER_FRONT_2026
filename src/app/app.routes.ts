@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth';
+import { butacasAccessGuard } from './guards/butacas-access';
 import { roleGuard } from './guards/role';
 
 /**
@@ -72,7 +73,7 @@ export const routes: Routes = [
             import('./pages/seleccion-asientos/seleccion-asientos').then(
                 (m) => m.SeleccionAsientosComponent
             ),
-        canActivate: [authGuard],
+        canActivate: [authGuard, butacasAccessGuard],
     },
     {
         path: 'ticket/:numero',

@@ -51,6 +51,22 @@
   font-weight: 500;
   margin-bottom: 0.3rem;
 }
+.input-group-text {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-fuente, white);
+}
+.btn-toggle-password {
+  cursor: pointer;
+  user-select: none;
+}
+.btn-toggle-password:hover {
+  color: var(--color-accent, #f5c518);
+}
+.font-icon-sm {
+  font-size: 1.15rem;
+  vertical-align: middle;
+}
 .tabla-admins {
   --bs-table-bg: transparent;
   --bs-table-color: var(--color-fuente);
