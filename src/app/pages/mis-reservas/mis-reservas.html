@@ -1,0 +1,115 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">← Volver</button>
+    <h2 class="mb-0">Mis Compras</h2>
+  </div>
+
+  <div *ngIf="!loading; else loadingTemplate">
+
+    <div class="alert alert-info" *ngIf="reservas.length === 0">
+      No tenés compras realizadas todavía.
+      <br><a routerLink="/cartelera" class="btn btn-primary btn-sm mt-2">Ver Cartelera</a>
+    </div>
+
+    <div class="row g-3" *ngIf="reservas.length > 0">
+      <div class="col-12">
+        <div class="card resumen-card">
+          <div class="card-body py-2">
+            <div class="row text-center">
+                  <div class="col">
+                    <div class="resumen-num">{{ reservasActivas.length }}</div>
+                    <div class="resumen-label">Compras</div>
+                  </div>
+                  <div class="col">
+                    <div class="resumen-num">{{ totalAsientos() }}</div>
+                    <div class="resumen-label">Entradas</div>
+                  </div>
+                  <div class="col">
+                    <div class="resumen-num">$ {{ calcularTotalGastado() | number:'1.0-0' }}</div>
+                    <div class="resumen-label">Total gastado</div>
+                  </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12" *ngFor="let reserva of reservas">
+        <div class="card reserva-card" [class.cancelada]="reserva.estadoReserva === 'CANCELADA'">
+          <div class="card-body" *ngIf="reserva.estadoReserva === 'CANCELADA'">
+            <div class="row align-items-center">
+              <div class="col-12">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-danger fs-6">✕ Cancelada</span>
+                  <span class="ticket-num"><span class="material-icons">confirmation_number</span> {{ reserva.numeroTicket }}</span>
+                </div>
+                <div class="pelicula-nombre mt-1">{{ reserva.peliculaNombre || 'Película' }}</div>
+                <div class="info-secundaria">
+                  <span class="material-icons">account_balance</span>
+                  {{ reserva.salaNombre || '-' }}
+                  &nbsp;|&nbsp;
+                  <span class="material-icons">schedule</span>
+                  {{ (reserva.horarioFuncion || '') | fechaApi:'dd/MM/yyyy HH:mm' }} hs
+                </div>
+                <div class="info-secundaria mt-2">
+                  <span class="material-icons">info</span>
+                  Esta compra fue cancelada.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body" *ngIf="reserva.estadoReserva !== 'CANCELADA'">
+            <div class="row align-items-center">
+              <div class="col-md-5">
+                <div class="ticket-num"><span class="material-icons">confirmation_number</span> {{ reserva.numeroTicket }}</div>
+                <span class="badge estado-chip"
+                  [ngClass]="reserva.estadoReserva | claseEstadoReserva">
+                  {{ reserva.estadoReserva | estadoReserva }}
+                </span>
+                <div class="pelicula-nombre mt-1">{{ reserva.peliculaNombre || 'Película' }}</div>
+                <div class="info-secundaria">
+                  <span class="material-icons">account_balance</span>
+                  {{ reserva.salaNombre || '-' }}
+                  &nbsp;|&nbsp;
+                  <span class="material-icons">schedule</span>
+                  {{ (reserva.horarioFuncion || '') | fechaApi:'dd/MM/yyyy HH:mm' }} hs
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="asientos-label">Asientos:</div>
+                <div class="asientos-val">{{ reserva.asientosSeleccionados.join(', ') }}</div>
+
+                <div class="metodo-pago mt-1">
+                  <span class="badge bg-secondary">{{ reserva.metodoPago }}</span>
+                </div>
+              </div>
+              <div class="col-md-2 text-center">
+                <div class="monto">$ {{ reserva.montoTotal | number:'1.0-0' }}</div>
+                <div class="fecha-emision">{{ reserva.fechaEmision | date:'dd/MM/yy' }}</div>
+              </div>
+              <div class="col-md-2 text-end">
+                <div class="d-flex flex-column gap-1">
+                    <button class="btn btn-sm btn-primary" (click)="verTicket(reserva.numeroTicket)">
+                      <span class="material-icons">confirmation_number</span> Ver Ticket
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="cancelarReserva(reserva.numeroTicket)"
+                      [disabled]="cancelando">
+                      <span class="material-icons">delete</span> Cancelar
+                    </button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-2">Cargando tus compras...</p>
+    </div>
+  </ng-template>
+</div>

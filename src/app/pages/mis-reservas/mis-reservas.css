@@ -1,0 +1,17 @@
+.card { background-color: var(--color-contenedor); color: var(--color-fuente); }
+.resumen-card { border-left: 4px solid var(--color-slider); }
+.resumen-num { font-size: 1.5rem; font-weight: bold; color: var(--color-slider); }
+.resumen-label { font-size: 0.8rem; color: var(--color-muted); }
+.reserva-card { border: 1px solid rgba(255,255,255,0.1); transition: box-shadow 0.2s; }
+.reserva-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.ticket-num { font-size: 0.85rem; color: var(--color-muted); font-family: monospace; }
+.pelicula-nombre { font-size: 1.1rem; font-weight: bold; }
+.info-secundaria { font-size: 0.85rem; color: #bbb; margin-top: 2px; }
+.asientos-label { font-size: 0.8rem; color: var(--color-muted); }
+.asientos-val { font-weight: bold; }
+.metodo-pago { margin-top: 4px; }
+.estado-chip { font-size: 0.68rem; padding: 0.3rem 0.6rem; }
+.monto { font-size: 1.3rem; font-weight: bold; color: var(--color-slider); }
+.fecha-emision { font-size: 0.8rem; color: var(--color-muted); }
+.btn-xs { padding: 2px 6px; font-size: 0.75rem; }
+.cancelada { opacity: 0.75; border-color: #dc3545 !important; }
