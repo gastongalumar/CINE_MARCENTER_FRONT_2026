@@ -1,11 +1,11 @@
 import { Component, OnInit, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../service/auth.service';
-import { CustomizacionService } from '../../service/customizacion-service';
-import { ImageService } from '../../service/image.service';
+import { AuthService } from '../../services/auth';
+import { CustomizacionService } from '../../services/customizacion';
+import { ImageService } from '../../services/image';
 import { Observable } from 'rxjs';
-import type { Customizacion } from '../../models/customizacion.model';
+import type { Customizacion } from '../../models/customizacion';
 
 @Component({
   selector: 'app-header',

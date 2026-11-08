@@ -15,13 +15,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-// import { ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
-// import { SalaService } from '../../services/sala.service';
-// import { ConfirmDialogService } from '../../services/confirm-dialog.service';
-// import { Sala, SalaRequest } from '../../models/sala.model';
-// import { getErrorMessage } from '../../utils/api-error.util';
-// import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error.util';
+import { SalaService } from '../../services/sala';
+import { ConfirmDialogService } from '../../services/confirm-dialog';
+import { Sala, SalaRequest } from '../../models/sala';
+import { getErrorMessage } from '../../utils/api-error';
+import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
 
 /** Capacidad total de la sala ≤ 320 butacas (CapacidadSalaValidator del backend). */
 function capacidadValida(group: AbstractControl): ValidationErrors | null {
