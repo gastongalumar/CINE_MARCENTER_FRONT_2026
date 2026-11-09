@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomizacionService } from '../../services/customizacion';
 import { Customizacion } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { getErrorMessage } from '../../utils/api-error';
 import { ConfirmDialogService } from '../../services/confirm-dialog';
@@ -43,7 +43,6 @@ export class TemaComponent implements OnInit {
 
   constructor(
     private customizacionService: CustomizacionService,
-    private router: Router,
     private toastr: ToastrService,
     private confirmDialog: ConfirmDialogService,
     private cdr: ChangeDetectorRef
@@ -74,6 +73,7 @@ export class TemaComponent implements OnInit {
           globalOpacityPercent: tema.globalOpacity ? Math.round(parseFloat(tema.globalOpacity)) : 100
         };
         this.verificarFondoUrl();
+        this.aplicarTemaGlobal();
         refreshView(this.cdr);
       },
       error: (error) => {
@@ -138,6 +138,11 @@ export class TemaComponent implements OnInit {
     this.fondoUrlValido = !!this.tema.fondoUrl && this.tema.fondoUrl.trim() !== '';
   }
 
+  /** Solo actualiza el estado local / panel de preview (no reestiliza toda la app). */
+  onCampoCambiado(): void {
+    this.verificarFondoUrl();
+  }
+
   /** true si el fondo actual es un video (MP4/WEBM). */
   esVideoFondo(): boolean {
     return this.customizacionService.esVideo(this.tema?.fondoUrl);
@@ -169,7 +174,7 @@ export class TemaComponent implements OnInit {
     this.customizacionService.subirLogo(file).subscribe({
       next: (tema) => {
         this.tema.logoUrl = tema.logoUrl || '';
-        this.aplicarVistaPrevia();
+        this.onCampoCambiado();
       },
       error: (err) => {
         console.error('Error al subir logo:', err);
@@ -204,7 +209,6 @@ export class TemaComponent implements OnInit {
       next: (tema) => {
         this.tema.fondoUrl = tema.fondoUrl || '';
         this.verificarFondoUrl();
-        this.aplicarVistaPrevia();
         refreshView(this.cdr);
         this.toastr.success(esVideo ? 'Video de fondo subido' : 'Imagen de fondo subida', 'Éxito');
       },
@@ -228,7 +232,7 @@ export class TemaComponent implements OnInit {
         this.customizacionService.eliminarLogo().subscribe({
           next: () => {
             this.tema.logoUrl = '';
-            this.aplicarVistaPrevia();
+            this.aplicarTemaGlobal();
             this.toastr.success('Logo eliminado', 'Éxito');
           },
           error: (err) => {
@@ -248,7 +252,7 @@ export class TemaComponent implements OnInit {
           next: () => {
             this.tema.fondoUrl = '';
             this.verificarFondoUrl();
-            this.aplicarVistaPrevia();
+            this.aplicarTemaGlobal();
             refreshView(this.cdr);
             this.toastr.success('Fondo eliminado', 'Éxito');
           },
@@ -261,13 +265,12 @@ export class TemaComponent implements OnInit {
 
   actualizarGlobalOpacity(): void {
     this.tema.globalOpacity = (this.tema.globalOpacityPercent / 100).toString();
-    this.aplicarVistaPrevia();
+    this.onCampoCambiado();
   }
 
-  aplicarVistaPrevia(): void {
-    this.verificarFondoUrl();
-
-    const temaPreview: Customizacion = {
+  /** Aplica el tema actual a toda la app (cargar / guardar / cancelar / eliminar). */
+  private construirTemaActual(): Customizacion {
+    return {
       colorFondo: this.tema.colorFondo,
       colorContenedor: this.tema.colorContenedor,
       colorFuente: this.tema.colorFuente,
@@ -280,28 +283,32 @@ export class TemaComponent implements OnInit {
       logoOpacity: this.tema.logoOpacity,
       globalOpacity: this.tema.globalOpacity
     };
-    this.customizacionService.aplicarTema(temaPreview);
+  }
+
+  private aplicarTemaGlobal(): void {
+    this.verificarFondoUrl();
+    this.customizacionService.aplicarTema(this.construirTemaActual());
   }
 
   actualizarTitulos(): void {
     this.tema.tamanoFuenteTitulos = this.tema.tamanoFuenteTitulosPx + 'px';
-    this.aplicarVistaPrevia();
+    this.onCampoCambiado();
   }
 
   actualizarTexto(): void {
     this.tema.tamanoFuenteTexto = this.tema.tamanoFuenteTextoPx + 'px';
-    this.aplicarVistaPrevia();
+    this.onCampoCambiado();
   }
 
   actualizarLogoTamano(): void {
     this.tema.logoTamano = this.tema.logoTamanoPx + 'px';
-    this.aplicarVistaPrevia();
+    this.onCampoCambiado();
   }
 
   actualizarLogoOpacity(): void {
     // Convertir percent a string entre 0 y 1
     this.tema.logoOpacity = (this.tema.logoOpacityPercent / 100).toString();
-    this.aplicarVistaPrevia();
+    this.onCampoCambiado();
   }
 
   guardarTema(): void {
@@ -309,22 +316,10 @@ export class TemaComponent implements OnInit {
     this.errorMensaje = '';
 
     const temaGuardar: Customizacion = {
-      colorFondo: this.tema.colorFondo,
-      colorContenedor: this.tema.colorContenedor,
-      colorFuente: this.tema.colorFuente,
-      colorSlider: this.tema.colorSlider,
-      tamanoFuenteTitulos: this.tema.tamanoFuenteTitulos,
-      tamanoFuenteTexto: this.tema.tamanoFuenteTexto,
-      logoUrl: this.tema.logoUrl,
-      fondoUrl: this.tema.fondoUrl,
-      logoTamano: this.tema.logoTamano,
-      logoOpacity: this.tema.logoOpacity,
+      ...this.construirTemaActual(),
       // El backend espera globalOpacity como un número entre 0 y 100
-      // Convertir de 0-1 (preview) a 0-100 (backend)
       globalOpacity: String(this.tema.globalOpacityPercent)
     };
-
-    console.log('📤 Enviando tema al backend:', temaGuardar);
 
     this.customizacionService.guardarTema(temaGuardar).subscribe({
       next: () => {
@@ -341,9 +336,5 @@ export class TemaComponent implements OnInit {
 
   cancelar(): void {
     this.cargarTema();
-  }
-
-  irALogin(): void {
-    this.router.navigate(['/login']);
   }
 }

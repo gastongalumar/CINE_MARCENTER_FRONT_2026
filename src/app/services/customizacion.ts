@@ -70,11 +70,27 @@ export class CustomizacionService {
   }
 
   eliminarLogo(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/logo`);
+    return this.http.delete(`${this.apiUrl}/logo`).pipe(
+      tap(() => {
+        const current = this.temaSubject.value;
+        if (!current) return;
+        const updated = { ...current, logoUrl: '' };
+        this.temaSubject.next(updated);
+        this.aplicarTema(updated);
+      })
+    );
   }
 
   eliminarFondo(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/fondo`);
+    return this.http.delete(`${this.apiUrl}/fondo`).pipe(
+      tap(() => {
+        const current = this.temaSubject.value;
+        if (!current) return;
+        const updated = { ...current, fondoUrl: '' };
+        this.temaSubject.next(updated);
+        this.aplicarTema(updated);
+      })
+    );
   }
 
   private actualizarTema(tema: Customizacion): void {
