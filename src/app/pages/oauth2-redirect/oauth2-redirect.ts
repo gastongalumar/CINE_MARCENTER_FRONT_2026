@@ -8,7 +8,7 @@ import { decodeJwtPayload, isJwtExpired } from '../../utils/jwt';
  * Destino del redirect de OAuth2.
  *
  * El backend (OAuth2AuthenticationSuccessHandler) llega acá con el JWT propio
- * en el query param `token`. Se guarda en localStorage con la misma clave que
+ * en el query param `token`. Se guarda en sessionStorage con la misma clave que
  * usa el login tradicional y se recarga la aplicación para que `AuthService`
  * restaure la sesión desde el almacenamiento. Así el interceptor y los guards
  * siguen funcionando sin cambios.
@@ -41,7 +41,7 @@ export class OAuth2RedirectComponent implements OnInit {
     }
 
     try {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
     } catch {
       this.irAlLogin();
       return;
@@ -58,7 +58,7 @@ export class OAuth2RedirectComponent implements OnInit {
 
   private irAlLogin(): void {
     try {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     } catch {
       // localStorage puede no estar disponible: se ignora.
     }

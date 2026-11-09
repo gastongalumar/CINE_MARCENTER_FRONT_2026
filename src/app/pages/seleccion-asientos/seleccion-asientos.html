@@ -105,7 +105,7 @@
   <!-- PASO 2: Seleccionar asientos -->
   <div *ngIf="paso === 2">
     <div class="d-flex align-items-center mb-4 gap-3">
-      <button class="btn btn-secondary btn-sm" (click)="paso = 1">
+      <button class="btn btn-secondary btn-sm" (click)="volverAHorarios()">
         <span class="material-icons font-icon-sm">arrow_back</span> Horarios
       </button>
       <h2 class="mb-0 page-title-cinematic">{{ esAdmin ? 'Ocupación de la Función' : 'Elegir Asientos' }}</h2>
@@ -144,24 +144,29 @@
       [filas]="salaFilas"
       [columnas]="salaColumnas"
       [ocupados]="asientosOcupados"
+      [bloqueados]="asientosBloqueados"
       [seleccionados]="asientosSeleccionados"
       [soloLectura]="esAdmin"
-      (seleccionChange)="asientosSeleccionados = $event">
+      (seleccionChange)="onSeleccionChange($event)">
     </app-seat-map>
 
     <!-- Reporte de ocupación (solo admin) -->
     <div class="ocupacion-report mt-4 p-4 text-center" *ngIf="esAdmin">
       <div class="row">
-        <div class="col-4 border-end border-secondary">
+        <div class="col-3 border-end border-secondary">
           <div class="report-value">{{ totalAsientos }}</div>
           <div class="report-label">Total Asientos</div>
         </div>
-        <div class="col-4 border-end border-secondary">
+        <div class="col-3 border-end border-secondary">
           <div class="report-value ocupados text-danger">{{ asientosOcupados.length }}</div>
           <div class="report-label">Ocupados</div>
         </div>
-        <div class="col-4">
-          <div class="report-value libres text-success">{{ totalAsientos - asientosOcupados.length }}</div>
+        <div class="col-3 border-end border-secondary">
+          <div class="report-value text-primary">{{ asientosBloqueados.length }}</div>
+          <div class="report-label">Bloqueados</div>
+        </div>
+        <div class="col-3">
+          <div class="report-value libres text-success">{{ totalAsientos - asientosOcupados.length - asientosBloqueados.length }}</div>
           <div class="report-label">Libres</div>
         </div>
       </div>
@@ -280,7 +285,7 @@
                   <span class="material-icons">check_circle</span> Confirmar Compra
                 </span>
               </button>
-              <button class="btn btn-secondary py-3" routerLink="/cartelera">Cancelar Compra</button>
+              <button class="btn btn-secondary py-3" (click)="cancelarCompra()">Cancelar Compra</button>
             </div>
           </div>
         </div>
