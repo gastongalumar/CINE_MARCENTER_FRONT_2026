@@ -1,0 +1,26 @@
+<div class="container py-4 cumple-page">
+  <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">
+      <span class="material-icons align-middle me-1">arrow_back</span> Volver
+    </button>
+    <h2 class="mb-0">Beneficios y promociones</h2>
+  </div>
+
+  <p class="section-lead mb-4">
+    Promos simuladas para el TP. Condiciones de referencia; confirmá siempre en boletería o Candy Bar.
+  </p>
+
+  <div class="row g-3 mb-4">
+    @for (promo of promos; track promo.id) {
+      <div class="col-12" [attr.id]="'promo-' + promo.id">
+        <article class="include-card" [class.promo-destacada]="esDestacada(promo.id)">
+          <span class="material-icons include-icon">{{ promo.icon }}</span>
+          <div>
+            <h4>{{ promo.titulo }}</h4>
+            <p>{{ promo.texto }}</p>
+          </div>
+        </article>
+      </div>
+    }
+  </div>
+</div>

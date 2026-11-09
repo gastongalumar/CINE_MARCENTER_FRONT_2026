@@ -72,6 +72,16 @@ export const routes: Routes = [
             import('./pages/contacto/cumpleanos').then((m) => m.CumpleanosComponent),
     },
     {
+        path: 'contacto/candy',
+        title: 'Candy Bar | Cinemacenter',
+        loadComponent: () => import('./pages/contacto/candy').then((m) => m.CandyComponent),
+    },
+    {
+        path: 'contacto/promos',
+        title: 'Promociones | Cinemacenter',
+        loadComponent: () => import('./pages/contacto/promos').then((m) => m.PromosComponent),
+    },
+    {
         path: 'welcome',
         redirectTo: 'cartelera',
         pathMatch: 'full',

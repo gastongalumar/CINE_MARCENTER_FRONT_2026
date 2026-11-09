@@ -20,11 +20,16 @@ import { autorizarButacas } from '../../utils/butacas-access';
 })
 export class CarteleraComponent implements OnDestroy {
 
-  private readonly initLoad = afterNextRender(() => this.cargarPeliculas());
+  private readonly initLoad = afterNextRender(() => {
+    this.cargarPeliculas();
+    this.iniciarPromoAutoplay();
+  });
   readonly diasProximamente = 30;
   readonly heroMaxSlides = 6;
   private readonly heroAutoplayMs = 3000;
   private heroAutoplayId: ReturnType<typeof setInterval> | null = null;
+  private readonly promoAutoplayMs = 4000;
+  private promoAutoplayId: ReturnType<typeof setInterval> | null = null;
 
   peliculas: Pelicula[] = [];
   peliculasProximamente: Pelicula[] = [];
@@ -63,11 +68,40 @@ export class CarteleraComponent implements OnDestroy {
   ];
   candyIndex = 0;
 
-  readonly promoSidebar = {
-    src: 'assets/images/promos/promo-happy-hour.jpg',
-    titulo: 'Cinema Happy Hour',
-    detalle: '2x1 de jueves a martes antes de las 18 hs'
-  };
+  /** Carrusel chico de beneficios / promociones (sidebar). */
+  readonly promoSlides = [
+    {
+      id: 'happy-hour',
+      titulo: 'Cinema Happy Hour',
+      barra: '2x1 · Jueves a martes antes de las 18 hs',
+      src: 'assets/images/promos/promo-happy-hour.jpg',
+    },
+    {
+      id: 'miercoles',
+      titulo: 'Miércoles de rebajas',
+      barra: '25% off en entradas · solo miércoles',
+      src: 'assets/images/promos/promo-miercoles.jpg',
+    },
+    {
+      id: 'planazo',
+      titulo: 'Planazo de amigos',
+      barra: '4x2 en entradas · jueves y viernes',
+      src: 'assets/images/promos/promo-planazo.jpg',
+    },
+    {
+      id: 'mp-qr',
+      titulo: 'Mercado Pago QR',
+      barra: '10% off en Candy Bar pagando con QR',
+      src: 'assets/images/promos/promo-mp-qr.jpg',
+    },
+    {
+      id: 'tarjeta',
+      titulo: 'Tarjeta Marcenter',
+      barra: '2x1 en entradas con tarjeta adherida',
+      src: 'assets/images/promos/promo-tarjeta.jpg',
+    },
+  ];
+  promoIndex = 0;
 
   readonly promoEventos = [
     {
@@ -80,7 +114,7 @@ export class CarteleraComponent implements OnDestroy {
       src: 'assets/images/promos/promo-combo.jpg',
       titulo: 'Candy Bar Marcenter',
       texto: 'Combos y snacks para disfrutar la función. Precios y opciones en boletería.',
-      link: '/contacto',
+      link: '/contacto/candy',
     },
   ];
 
@@ -113,6 +147,7 @@ export class CarteleraComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.loading = false;
     this.detenerHeroAutoplay();
+    this.detenerPromoAutoplay();
   }
 
   get heroActual(): Pelicula | null {
@@ -368,6 +403,43 @@ export class CarteleraComponent implements OnDestroy {
     console.warn('Error al cargar imagen de película ID:', id);
     this.imageErrorMap[id] = true;
     refreshView(this.cd);
+  }
+
+  iniciarPromoAutoplay(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.detenerPromoAutoplay();
+    this.promoAutoplayId = setInterval(() => this.promoSiguiente(false), this.promoAutoplayMs);
+  }
+
+  detenerPromoAutoplay(): void {
+    if (this.promoAutoplayId != null) {
+      clearInterval(this.promoAutoplayId);
+      this.promoAutoplayId = null;
+    }
+  }
+
+  promoAnterior(): void {
+    const total = this.promoSlides.length;
+    this.promoIndex = (this.promoIndex - 1 + total) % total;
+    this.iniciarPromoAutoplay();
+    refreshView(this.cd);
+  }
+
+  promoSiguiente(reiniciarAutoplay = true): void {
+    const total = this.promoSlides.length;
+    this.promoIndex = (this.promoIndex + 1) % total;
+    if (reiniciarAutoplay) this.iniciarPromoAutoplay();
+    refreshView(this.cd);
+  }
+
+  irAPromo(index: number): void {
+    this.promoIndex = index;
+    this.iniciarPromoAutoplay();
+    refreshView(this.cd);
+  }
+
+  get promoActual() {
+    return this.promoSlides[this.promoIndex];
   }
 
   candyAnterior(): void {
