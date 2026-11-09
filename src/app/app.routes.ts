@@ -36,6 +36,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/registro/registro').then((m) => m.RegistroComponent),
     },
     {
+        path: 'olvidar-password',
+        title: 'Recuperar contraseña | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/olvidar-password/olvidar-password').then((m) => m.OlvidarPasswordComponent),
+    },
+    {
+        path: 'reset-password',
+        title: 'Nueva contraseña | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
+    },
+    {
         path: 'cartelera',
         title: 'Inicio | Cinemacenter',
         loadComponent: () => import('./pages/cartelera/cartelera').then((m) => m.CarteleraComponent),
