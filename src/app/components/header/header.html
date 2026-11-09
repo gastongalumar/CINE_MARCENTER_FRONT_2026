@@ -25,7 +25,7 @@
           <a class="nav-link" routerLink="/cartelera" routerLinkActive="active">Inicio</a>
         </li>
 
-        <ng-container *ngIf="authService.isAuthenticated() && authService.getTipoUsuario() !== 'ADMINISTRADOR'">
+        <ng-container *ngIf="authService.isAuthenticated() && !authService.isAdmin()">
           <li class="nav-item">
             <a class="nav-link" routerLink="/mis-reservas" routerLinkActive="active">Mis Reservas</a>
           </li>
@@ -39,7 +39,7 @@
           <a class="nav-link" routerLink="/contacto" routerLinkActive="active">Contacto</a>
         </li>
 
-        <ng-container *ngIf="authService.getTipoUsuario() === 'ADMINISTRADOR'">
+        <ng-container *ngIf="authService.isAdmin()">
           <li class="nav-item dropdown admin-nav-dropdown">
             <a class="nav-link dropdown-toggle admin-nav-toggle" href="#" role="button"
                data-bs-toggle="dropdown" aria-expanded="false">
@@ -97,7 +97,7 @@
                   <span>Personalizar Tema</span>
                 </a>
               </li>
-              <li>
+              <li *ngIf="authService.isSuperAdmin()">
                 <a class="dropdown-item admin-dropdown-item" routerLink="/admin/crear-admin" routerLinkActive="active">
                   <span class="material-icons">person_add</span>
                   <span>Crear Admin</span>
@@ -115,12 +115,6 @@
       </ul>
 
       <ul class="navbar-nav align-items-center">
-        <li class="nav-item me-2">
-          <button class="theme-toggle btn" (click)="toggleTheme()" title="Cambiar tema">
-            <span *ngIf="isLightTheme" class="material-icons">light_mode</span>
-            <span *ngIf="!isLightTheme" class="material-icons">dark_mode</span>
-          </button>
-        </li>
         <ng-container *ngIf="authService.isAuthenticated(); else loginBlock">
           <li class="nav-item me-2">
             <a class="nav-link user-greet d-flex align-items-center gap-2" routerLink="/perfil" title="Mi perfil">

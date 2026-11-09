@@ -68,13 +68,45 @@
               </div>
 
               <div class="col-12">
-                <label class="form-label" for="telefono">Teléfono</label>
+                <label class="form-label" for="tipo">Rol *</label>
+                <select class="form-select" id="tipo" formControlName="tipo" (blur)="onCampoBlur()">
+                  <option value="ADMINISTRADOR">Administrador</option>
+                  <option value="SUPERADMIN">SuperAdmin</option>
+                </select>
+                <small class="form-hint">SuperAdmin puede crear y eliminar otros admins</small>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label" for="codigoArea">Cód. área</label>
                 <input
                   type="tel"
                   class="form-control"
-                  id="telefono"
-                  formControlName="telefono"
-                  placeholder="+54 9 11 1234-5678" />
+                  id="codigoArea"
+                  formControlName="codigoArea"
+                  placeholder="0223"
+                  inputmode="numeric"
+                  (blur)="onCampoBlur()"
+                  [class.is-invalid]="esInvalido('codigoArea')" />
+                @if (esInvalido('codigoArea')) {
+                  <div class="invalid-feedback d-block">Ej.: 0223</div>
+                }
+              </div>
+
+              <div class="col-md-8">
+                <label class="form-label" for="numeroLocal">Teléfono (sin 15)</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="numeroLocal"
+                  formControlName="numeroLocal"
+                  placeholder="5678912"
+                  inputmode="numeric"
+                  (blur)="onCampoBlur()"
+                  [class.is-invalid]="esInvalido('numeroLocal')" />
+                @if (esInvalido('numeroLocal')) {
+                  <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+                }
+                <small class="form-hint">Ej.: 0223 / 5678912</small>
               </div>
 
               <div class="col-md-6">
@@ -133,13 +165,17 @@
               </div>
             </div>
 
-            <div *ngIf="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
-            <div *ngIf="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+            @if (errorMessage) {
+              <div class="alert alert-danger py-2 small mt-3">{{ errorMessage }}</div>
+            }
+            @if (successMessage) {
+              <div class="alert alert-success py-2 small mt-3">{{ successMessage }}</div>
+            }
 
             <div class="d-flex gap-2 mt-4">
-              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ loading ? 'Creando...' : 'Crear Administrador' }}
+                {{ loading ? 'Creando...' : (form.controls.tipo.value === 'SUPERADMIN' ? 'Crear SuperAdmin' : 'Crear Administrador') }}
                 <span class="material-icons ms-2">person_add</span>
               </button>
               <button type="button" class="btn btn-secondary" routerLink="/admin">Cancelar</button>
@@ -175,6 +211,7 @@
                   <tr>
                     <th>Nombre</th>
                     <th>Email</th>
+                    <th>Rol</th>
                     <th>Teléfono</th>
                     <th>Estado</th>
                     <th>Registro</th>
@@ -184,6 +221,13 @@
                   <tr *ngFor="let admin of administradoresPagina">
                     <td>{{ admin.nombre }} {{ admin.apellido }}</td>
                     <td>{{ admin.email }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.bg-danger]="admin.tipo === 'SUPERADMIN'"
+                        [class.bg-warning]="admin.tipo === 'ADMINISTRADOR'">
+                        {{ etiquetaRol(admin.tipo) }}
+                      </span>
+                    </td>
                     <td>{{ admin.telefono || '—' }}</td>
                     <td>
                       <span class="badge"

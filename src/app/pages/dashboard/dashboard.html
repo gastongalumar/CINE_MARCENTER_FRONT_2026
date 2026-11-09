@@ -247,6 +247,7 @@
           <div class="menu-action">Ingresar →</div>
         </a>
       </div>
+      @if (authService.isSuperAdmin()) {
       <div class="col-6 col-md-4 col-xl-3">
         <a routerLink="/admin/crear-admin" class="menu-card">
           <div class="menu-icon"><span class="material-icons">admin_panel_settings</span></div>
@@ -255,6 +256,7 @@
           <div class="menu-action">Nuevo →</div>
         </a>
       </div>
+      }
       <div class="col-6 col-md-4 col-xl-3">
         <a routerLink="/admin/tema" class="menu-card">
           <div class="menu-icon"><span class="material-icons">palette</span></div>

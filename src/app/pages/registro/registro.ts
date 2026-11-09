@@ -10,12 +10,24 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { RegistroRequest } from '../../models/auth';
+import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
+import {
+  CODIGO_AREA_PATTERN,
+  NUMERO_LOCAL_PATTERN,
+  armarTelefonoLocal,
+  telefonoLocalCompleto,
+} from '../../utils/telefono';
 
 function passwordsIguales(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
   if (!password || !confirm) return null;
   return password === confirm ? null : { passwordsNoCoinciden: true };
+}
+
+function registroExtras(group: AbstractControl): ValidationErrors | null {
+  return passwordsIguales(group) ?? telefonoLocalCompleto(group);
 }
 
 @Component({
@@ -33,14 +45,16 @@ export class RegistroComponent {
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      telefono: [''],
+      codigoArea: ['', Validators.pattern(CODIGO_AREA_PATTERN)],
+      numeroLocal: ['', Validators.pattern(NUMERO_LOCAL_PATTERN)],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
     },
-    { validators: passwordsIguales }
+    { validators: registroExtras }
   );
 
   loading = false;
+  errorMessage = '';
   mostrarPassword = false;
   mostrarConfirmPassword = false;
 
@@ -51,12 +65,14 @@ export class RegistroComponent {
   ) {}
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   passwordsNoCoinciden(): boolean {
-    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+    return (
+      this.form.hasError('passwordsNoCoinciden') &&
+      (!!this.form.get('confirmPassword')?.touched || !!this.form.get('confirmPassword')?.dirty)
+    );
   }
 
   alternarPassword(): void {
@@ -68,15 +84,17 @@ export class RegistroComponent {
   }
 
   onSubmit(): void {
+    this.errorMessage = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
     this.loading = true;
-    const { confirmPassword: _, ...userData } = this.form.getRawValue();
+    const { confirmPassword: _, codigoArea, numeroLocal, ...userData } = this.form.getRawValue();
     const payload: RegistroRequest = {
       ...userData,
-      telefono: userData.telefono?.trim() || undefined,
+      telefono: armarTelefonoLocal(codigoArea, numeroLocal),
     };
 
     this.authService.registro(payload).subscribe({
@@ -87,8 +105,9 @@ export class RegistroComponent {
           queryParams: { registered: 'true' }
         });
       },
-      error: () => {
+      error: (error: unknown) => {
         this.loading = false;
+        this.errorMessage = getErrorMessage(error, 'No se pudo completar el registro.');
         setTimeout(() => this.cdr.detectChanges());
       }
     });

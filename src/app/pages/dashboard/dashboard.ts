@@ -6,6 +6,7 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { catchError, forkJoin, of } from 'rxjs';
 
 import { EstadisticasService } from '../../services/estadisticas';
+import { AuthService } from '../../services/auth';
 import {
   DashboardResumen,
   VentaDiaria,
@@ -28,6 +29,7 @@ import { getErrorMessage } from '../../utils/api-error';
 })
 export class DashboardComponent implements OnInit {
   private readonly estadisticas = inject(EstadisticasService);
+  readonly authService = inject(AuthService);
 
   readonly resumen = signal<DashboardResumen | null>(null);
   readonly ventasPorPelicula = signal<VentaPelicula[]>([]);

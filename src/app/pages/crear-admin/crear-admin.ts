@@ -8,18 +8,31 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../services/auth';
 import { UsuarioService } from '../../services/usuario';
-import { RegistroRequest } from '../../models/auth';
+import { RegistroRequest, TipoUsuario } from '../../models/auth';
 import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
 import { refreshView } from '../../utils/refresh-view';
+import {
+  CODIGO_AREA_PATTERN,
+  NUMERO_LOCAL_PATTERN,
+  armarTelefonoLocal,
+  telefonoLocalCompleto,
+} from '../../utils/telefono';
 
 function passwordsIguales(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
   if (!password || !confirm) return null;
   return password === confirm ? null : { passwordsNoCoinciden: true };
+}
+
+function crearAdminExtras(group: AbstractControl): ValidationErrors | null {
+  return passwordsIguales(group) ?? telefonoLocalCompleto(group);
 }
 
 @Component({
@@ -39,11 +52,13 @@ export class CrearAdminComponent {
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      telefono: [''],
+      codigoArea: ['', Validators.pattern(CODIGO_AREA_PATTERN)],
+      numeroLocal: ['', Validators.pattern(NUMERO_LOCAL_PATTERN)],
+      tipo: ['ADMINISTRADOR' as TipoUsuario, Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
     },
-    { validators: passwordsIguales }
+    { validators: crearAdminExtras }
   );
 
   loading = false;
@@ -82,12 +97,14 @@ export class CrearAdminComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   passwordsNoCoinciden(): boolean {
-    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+    return (
+      this.form.hasError('passwordsNoCoinciden') &&
+      (!!this.form.get('confirmPassword')?.touched || !!this.form.get('confirmPassword')?.dirty)
+    );
   }
 
   onCampoBlur(): void {
@@ -104,14 +121,29 @@ export class CrearAdminComponent {
     refreshView(this.cdr);
   }
 
+  etiquetaRol(tipo: string): string {
+    if (tipo === 'SUPERADMIN') return 'SuperAdmin';
+    if (tipo === 'ADMINISTRADOR') return 'Administrador';
+    return tipo;
+  }
+
   cargarAdministradores(): void {
     this.cargandoLista = true;
     this.errorCarga = '';
     refreshView(this.cdr);
 
-    this.usuarioService.listarPorRol('ADMINISTRADOR').subscribe({
-      next: (data) => {
-        this.administradores = data;
+    forkJoin({
+      admins: this.usuarioService
+        .listarPorRol('ADMINISTRADOR', { skipErrorToast: true })
+        .pipe(catchError(() => of([] as Usuario[]))),
+      supers: this.usuarioService
+        .listarPorRol('SUPERADMIN', { skipErrorToast: true })
+        .pipe(catchError(() => of([] as Usuario[]))),
+    }).subscribe({
+      next: ({ admins, supers }) => {
+        this.administradores = [...supers, ...admins].sort((a, b) =>
+          `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, 'es')
+        );
         this.pagina = 1;
         this.cargandoLista = false;
         refreshView(this.cdr);
@@ -120,7 +152,7 @@ export class CrearAdminComponent {
         this.errorCarga = getErrorMessage(error, 'No se pudo cargar el listado de administradores.');
         this.cargandoLista = false;
         refreshView(this.cdr);
-      }
+      },
     });
   }
 
@@ -131,30 +163,36 @@ export class CrearAdminComponent {
   }
 
   onSubmit(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      refreshView(this.cdr);
       return;
     }
 
     this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
     refreshView(this.cdr);
 
-    const { confirmPassword: _, ...valores } = this.form.getRawValue();
+    const { confirmPassword: _, codigoArea, numeroLocal, ...valores } = this.form.getRawValue();
+    const tipo = valores.tipo === 'SUPERADMIN' ? 'SUPERADMIN' : 'ADMINISTRADOR';
     const adminData: RegistroRequest = {
       ...valores,
-      telefono: valores.telefono?.trim() || undefined,
+      tipo,
+      telefono: armarTelefonoLocal(codigoArea, numeroLocal),
     };
 
     this.authService.registrarAdmin(adminData).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = `Administrador ${adminData.nombre} ${adminData.apellido} creado exitosamente.`;
+        this.successMessage = `${this.etiquetaRol(tipo)} ${adminData.nombre} ${adminData.apellido} creado exitosamente.`;
         this.form.reset({
           nombre: '',
           apellido: '',
           email: '',
-          telefono: '',
+          codigoArea: '',
+          numeroLocal: '',
+          tipo: 'ADMINISTRADOR',
           password: '',
           confirmPassword: '',
         });
@@ -169,12 +207,12 @@ export class CrearAdminComponent {
         if (status === 409) {
           this.errorMessage = 'Ya existe un usuario con este email';
         } else if (status === 403) {
-          this.errorMessage = 'No tienes permiso para crear administradores';
+          this.errorMessage = 'Solo un SuperAdmin puede crear administradores';
         } else {
           this.errorMessage = getErrorMessage(error, 'Error al crear el administrador');
         }
         refreshView(this.cdr);
-      }
+      },
     });
   }
 }

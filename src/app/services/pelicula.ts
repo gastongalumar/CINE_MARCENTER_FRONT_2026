@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { Pelicula, PeliculaRequest } from '../models/pelicula';
 import { GeneroPelicula } from '../models/genero-pelicula';
 import { MensajeResponse } from '../models/usuario';
+import { skipErrorToastContext } from '../utils/http.context';
 
 /** Servicio HTTP de películas (CRUD completo: alta, lectura, edición y baja). */
 @Injectable({
@@ -15,8 +16,10 @@ export class PeliculaService {
   private readonly apiUrl = `${environment.apiUrl}/peliculas`;
 
   /** GET /api/peliculas — listado completo (público). */
-  listarTodas(): Observable<Pelicula[]> {
-    return this.http.get<Pelicula[]>(this.apiUrl);
+  listarTodas(opciones?: { skipErrorToast?: boolean }): Observable<Pelicula[]> {
+    return this.http.get<Pelicula[]>(this.apiUrl, {
+      context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
+    });
   }
 
   /** GET /api/peliculas/vigentes — películas en cartelera (público). */
@@ -30,18 +33,24 @@ export class PeliculaService {
   }
 
   /** GET /api/peliculas/{id} */
-  obtenerPorId(id: number): Observable<Pelicula> {
-    return this.http.get<Pelicula>(`${this.apiUrl}/${id}`);
+  obtenerPorId(id: number, opciones?: { skipErrorToast?: boolean }): Observable<Pelicula> {
+    return this.http.get<Pelicula>(`${this.apiUrl}/${id}`, {
+      context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
+    });
   }
 
   /** POST /api/peliculas — crear película (ADMIN). */
   crear(pelicula: PeliculaRequest): Observable<Pelicula> {
-    return this.http.post<Pelicula>(this.apiUrl, pelicula);
+    return this.http.post<Pelicula>(this.apiUrl, pelicula, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** PUT /api/peliculas/{id} — actualizar película (ADMIN). */
   actualizar(id: number, pelicula: Partial<PeliculaRequest>): Observable<Pelicula> {
-    return this.http.put<Pelicula>(`${this.apiUrl}/${id}`, pelicula);
+    return this.http.put<Pelicula>(`${this.apiUrl}/${id}`, pelicula, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** DELETE /api/peliculas/{id} — eliminar película (ADMIN). */

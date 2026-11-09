@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth';
  * Crea un guard parametrizado con los roles permitidos:
  *
  * ```ts
- * { path: 'admin', canActivate: [roleGuard('ADMINISTRADOR')] }
+ * { path: 'admin', canActivate: [roleGuard('ADMINISTRADOR', 'SUPERADMIN')] }
  * ```
  *
  * - Sin sesión → redirige a `/login` (con `returnUrl`).

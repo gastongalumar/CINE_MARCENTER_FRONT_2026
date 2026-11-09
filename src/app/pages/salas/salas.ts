@@ -1,11 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  afterNextRender,
+  DestroyRef,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -14,14 +15,14 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { distinctUntilChanged, map } from 'rxjs';
 
 import { SalaService } from '../../services/sala';
-import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { Sala, SalaRequest } from '../../models/sala';
 import { getErrorMessage } from '../../utils/api-error';
-import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
+import { aplicarErroresDeCampos, esControlInvalido, limpiarErroresDeCampos } from '../../utils/form-error';
 
 /** Capacidad total de la sala ≤ 320 butacas (CapacidadSalaValidator del backend). */
 function capacidadValida(group: AbstractControl): ValidationErrors | null {
@@ -41,18 +42,15 @@ function capacidadValida(group: AbstractControl): ValidationErrors | null {
 })
 export class SalasComponent {
   private readonly salaService = inject(SalaService);
-  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly salas = signal<Sala[]>([]);
   readonly salaSeleccionada = signal<Sala | null>(null);
-  readonly cargando = signal(true);
   readonly guardando = signal(false);
-  readonly errorCarga = signal('');
   readonly errorMensaje = signal('');
-  readonly pagina = signal(1);
-  readonly pageSize = 6;
 
   private readonly valores = signal<{
     nombre: string | null;
@@ -75,56 +73,16 @@ export class SalasComponent {
   readonly filasPreview = computed(() => Array.from({ length: Math.min(this.filas(), 20) }, (_, i) => i));
   readonly columnasPreview = computed(() => Array.from({ length: Math.min(this.columnas(), 16) }, (_, i) => i));
 
-  readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.salas().length / this.pageSize))
-  );
-
-  readonly salasPagina = computed(() => {
-    const start = (this.pagina() - 1) * this.pageSize;
-    return this.salas().slice(start, start + this.pageSize);
-  });
-
-  readonly rangoDesde = computed(() => {
-    if (!this.salas().length) return 0;
-    return (this.pagina() - 1) * this.pageSize + 1;
-  });
-
-  readonly rangoHasta = computed(() =>
-    Math.min(this.pagina() * this.pageSize, this.salas().length)
-  );
-
-  private readonly initLoad = afterNextRender(() => this.cargarSalas());
-
   constructor() {
     this.form.valueChanges.subscribe(() => this.valores.set(this.form.getRawValue()));
-  }
 
-  cargarSalas(): void {
-    this.cargando.set(true);
-    this.salaService.listarTodas().subscribe({
-      next: (salas) => {
-        this.salas.set(salas);
-        this.ajustarPagina();
-        this.cargando.set(false);
-      },
-      error: (error) => {
-        this.errorCarga.set(getErrorMessage(error, 'No se pudieron cargar las salas.'));
-        this.cargando.set(false);
-      },
-    });
-  }
-
-  irAPagina(page: number): void {
-    const total = this.totalPaginas();
-    if (page < 1 || page > total) return;
-    this.pagina.set(page);
-  }
-
-  private ajustarPagina(): void {
-    const total = this.totalPaginas();
-    if (this.pagina() > total) {
-      this.pagina.set(total);
-    }
+    this.route.queryParamMap
+      .pipe(
+        map((params) => params.get('id')),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((idParam) => this.cargarEdicionDesdeQuery(idParam));
   }
 
   guardar(): void {
@@ -150,7 +108,6 @@ export class SalasComponent {
           'Éxito'
         );
         this.cancelarEdicion();
-        this.cargarSalas();
       },
       error: (error) => {
         this.guardando.set(false);
@@ -174,47 +131,60 @@ export class SalasComponent {
     this.errorMensaje.set('');
   }
 
-  eliminar(sala: Sala): void {
-    if (!sala.id) return;
-
-    this.confirmDialog
-      .confirmDanger(
-        'Eliminar sala',
-        `¿Seguro que querés eliminar «${sala.nombre}»? También se perderán sus butacas y funciones asociadas.`
-      )
-      .subscribe((confirmado) => {
-        if (!confirmado) return;
-
-        this.salaService.eliminar(sala.id!).subscribe({
-          next: () => {
-            this.toastr.success('Sala eliminada', 'Éxito');
-            if (this.salaSeleccionada()?.id === sala.id) {
-              this.cancelarEdicion();
-            }
-            this.cargarSalas();
-          },
-        });
-      });
-  }
-
   cancelarEdicion(): void {
     this.salaSeleccionada.set(null);
     this.errorMensaje.set('');
     this.form.reset(this.formularioInicial());
     this.valores.set(this.form.getRawValue());
     this.limpiarErrores();
-  }
-
-  capacidadDe(sala: Sala): number {
-    return sala.capacidad ?? sala.filas * sala.columnas;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
+    });
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && (control.touched || control.dirty);
+    return esControlInvalido(this.form.get(campo));
   }
 
   // ------------------------------------------------------------------ privados
+
+  private cargarEdicionDesdeQuery(idParam: string | null): void {
+    if (!idParam) {
+      if (this.salaSeleccionada()) {
+        this.salaSeleccionada.set(null);
+        this.form.reset(this.formularioInicial());
+        this.valores.set(this.form.getRawValue());
+        this.limpiarErrores();
+      }
+      return;
+    }
+
+    const id = Number(idParam);
+    if (!Number.isFinite(id) || id <= 0) {
+      this.toastr.error('Identificador de sala inválido.', 'Error');
+      this.limpiarQueryId();
+      return;
+    }
+
+    if (this.salaSeleccionada()?.id === id) return;
+
+    this.salaService.obtenerPorId(id).subscribe({
+      next: (sala) => this.editar(sala),
+      error: () => {
+        this.limpiarQueryId();
+      },
+    });
+  }
+
+  private limpiarQueryId(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
+    });
+  }
 
   private formularioInicial() {
     return { nombre: '', filas: 10, columnas: 16 };

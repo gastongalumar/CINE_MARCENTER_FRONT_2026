@@ -15,10 +15,11 @@ import { AuthService } from '../../services/auth';
 import { UsuarioService } from '../../services/usuario';
 import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { Usuario } from '../../models/usuario';
+import { esStaff } from '../../models/auth';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
-/** Email del admin sembrado: no se puede borrar ni dar de baja. */
+/** Email del superadmin sembrado: no se puede borrar ni dar de baja. */
 const EMAIL_ADMIN_PROTEGIDO = 'admin@mail.com';
 
 @Component({
@@ -30,7 +31,7 @@ const EMAIL_ADMIN_PROTEGIDO = 'admin@mail.com';
   styleUrls: ['./usuarios.css'],
 })
 export class UsuariosComponent {
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   private readonly usuarioService = inject(UsuarioService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toastr = inject(ToastrService);
@@ -70,7 +71,7 @@ export class UsuariosComponent {
     this.errorCarga.set('');
     refreshView(this.cdr);
 
-    this.usuarioService.listar().subscribe({
+    this.usuarioService.listar({ skipErrorToast: true }).subscribe({
       next: (data) => {
         this.usuarios.set(data);
         this.pagina.set(1);
@@ -96,7 +97,7 @@ export class UsuariosComponent {
     this.errorCarga.set('');
     refreshView(this.cdr);
 
-    this.usuarioService.buscar(texto).subscribe({
+    this.usuarioService.buscar(texto, { skipErrorToast: true }).subscribe({
       next: (data) => {
         this.usuarios.set(data);
         this.pagina.set(1);
@@ -133,6 +134,7 @@ export class UsuariosComponent {
 
   puedeDarDeBaja(usuario: Usuario): boolean {
     return (
+      !esStaff(usuario.tipo) &&
       !this.esAdminProtegido(usuario) &&
       !this.esUsuarioActual(usuario) &&
       usuario.estado === 'ACTIVO'
@@ -140,15 +142,28 @@ export class UsuariosComponent {
   }
 
   puedeReactivar(usuario: Usuario): boolean {
-    return !this.esAdminProtegido(usuario) && usuario.estado !== 'ACTIVO';
+    return (
+      !esStaff(usuario.tipo) &&
+      !this.esAdminProtegido(usuario) &&
+      usuario.estado !== 'ACTIVO'
+    );
   }
 
+  /** Solo SUPERADMIN puede eliminar ADMINISTRADOR / SUPERADMIN. */
   puedeEliminarAdmin(usuario: Usuario): boolean {
     return (
-      usuario.tipo === 'ADMINISTRADOR' &&
+      this.authService.isSuperAdmin() &&
+      esStaff(usuario.tipo) &&
       !this.esAdminProtegido(usuario) &&
       !this.esUsuarioActual(usuario)
     );
+  }
+
+  etiquetaRol(tipo: string): string {
+    if (tipo === 'SUPERADMIN') return 'SuperAdmin';
+    if (tipo === 'ADMINISTRADOR') return 'Administrador';
+    if (tipo === 'CLIENTE') return 'Cliente';
+    return tipo;
   }
 
   darDeBaja(usuario: Usuario): void {
@@ -170,8 +185,8 @@ export class UsuariosComponent {
             this.toastr.success('Usuario dado de baja', 'Listo');
             refreshView(this.cdr);
           },
-          error: (error) => {
-            this.toastr.error(getErrorMessage(error, 'No se pudo dar de baja.'), 'Error');
+          error: () => {
+            /* El interceptor muestra el toast de error. */
           },
         });
       });
@@ -186,8 +201,8 @@ export class UsuariosComponent {
         this.toastr.success('Usuario reactivado', 'Listo');
         refreshView(this.cdr);
       },
-      error: (error) => {
-        this.toastr.error(getErrorMessage(error, 'No se pudo reactivar.'), 'Error');
+      error: () => {
+        /* El interceptor muestra el toast de error. */
       },
     });
   }
@@ -197,8 +212,8 @@ export class UsuariosComponent {
 
     this.confirmDialog
       .confirmDanger(
-        'Eliminar administrador',
-        `¿Eliminar definitivamente a «${usuario.nombre} ${usuario.apellido}»? Esta acción no se puede deshacer.`
+        'Eliminar cuenta de staff',
+        `¿Eliminar definitivamente a «${usuario.nombre} ${usuario.apellido}» (${this.etiquetaRol(usuario.tipo)})? Esta acción no se puede deshacer.`
       )
       .subscribe((ok) => {
         if (!ok) return;
@@ -208,11 +223,11 @@ export class UsuariosComponent {
             if (this.pagina() > this.totalPaginas()) {
               this.pagina.set(this.totalPaginas());
             }
-            this.toastr.success('Administrador eliminado', 'Listo');
+            this.toastr.success('Cuenta eliminada', 'Listo');
             refreshView(this.cdr);
           },
-          error: (error) => {
-            this.toastr.error(getErrorMessage(error, 'No se pudo eliminar.'), 'Error');
+          error: () => {
+            /* El interceptor muestra el toast de error. */
           },
         });
       });
