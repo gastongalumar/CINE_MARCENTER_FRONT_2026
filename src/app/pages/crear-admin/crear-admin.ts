@@ -41,7 +41,7 @@ function crearAdminExtras(group: AbstractControl): ValidationErrors | null {
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './crear-admin.html',
-  styleUrls: ['./crear-admin.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './crear-admin.css'],
 })
 export class CrearAdminComponent {
   private readonly fb = inject(FormBuilder);

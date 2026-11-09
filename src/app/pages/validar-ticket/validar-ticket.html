@@ -1,18 +1,24 @@
-<div class="container py-4">
-  <div class="d-flex align-items-center mb-4 gap-3">
-    <button class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Volver</button>
-    <h2 class="mb-0">Validar Ticket</h2>
+<div class="py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0 admin-page-title">
+      <span class="material-icons align-middle me-1">confirmation_number</span>
+      Validar Ticket
+    </h2>
+    <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
   </div>
 
   <div class="row justify-content-center">
     <div class="col-lg-6">
-      <div class="card">
+      <div class="card app-card">
+        <div class="card-header">
+          <h5 class="mb-0">Ingreso de ticket</h5>
+        </div>
         <div class="card-body">
           <p class="text-muted small mb-3">
             Ingresá el número de ticket (formato <code>TK</code> seguido de dígitos) para validar el ingreso.
           </p>
 
-          <form [formGroup]="form" (ngSubmit)="validar()" novalidate>
+          <form [formGroup]="form" (ngSubmit)="validar()" class="form-compacto" novalidate>
             <div class="mb-3">
               <label for="numeroTicket" class="form-label">Número de ticket</label>
               <input
@@ -51,19 +57,18 @@
               <div class="alert alert-danger py-2 small">{{ error }}</div>
             }
 
-            <button
-              type="submit"
-              class="btn btn-primary w-100"
-              [disabled]="validando">
-              {{ validando ? 'Validando...' : 'Validar ticket' }}
-            </button>
+            <div class="form-acciones">
+              <button type="submit" class="btn btn-primary w-100" [disabled]="validando">
+                {{ validando ? 'Validando...' : 'Validar ticket' }}
+              </button>
+            </div>
           </form>
         </div>
       </div>
 
-      <div class="card mt-3" *ngIf="resultado">
+      <div class="card app-card mt-3" *ngIf="resultado">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <span>Resultado</span>
+          <h5 class="mb-0">Resultado</h5>
           <span class="badge" [ngClass]="estadoBadgeClass(resultado.estado)">
             {{ estadoLabel(resultado.estado) }}
           </span>
@@ -74,7 +79,7 @@
           <p class="mb-2" *ngIf="resultado.montoTotal != null">
             <strong>Monto:</strong> $ {{ resultado.montoTotal | number:'1.0-0' }}
           </p>
-           <p class="mb-0" *ngIf="resultado.asientos.length">
+          <p class="mb-0" *ngIf="resultado.asientos.length">
             <strong>Asientos:</strong> {{ resultado.asientos.join(', ') }}
           </p>
         </div>

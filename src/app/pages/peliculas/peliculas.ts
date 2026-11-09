@@ -49,7 +49,11 @@ function rangoDeFechas(group: AbstractControl): ValidationErrors | null {
   imports: [CommonModule, ReactiveFormsModule, RouterModule, CineDatePickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './peliculas.html',
-  styleUrls: ['./peliculas.css', '../../styles/cine-picker.shared.css'],
+  styleUrls: [
+    '../../styles/admin-panel.shared.css',
+    '../../styles/cine-picker.shared.css',
+    './peliculas.css',
+  ],
 })
 export class PeliculasComponent {
   private readonly peliculaService = inject(PeliculaService);

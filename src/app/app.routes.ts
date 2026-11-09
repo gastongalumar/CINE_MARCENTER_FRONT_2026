@@ -201,10 +201,42 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
+        path: 'admin/candy/nuevo',
+        title: 'Nuevo combo | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy-form/admin-candy-form').then((m) => m.AdminCandyFormComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/candy/:id',
+        title: 'Editar combo | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy-form/admin-candy-form').then((m) => m.AdminCandyFormComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
         path: 'admin/descuentos',
         title: 'Códigos de descuento | Cinemacenter',
         loadComponent: () =>
             import('./pages/admin-descuentos/admin-descuentos').then((m) => m.AdminDescuentosComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos/nuevo',
+        title: 'Nuevo código de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuento-form/admin-descuento-form').then(
+                (m) => m.AdminDescuentoFormComponent
+            ),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos/:id',
+        title: 'Editar código de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuento-form/admin-descuento-form').then(
+                (m) => m.AdminDescuentoFormComponent
+            ),
         canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {

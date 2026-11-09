@@ -18,6 +18,10 @@ export class CandyComboService {
     return this.http.get<CandyCombo[]>(this.apiUrl);
   }
 
+  obtener(id: number): Observable<CandyCombo> {
+    return this.http.get<CandyCombo>(`${this.apiUrl}/${id}`);
+  }
+
   crear(data: CandyComboRequest): Observable<CandyCombo> {
     return this.http.post<CandyCombo>(this.apiUrl, data);
   }

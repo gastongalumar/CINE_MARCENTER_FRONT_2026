@@ -22,6 +22,10 @@ export class CodigoDescuentoService {
     return this.http.get<CodigoDescuento[]>(this.apiUrl);
   }
 
+  obtener(id: number): Observable<CodigoDescuento> {
+    return this.http.get<CodigoDescuento>(`${this.apiUrl}/${id}`);
+  }
+
   crear(data: CodigoDescuentoRequest): Observable<CodigoDescuento> {
     return this.http.post<CodigoDescuento>(this.apiUrl, data);
   }

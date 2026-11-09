@@ -27,7 +27,7 @@ type TabId = 'ventas-diarias' | 'peliculas' | 'salas' | 'funciones' | 'pagos';
   imports: [CommonModule, RouterModule, FormsModule, FechaApiPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './estadisticas.html',
-  styleUrls: ['./estadisticas.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './estadisticas.css'],
 })
 export class EstadisticasComponent implements OnInit {
   private readonly estadisticas = inject(EstadisticasService);

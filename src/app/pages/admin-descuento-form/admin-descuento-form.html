@@ -1,0 +1,97 @@
+<div class="py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0 admin-page-title">
+      <span class="material-icons align-middle me-1">sell</span>
+      {{ titulo }}
+    </h2>
+    <div class="d-flex flex-wrap gap-2">
+      <a routerLink="/admin/descuentos" class="btn btn-outline-primary btn-sm">
+        <span class="material-icons">list</span>
+        Ver listado
+      </a>
+      <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border"></div>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="!cargando">
+    <div class="col-12 col-lg-8 col-xl-6">
+      <div class="card app-card">
+        <div class="card-header">
+          <h5 class="mb-0">{{ titulo }}</h5>
+          <p class="text-muted mb-0 small mt-1" *ngIf="editandoId">Código #{{ editandoId }}</p>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="guardar()" class="form-compacto" novalidate>
+            <div class="mb-2">
+              <label class="form-label" for="codigoDesc">Código *</label>
+              <input
+                id="codigoDesc"
+                class="form-control text-uppercase"
+                formControlName="codigo"
+                placeholder="MARCENTER10" />
+            </div>
+
+            <div class="row g-2">
+              <div class="col-md-6 mb-2">
+                <label class="form-label" for="tipoDesc">Tipo *</label>
+                <select id="tipoDesc" class="form-select" formControlName="tipo">
+                  <option value="PORCENTAJE">Porcentaje</option>
+                  <option value="MONTO_FIJO">Monto fijo</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label" for="valorDesc">Valor *</label>
+                <input
+                  id="valorDesc"
+                  type="number"
+                  class="form-control"
+                  formControlName="valor"
+                  min="0.01"
+                  step="0.01" />
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" for="usosDesc">Usos máximos</label>
+              <input
+                id="usosDesc"
+                type="number"
+                class="form-control"
+                formControlName="usosMaximos"
+                min="1"
+                placeholder="Ilimitado" />
+              <div class="form-text">Dejalo vacío para usos ilimitados.</div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" for="descCodigo">Descripción</label>
+              <input
+                id="descCodigo"
+                class="form-control"
+                formControlName="descripcion"
+                placeholder="10% off en la compra" />
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" formControlName="activo" id="activoCodigo" />
+              <label class="form-check-label" for="activoCodigo">Activo</label>
+            </div>
+
+            <div class="form-acciones d-flex flex-wrap gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="guardando">
+                {{ guardando ? 'Guardando…' : (editandoId ? 'Actualizar código' : 'Crear código') }}
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" [disabled]="guardando">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -15,7 +15,7 @@ import { refreshView } from '../../utils/refresh-view';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './tema.html',
-  styleUrls: ['./tema.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './tema.css'],
 })
 export class TemaComponent implements OnInit {
   tema: any = {

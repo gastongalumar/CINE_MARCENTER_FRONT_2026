@@ -1,94 +1,62 @@
-<div class="container py-4">
-  <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
-    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Panel</button>
-    <h2 class="mb-0">Códigos de descuento</h2>
-    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" (click)="nuevo()">Nuevo</button>
+<div class="py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0 admin-page-title">
+      <span class="material-icons align-middle me-1">sell</span>
+      Códigos de descuento
+    </h2>
+    <div class="d-flex flex-wrap gap-2">
+      <a routerLink="/admin/descuentos/nuevo" class="btn btn-primary btn-sm">
+        <span class="material-icons">add</span>
+        Nuevo código
+      </a>
+      <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+    </div>
   </div>
 
-  <div class="row g-4">
-    <div class="col-lg-5">
-      <div class="card glass-admin">
-        <div class="card-header bg-transparent">{{ editandoId ? 'Editar código' : 'Nuevo código' }}</div>
-        <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="guardar()" class="row g-3">
-            <div class="col-12">
-              <label class="form-label">Código *</label>
-              <input class="form-control text-uppercase" formControlName="codigo" placeholder="MARCENTER10" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Tipo *</label>
-              <select class="form-select" formControlName="tipo">
-                <option value="PORCENTAJE">Porcentaje</option>
-                <option value="MONTO_FIJO">Monto fijo</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Valor *</label>
-              <input type="number" class="form-control" formControlName="valor" min="0.01" step="0.01" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Usos máximos</label>
-              <input type="number" class="form-control" formControlName="usosMaximos" min="1" placeholder="Ilimitado" />
-            </div>
-            <div class="col-12">
-              <label class="form-label">Descripción</label>
-              <input class="form-control" formControlName="descripcion" />
-            </div>
-            <div class="col-12 form-check ms-1">
-              <input class="form-check-input" type="checkbox" formControlName="activo" id="activoCodigo" />
-              <label class="form-check-label" for="activoCodigo">Activo</label>
-            </div>
-            <div class="col-12">
-              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || guardando">
-                {{ guardando ? 'Guardando…' : (editandoId ? 'Actualizar' : 'Crear') }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+  <div class="card app-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Listado de códigos</h5>
+      <span class="badge bg-secondary">{{ codigos.length }}</span>
     </div>
-
-    <div class="col-lg-7">
-      <div class="card glass-admin">
-        <div class="card-header bg-transparent d-flex justify-content-between">
-          <span>Listado</span>
-          <span class="badge bg-secondary">{{ codigos.length }}</span>
-        </div>
-        <div class="card-body p-0">
-          <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
-          <div class="table-responsive" *ngIf="!cargando">
-            <table class="table table-hover mb-0 align-middle">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Valor</th>
-                  <th>Usos</th>
-                  <th>Estado</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let c of codigos">
-                  <td>
-                    <div class="fw-bold">{{ c.codigo }}</div>
-                    <div class="small text-muted">{{ c.descripcion }}</div>
-                  </td>
-                  <td>{{ etiquetaValor(c) }}</td>
-                  <td>{{ c.usosActuales }}{{ c.usosMaximos != null ? ' / ' + c.usosMaximos : '' }}</td>
-                  <td>
-                    <span class="badge" [class.bg-success]="c.activo" [class.bg-secondary]="!c.activo">
-                      {{ c.activo ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
-                  <td class="text-end text-nowrap">
-                    <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editar(c)">Editar</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(c)">Borrar</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div class="card-body p-0">
+      <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
+      <div class="table-responsive" *ngIf="!cargando">
+        <table class="table table-hover admin-table align-middle">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Valor</th>
+              <th>Usos</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of codigos">
+              <td>
+                <div class="fw-bold">{{ c.codigo }}</div>
+                <div class="small text-muted">{{ c.descripcion }}</div>
+              </td>
+              <td>{{ etiquetaValor(c) }}</td>
+              <td>{{ c.usosActuales }}{{ c.usosMaximos != null ? ' / ' + c.usosMaximos : '' }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="c.activo" [class.bg-secondary]="!c.activo">
+                  {{ c.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editar(c)">Editar</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(c)">Borrar</button>
+              </td>
+            </tr>
+            <tr *ngIf="!codigos.length">
+              <td colspan="5" class="text-center text-muted py-4">
+                Todavía no hay códigos.
+                <a routerLink="/admin/descuentos/nuevo" class="d-block mt-2">Crear el primero →</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
