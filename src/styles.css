@@ -33,14 +33,12 @@
     --shadow-premium: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
-/* Tema claro */
+/* Tema claro — superficies fijas; el acento (--color-slider) hereda de la marca custom */
 .light-theme {
     --color-fondo: #f4f6fa;
     --color-fondo-rgba: rgba(244, 246, 250, 1);
     --color-contenedor: #ffffff;
     --color-contenedor-rgba: rgba(255, 255, 255, 0.85);
-    --color-slider: #1a237e;
-    /* Azul marino */
     --color-fuente: #0d121f;
 
     --color-bg-1: var(--color-fondo-rgba);

@@ -15,8 +15,6 @@
 }
 .btn-primary { background-color: var(--color-slider); border-color: var(--color-slider); color: #000; }
 .btn-outline-light { border-color: rgba(255,255,255,0.2); color: var(--color-fuente); }
-.theme-toggle { background: transparent; border: 1px solid rgba(255,255,255,0.04); color: var(--color-fuente); }
-
 /* Admin dropdown */
 .admin-nav-toggle {
   display: inline-flex !important;
