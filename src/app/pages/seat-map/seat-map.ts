@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 
 /** Estado visual de un asiento. */
-export type EstadoAsiento = 'libre' | 'seleccionada' | 'ocupada';
+export type EstadoAsiento = 'libre' | 'seleccionada' | 'bloqueada' | 'ocupada';
 
 /** Fila del mapa: letra de fila + número de asiento. */
 export interface AsientoMapa {
@@ -59,6 +59,12 @@ export class SeatMapComponent {
     this.recalcular();
   }
 
+  /** Etiquetas de asientos retenidos por otros clientes. */
+  @Input() set bloqueados(value: string[] | null | undefined) {
+    this._bloqueados = new Set((value ?? []).map((v) => v.toUpperCase()));
+    this.recalcular();
+  }
+
   /** Etiquetas de los asientos seleccionados por el usuario. */
   @Input() set seleccionados(value: string[] | null | undefined) {
     this._seleccionados = new Set((value ?? []).map((v) => v.toUpperCase()));
@@ -74,6 +80,7 @@ export class SeatMapComponent {
   private _filas = 0;
   private _columnas = 0;
   private _ocupados = new Set<string>();
+  private _bloqueados = new Set<string>();
   private _seleccionados = new Set<string>();
 
   /** Versión reactiva para forzar el recálculo de las filas. */
@@ -117,11 +124,11 @@ export class SeatMapComponent {
     });
   });
 
-  /** Alterna la selección de un asiento (no hace nada si está ocupado). */
+  /** Alterna la selección de un asiento disponible. */
   alternar(etiqueta: string): void {
-    if (this.soloLectura || this._ocupados.has(etiqueta.toUpperCase())) return;
-
     const clave = etiqueta.toUpperCase();
+    if (this.soloLectura || this._ocupados.has(clave) || this._bloqueados.has(clave)) return;
+
     const nueva = new Set(this._seleccionados);
 
     if (nueva.has(clave)) {
@@ -139,6 +146,7 @@ export class SeatMapComponent {
     const clave = etiqueta.toUpperCase();
     if (this._ocupados.has(clave)) return 'ocupada';
     if (this._seleccionados.has(clave)) return 'seleccionada';
+    if (this._bloqueados.has(clave)) return 'bloqueada';
     return 'libre';
   }
 

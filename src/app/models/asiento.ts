@@ -7,4 +7,4 @@ export interface Asiento {
   etiqueta: string;
 }
 
-export type EstadoAsiento = 'LIBRE' | 'SELECCIONADO' | 'OCUPADO';
+export type EstadoAsiento = 'LIBRE' | 'SELECCIONADO' | 'BLOQUEADO' | 'OCUPADO';
