@@ -71,7 +71,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (dia of ventasDiarias(); track dia.fecha) {
+              @for (dia of ventasDiariasPagina(); track dia.fecha) {
                 <tr>
                   <td>{{ dia.fecha | fechaApi: 'dd/MM/yyyy' }}</td>
                   <td class="text-end">{{ dia.reservas }}</td>
@@ -98,6 +98,16 @@
             </tfoot>
           </table>
         </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+          <span class="text-muted small">
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ datasetActivo() }}
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() <= 1" (click)="irAPagina(pagina() - 1)">Anterior</button>
+            <button type="button" class="btn btn-outline-secondary" disabled>{{ pagina() }} / {{ totalPaginas() }}</button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() >= totalPaginas()" (click)="irAPagina(pagina() + 1)">Siguiente</button>
+          </div>
+        </div>
       } @else {
         <div class="alert alert-info">Sin datos de ventas diarias.</div>
       }
@@ -119,9 +129,17 @@
               </tr>
             </thead>
             <tbody>
-              @for (item of ventasPelicula(); track item.peliculaId; let i = $index) {
+              @for (item of ventasPeliculaPagina(); track item.peliculaId; let i = $index) {
                 <tr>
-                  <td><span class="badge-rank" [class.oro]="i === 0" [class.plata]="i === 1" [class.bronce]="i === 2">{{ i + 1 }}</span></td>
+                  <td>
+                    <span
+                      class="badge-rank"
+                      [class.oro]="indiceAbsoluto(i) === 1"
+                      [class.plata]="indiceAbsoluto(i) === 2"
+                      [class.bronce]="indiceAbsoluto(i) === 3">
+                      {{ indiceAbsoluto(i) }}
+                    </span>
+                  </td>
                   <td class="fw-semibold">{{ item.peliculaNombre }}</td>
                   <td class="text-end">{{ item.totalReservas }}</td>
                   <td class="text-end">{{ item.totalEntradas }}</td>
@@ -138,6 +156,16 @@
             </tbody>
           </table>
         </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+          <span class="text-muted small">
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ datasetActivo() }}
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() <= 1" (click)="irAPagina(pagina() - 1)">Anterior</button>
+            <button type="button" class="btn btn-outline-secondary" disabled>{{ pagina() }} / {{ totalPaginas() }}</button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() >= totalPaginas()" (click)="irAPagina(pagina() + 1)">Siguiente</button>
+          </div>
+        </div>
       } @else {
         <div class="alert alert-info">Sin datos de películas.</div>
       }
@@ -147,7 +175,7 @@
     @if (tabActivo() === 'salas') {
       @if (ventasSala().length) {
         <div class="row g-3">
-          @for (sala of ventasSala(); track sala.salaId) {
+          @for (sala of ventasSalaPagina(); track sala.salaId) {
             <div class="col-md-6 col-xl-4">
               <div class="card sala-card">
                 <div class="card-body">
@@ -192,6 +220,16 @@
             </div>
           }
         </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+          <span class="text-muted small">
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ datasetActivo() }}
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() <= 1" (click)="irAPagina(pagina() - 1)">Anterior</button>
+            <button type="button" class="btn btn-outline-secondary" disabled>{{ pagina() }} / {{ totalPaginas() }}</button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() >= totalPaginas()" (click)="irAPagina(pagina() + 1)">Siguiente</button>
+          </div>
+        </div>
       } @else {
         <div class="alert alert-info">Sin datos de salas.</div>
       }
@@ -224,7 +262,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (funcion of ocupacionFunciones(); track funcion.funcionId) {
+              @for (funcion of ocupacionFuncionesPagina(); track funcion.funcionId) {
                 <tr>
                   <td class="fw-semibold">{{ funcion.peliculaNombre }}</td>
                   <td>{{ funcion.salaNombre }}</td>
@@ -251,6 +289,16 @@
             </tbody>
           </table>
         </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+          <span class="text-muted small">
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ datasetActivo() }}
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() <= 1" (click)="irAPagina(pagina() - 1)">Anterior</button>
+            <button type="button" class="btn btn-outline-secondary" disabled>{{ pagina() }} / {{ totalPaginas() }}</button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() >= totalPaginas()" (click)="irAPagina(pagina() + 1)">Siguiente</button>
+          </div>
+        </div>
       } @else {
         <div class="alert alert-info">Sin funciones para mostrar.</div>
       }
@@ -267,7 +315,7 @@
                   <span class="material-icons">payments</span>
                   Distribución de métodos de pago
                 </h5>
-                @for (metodo of metodosPago(); track metodo.metodo) {
+                @for (metodo of metodosPagoPagina(); track metodo.metodo) {
                   <div class="mb-3">
                     <div class="d-flex justify-content-between mb-1">
                       <span>
@@ -292,6 +340,16 @@
                 }
               </div>
             </div>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
+          <span class="text-muted small">
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ datasetActivo() }}
+          </span>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() <= 1" (click)="irAPagina(pagina() - 1)">Anterior</button>
+            <button type="button" class="btn btn-outline-secondary" disabled>{{ pagina() }} / {{ totalPaginas() }}</button>
+            <button type="button" class="btn btn-outline-secondary" [disabled]="pagina() >= totalPaginas()" (click)="irAPagina(pagina() + 1)">Siguiente</button>
           </div>
         </div>
       } @else {

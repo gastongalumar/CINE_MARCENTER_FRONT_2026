@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Funcion, FuncionRangoRequest, FuncionRequest } from '../models/funcion';
 import { MensajeResponse } from '../models/usuario';
+import { EstadoAsientos } from '../models/estado-asientos.model';
+import { SKIP_ERROR_TOAST } from '../utils/http.context';
 
 /**
  * Servicio HTTP de funciones.
@@ -42,6 +44,13 @@ export class FuncionService {
   /** GET /api/funciones/{funcionId}/ocupados → etiquetas de los asientos reservados. */
   obtenerAsientosOcupados(funcionId: number): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/${funcionId}/ocupados`);
+  }
+
+  /** GET /api/funciones/{funcionId}/estado-asientos → estado y holds vigentes. */
+  obtenerEstadoAsientos(funcionId: number): Observable<EstadoAsientos> {
+    return this.http.get<EstadoAsientos>(`${this.apiUrl}/${funcionId}/estado-asientos`, {
+      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+    });
   }
 
   /** POST /api/funciones — crear una función (ADMIN). */

@@ -1,20 +1,31 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, afterNextRender } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
+  afterNextRender,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { EMPTY, Subscription, interval } from 'rxjs';
+import { catchError, finalize, startWith, switchMap, timeout } from 'rxjs/operators';
 import { FuncionService } from '../../services/funcion';
 import { ReservaService } from '../../services/reserva';
+import { HoldService } from '../../services/hold.service';
 import { AuthService } from '../../services/auth';
 import { PaymentService } from '../../services/payment';
 import { Funcion } from '../../models/funcion';
 import { METODOS_PAGO, MetodoPago } from '../../models/metodo-pago';
-import { finalize, timeout } from 'rxjs/operators';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 import { fechaLocalIso, parseApiDateTime } from '../../utils/datetime';
 import { FechaApiPipe } from '../../pipes/fecha-api';
 import { SeatMapComponent } from '../seat-map/seat-map';
+import { autorizarButacas } from '../../utils/butacas-access';
+import { EstadoAsientos } from '../../models/estado-asientos.model';
 
 export interface FuncionesPorDia {
   clave: string;
@@ -29,7 +40,7 @@ export interface FuncionesPorDia {
   templateUrl: './seleccion-asientos.html',
   styleUrls: ['./seleccion-asientos.css'],
 })
-export class SeleccionAsientosComponent {
+export class SeleccionAsientosComponent implements OnDestroy {
 
   private readonly initLoad = afterNextRender(() => {
     const id = this.route.snapshot.paramMap.get('id');
@@ -51,7 +62,10 @@ export class SeleccionAsientosComponent {
   mostrandoOtrosDias = false;
   funcion: Funcion | null = null;
   asientosOcupados: string[] = [];
+  asientosBloqueados: string[] = [];
   asientosSeleccionados: string[] = [];
+  readonly pollMs = 2500;
+  pollingSub: Subscription | null = null;
   metodoPago: MetodoPago = MetodoPago.MERCADO_PAGO;
 
   loadingFunciones = true;
@@ -62,6 +76,10 @@ export class SeleccionAsientosComponent {
   salaColumnas = 0;
 
   esAdmin = false;
+
+  private readonly holdsLiberandose = new Set<string>();
+  private errorPollingNotificado = false;
+  private cleanupSolicitado = false;
 
   get totalAsientos(): number {
     return this.salaFilas * this.salaColumnas;
@@ -100,6 +118,7 @@ export class SeleccionAsientosComponent {
     private router: Router,
     private funcionService: FuncionService,
     private reservaService: ReservaService,
+    private holdService: HoldService,
     private paymentService: PaymentService,
     public authService: AuthService,
     private toastr: ToastrService,
@@ -178,11 +197,21 @@ export class SeleccionAsientosComponent {
   }
 
   elegirFuncion(funcion: Funcion): void {
+    if (funcion.id == null) {
+      this.toastr.error('Seleccione una función válida.', 'Error');
+      return;
+    }
+
+    this.detenerPollingYLiberarHolds();
     this.funcion = funcion;
     this.asientosSeleccionados = [];
+    this.asientosOcupados = [];
+    this.asientosBloqueados = [];
+    this.holdsLiberandose.clear();
+    this.cleanupSolicitado = false;
     this.construirGrid(funcion);
-    this.cargarAsientosOcupados(funcion.id!);
     this.paso = 2;
+    this.iniciarPollingEstado(funcion.id);
     refreshView(this.cdr);
   }
 
@@ -191,17 +220,169 @@ export class SeleccionAsientosComponent {
     this.salaColumnas = funcion.salaColumnas || 0;
   }
 
-  cargarAsientosOcupados(funcionId: number): void {
-    this.funcionService.obtenerAsientosOcupados(funcionId).subscribe({
-      next: (ocupados: string[]) => {
-        this.asientosOcupados = ocupados || [];
+  iniciarPollingEstado(funcionId: number): void {
+    this.detenerPolling();
+    this.errorPollingNotificado = false;
+    this.pollingSub = interval(this.pollMs).pipe(
+      startWith(0),
+      switchMap(() => this.funcionService.obtenerEstadoAsientos(funcionId).pipe(
+        catchError((error: unknown) => {
+          if (!this.errorPollingNotificado) {
+            this.toastr.warning(
+              getErrorMessage(error, 'No se pudo actualizar el estado de los asientos.'),
+              'Sincronización'
+            );
+            this.errorPollingNotificado = true;
+          }
+          return EMPTY;
+        })
+      ))
+    ).subscribe((estado) => {
+      this.aplicarEstadoAsientos(estado);
+      this.errorPollingNotificado = false;
+      refreshView(this.cdr);
+    });
+  }
+
+  aplicarEstadoAsientos(estado: EstadoAsientos): void {
+    this.asientosOcupados = (estado.ocupados ?? []).map((etiqueta) => etiqueta.trim().toUpperCase());
+    this.asientosBloqueados = (estado.bloqueados ?? []).map((etiqueta) => etiqueta.trim().toUpperCase());
+    const misBloqueados = new Set(
+      (estado.misBloqueados ?? []).map((etiqueta) => etiqueta.trim().toUpperCase())
+    );
+
+    for (const etiqueta of this.holdsLiberandose) {
+      if (!misBloqueados.has(etiqueta)) this.holdsLiberandose.delete(etiqueta);
+    }
+
+    const ocupados = new Set(this.asientosOcupados);
+    const bloqueados = new Set(this.asientosBloqueados);
+    const seleccion = new Set([...misBloqueados, ...this.asientosSeleccionados]);
+
+    for (const etiqueta of seleccion) {
+      if (ocupados.has(etiqueta) || bloqueados.has(etiqueta) || this.holdsLiberandose.has(etiqueta)) {
+        seleccion.delete(etiqueta);
+      }
+    }
+
+    this.asientosSeleccionados = [...seleccion].sort();
+  }
+
+  onSeleccionChange(nuevaSeleccion: string[]): void {
+    if (this.esAdmin || !this.authService.isAuthenticated() || !this.authService.isCliente()) return;
+    const funcionId = this.funcion?.id;
+    if (funcionId == null) return;
+
+    const anterior = new Set(this.asientosSeleccionados);
+    const nueva = new Set(nuevaSeleccion.map((etiqueta) => etiqueta.trim().toUpperCase()));
+    const agregados = [...nueva].filter((etiqueta) => !anterior.has(etiqueta));
+    const quitados = [...anterior].filter((etiqueta) => !nueva.has(etiqueta));
+
+    this.asientosSeleccionados = [...nueva].sort();
+    refreshView(this.cdr);
+
+    for (const etiqueta of agregados) {
+      this.holdsLiberandose.delete(etiqueta);
+      this.holdService.crear(funcionId, etiqueta).subscribe({
+        error: (error: unknown) => {
+          this.asientosSeleccionados = this.asientosSeleccionados.filter((item) => item !== etiqueta);
+          if (this.esConflicto(error)) {
+            this.toastr.warning('Asiento no disponible', 'Selección');
+          } else {
+            this.toastr.error(getErrorMessage(error, 'No se pudo bloquear el asiento.'), 'Error');
+          }
+          this.refrescarEstadoAsientos(funcionId);
+          refreshView(this.cdr);
+        },
+      });
+    }
+
+    for (const etiqueta of quitados) {
+      this.holdsLiberandose.add(etiqueta);
+      this.holdService.liberar(funcionId, etiqueta).subscribe({
+        error: (error: unknown) => {
+          this.holdsLiberandose.delete(etiqueta);
+          this.toastr.warning(
+            getErrorMessage(error, 'No se pudo liberar el asiento; se volverá a sincronizar.'),
+            'Sincronización'
+          );
+          this.refrescarEstadoAsientos(funcionId);
+        },
+      });
+    }
+  }
+
+  private refrescarEstadoAsientos(funcionId: number): void {
+    this.funcionService.obtenerEstadoAsientos(funcionId).subscribe({
+      next: (estado) => {
+        this.aplicarEstadoAsientos(estado);
         refreshView(this.cdr);
       },
-      error: () => {
-        this.asientosOcupados = [];
-        refreshView(this.cdr);
-      }
+      error: (error: unknown) => {
+        this.toastr.warning(
+          getErrorMessage(error, 'No se pudo actualizar el estado de los asientos.'),
+          'Sincronización'
+        );
+      },
     });
+  }
+
+  private esConflicto(error: unknown): boolean {
+    if (error instanceof HttpErrorResponse) return error.status === 409;
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error &&
+      error.status === 409
+    );
+  }
+
+  private detenerPolling(): void {
+    this.pollingSub?.unsubscribe();
+    this.pollingSub = null;
+  }
+
+  detenerPollingYLiberarHolds(): void {
+    this.detenerPolling();
+    const funcionId = this.funcion?.id;
+    if (
+      funcionId == null ||
+      this.esAdmin ||
+      !this.authService.isAuthenticated() ||
+      !this.authService.isCliente() ||
+      this.cleanupSolicitado
+    ) {
+      return;
+    }
+
+    this.cleanupSolicitado = true;
+    this.holdService.liberarTodos(funcionId).subscribe({
+      error: (error: unknown) => {
+        this.toastr.warning(
+          getErrorMessage(error, 'No se pudieron liberar los asientos seleccionados.'),
+          'Sincronización'
+        );
+      },
+    });
+  }
+
+  volverAHorarios(): void {
+    this.detenerPollingYLiberarHolds();
+    this.funcion = null;
+    this.asientosSeleccionados = [];
+    this.asientosOcupados = [];
+    this.asientosBloqueados = [];
+    this.paso = 1;
+    refreshView(this.cdr);
+  }
+
+  cancelarCompra(): void {
+    this.detenerPollingYLiberarHolds();
+    this.router.navigate(['/cartelera']);
+  }
+
+  ngOnDestroy(): void {
+    this.detenerPollingYLiberarHolds();
   }
 
   calcularTotal(): number {
@@ -214,6 +395,7 @@ export class SeleccionAsientosComponent {
     const tipo = this.authService.getTipoUsuario();
 
     if (!clienteId || !this.authService.isAuthenticated()) {
+      autorizarButacas(this.peliculaId);
       this.router.navigate(['/login'], {
         queryParams: { returnUrl: `/butacas/${this.peliculaId}` },
       });
@@ -255,6 +437,8 @@ export class SeleccionAsientosComponent {
       )
       .subscribe({
         next: (reserva) => {
+          this.detenerPolling();
+          this.cleanupSolicitado = true;
           // Con Mercado Pago se crea la preferencia y se redirige al checkout.
           if (this.metodoPago === MetodoPago.MERCADO_PAGO && reserva.id != null) {
             this.paymentService.crearPreferencia(reserva.id).subscribe({
@@ -301,6 +485,7 @@ export class SeleccionAsientosComponent {
   }
 
   volver(): void {
+    this.detenerPollingYLiberarHolds();
     this.router.navigate(['/cartelera']);
   }
 }

@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 import { AuthResponse, LoginRequest, RegistroRequest, TipoUsuario } from '../models/auth';
 import { decodeJwtPayload, isJwtExpired } from '../utils/jwt';
 
-/** Clave del token en localStorage. */
+/** Clave del token aislado por pestaña en sessionStorage. */
 export const TOKEN_STORAGE_KEY = 'access_token';
 
 /** Foto de perfil en localStorage (sobrevive hasta el próximo login/logout). */
@@ -15,7 +15,7 @@ const FOTO_PERFIL_STORAGE_KEY = 'foto_perfil_url';
 /**
  * Servicio de autenticación.
  *
- * - Persiste el JWT en `localStorage`.
+ * - Persiste el JWT en `sessionStorage` para aislar las sesiones por pestaña.
  * - Decodifica el payload para conocer el rol (`tipo`) del usuario.
  * - Expone el estado de sesión con **signals** (`currentUser`, `token`,
  *   `isAuthenticated`, `isAdmin`, `isCliente`).
@@ -63,7 +63,7 @@ export class AuthService {
   // Sesión
   // ---------------------------------------------------------------------
 
-  /** Recupera la sesión guardada en localStorage (si el token sigue vigente). */
+  /** Recupera la sesión guardada en esta pestaña (si el token sigue vigente). */
   private restaurarSesion(): void {
     const token = this.getToken();
     if (!token || isJwtExpired(token)) {
@@ -127,7 +127,7 @@ export class AuthService {
   /** Token JWT guardado (null si no hay). */
   getToken(): string | null {
     if (!this.isBrowser) return this._token();
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
   }
 
   /** Usuario de la sesión actual (null si no hay). */
@@ -179,7 +179,7 @@ export class AuthService {
 
   private guardarSesion(response: AuthResponse): void {
     if (this.isBrowser && response?.token) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, response.token);
     }
     this._token.set(response?.token ?? null);
     this._currentUser.set(response ?? null);
@@ -211,7 +211,7 @@ export class AuthService {
   private limpiarStorage(): void {
     if (!this.isBrowser) return;
     try {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(FOTO_PERFIL_STORAGE_KEY);
     } catch {
       // localStorage puede no estar disponible (modo privado): se ignora.

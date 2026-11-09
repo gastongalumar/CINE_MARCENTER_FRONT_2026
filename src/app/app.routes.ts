@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth';
+import { butacasAccessGuard } from './guards/butacas-access';
 import { roleGuard } from './guards/role';
 
 /**
@@ -72,7 +73,7 @@ export const routes: Routes = [
             import('./pages/seleccion-asientos/seleccion-asientos').then(
                 (m) => m.SeleccionAsientosComponent
             ),
-        canActivate: [authGuard],
+        canActivate: [authGuard, butacasAccessGuard],
     },
     {
         path: 'ticket/:numero',
@@ -130,13 +131,6 @@ export const routes: Routes = [
         title: 'Gestión de películas | Cinemacenter',
         loadComponent: () =>
             import('./pages/peliculas/peliculas').then((m) => m.PeliculasComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
-    },
-    {
-        path: 'admin/peliculas/:id/editar',
-        title: 'Editar película | Cinemacenter',
-        loadComponent: () =>
-            import('./pages/peliculas/pelicula-editar').then((m) => m.PeliculaEditarComponent),
         canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
     },
     {
