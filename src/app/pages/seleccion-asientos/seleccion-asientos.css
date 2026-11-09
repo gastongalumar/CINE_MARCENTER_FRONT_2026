@@ -192,14 +192,20 @@
 /* Pantalla y mapa de asientos: viven en <app-seat-map> */
 
 /* Resumen */
-.selection-summary { background: rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); border: 1px solid rgba(255,255,255,0.06); }
+.selection-summary {
+  background: linear-gradient(145deg, #1a2333 0%, #111827 100%);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
 .total-text { font-size: 1.6rem; color: var(--color-slider); font-weight: 800; }
 
 /* Reporte de ocupación (admin) */
 .ocupacion-report {
-  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(145deg, #1a2333 0%, #111827 100%);
   border-radius: var(--border-radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 .report-value { font-size: 2.2rem; font-weight: 800; color: var(--color-slider); line-height: 1.1; }
 .report-label {
