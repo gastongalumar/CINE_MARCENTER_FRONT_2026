@@ -22,7 +22,7 @@ export class UsuarioService {
   }
 
   /** GET /api/usuarios/rol/{rol} */
-  listarPorRol(rol: 'ADMINISTRADOR' | 'CLIENTE'): Observable<Usuario[]> {
+  listarPorRol(rol: 'ADMINISTRADOR' | 'SUPERADMIN' | 'CLIENTE'): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/rol/${rol}`);
   }
 

@@ -1,4 +1,18 @@
-export type TipoUsuario = 'ADMINISTRADOR' | 'CLIENTE';
+export type TipoUsuario = 'SUPERADMIN' | 'ADMINISTRADOR' | 'CLIENTE';
+
+/** Roles con acceso al panel de administración. */
+export const ROLES_STAFF: TipoUsuario[] = ['SUPERADMIN', 'ADMINISTRADOR'];
+
+export function esStaff(tipo: TipoUsuario | null | undefined): boolean {
+  return tipo === 'SUPERADMIN' || tipo === 'ADMINISTRADOR';
+}
+
+export function parseTipoUsuario(valor: string | null | undefined): TipoUsuario {
+  if (valor === 'SUPERADMIN' || valor === 'ADMINISTRADOR' || valor === 'CLIENTE') {
+    return valor;
+  }
+  return 'CLIENTE';
+}
 
 export interface LoginRequest {
   email: string;
@@ -11,6 +25,8 @@ export interface RegistroRequest {
   email: string;
   password: string;
   telefono?: string;
+  /** Solo para registro-admin: ADMINISTRADOR o SUPERADMIN. */
+  tipo?: 'ADMINISTRADOR' | 'SUPERADMIN';
 }
 
 export interface AuthResponse {
