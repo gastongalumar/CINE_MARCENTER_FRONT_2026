@@ -127,6 +127,15 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
     },
     {
+        path: 'admin/peliculas/listado',
+        title: 'Listado de películas | Cinemacenter',
+        loadComponent: () =>
+            import('./components/listado-peliculas/listado-peliculas').then(
+                (m) => m.ListadoPeliculasComponent
+            ),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+    },
+    {
         path: 'admin/peliculas',
         title: 'Gestión de películas | Cinemacenter',
         loadComponent: () =>
@@ -134,10 +143,26 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
     },
     {
+        path: 'admin/funciones/listado',
+        title: 'Listado de funciones | Cinemacenter',
+        loadComponent: () =>
+            import('./components/listado-funciones/listado-funciones').then(
+                (m) => m.ListadoFuncionesComponent
+            ),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+    },
+    {
         path: 'admin/funciones',
         title: 'Gestión de funciones | Cinemacenter',
         loadComponent: () =>
             import('./pages/funciones/funciones').then((m) => m.FuncionesComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+    },
+    {
+        path: 'admin/salas/listado',
+        title: 'Listado de salas | Cinemacenter',
+        loadComponent: () =>
+            import('./components/listado-salas/listado-salas').then((m) => m.ListadoSalasComponent),
         canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
     },
     {

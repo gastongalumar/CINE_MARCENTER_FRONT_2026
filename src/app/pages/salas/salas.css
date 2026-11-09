@@ -82,54 +82,5 @@
   opacity: 0.65;
 }
 
-.tabla-salas {
-  --bs-table-bg: transparent;
-  --bs-table-color: var(--color-fuente);
-  color: var(--color-fuente) !important;
-  width: 100%;
-  background-color: transparent !important;
-}
-.tabla-salas thead th {
-  color: var(--color-slider) !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
-  border-bottom: 2px solid var(--color-slider) !important;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  padding: 0.65rem 0.5rem;
-}
-.tabla-salas tbody td {
-  color: var(--color-fuente) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  padding: 0.65rem 0.5rem;
-  background-color: rgba(0, 0, 0, 0.12) !important;
-}
-.tabla-salas tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-.tabla-salas .fila-activa td {
-  background: rgba(245, 197, 24, 0.12) !important;
-}
-:host-context(.light-theme) .tabla-salas thead th {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-:host-context(.light-theme) .tabla-salas tbody td {
-  background-color: rgba(0, 0, 0, 0.02) !important;
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-:host-context(.light-theme) .tabla-salas tbody tr:hover td {
-  background: rgba(0, 0, 0, 0.04) !important;
-}
-:host-context(.light-theme) .tabla-salas .fila-activa td {
-  background: rgba(26, 35, 126, 0.08) !important;
-}
-.capacidad-badge {
-  background: rgba(245, 197, 24, 0.16);
-  color: var(--color-slider);
-  font-weight: 700;
-}
-.paginador .btn:disabled { opacity: 0.55; }
 .material-icons { font-size: 1.1rem; vertical-align: middle; }
 .text-muted { color: var(--color-muted) !important; }

@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  afterNextRender,
-  computed,
+  DestroyRef,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -14,13 +14,13 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpEventType } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { distinctUntilChanged, map } from 'rxjs';
 
 import { PeliculaService } from '../../services/pelicula';
 import { ImageService } from '../../services/image';
-import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { Pelicula, PeliculaRequest } from '../../models/pelicula';
 import { GENEROS_PELICULA, GeneroPelicula, etiquetaGenero } from '../../models/genero-pelicula';
 import { getErrorMessage } from '../../utils/api-error';
@@ -53,58 +53,27 @@ function rangoDeFechas(group: AbstractControl): ValidationErrors | null {
 })
 export class PeliculasComponent {
   private readonly peliculaService = inject(PeliculaService);
-  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly imageService = inject(ImageService);
 
   readonly generos = GENEROS_PELICULA;
   readonly etiquetaGenero = etiquetaGenero;
 
-  readonly peliculas = signal<Pelicula[]>([]);
   readonly peliculaSeleccionada = signal<Pelicula | null>(null);
-  readonly cargando = signal(true);
   readonly guardando = signal(false);
-  readonly errorCarga = signal('');
   readonly errorMensaje = signal('');
-  readonly filtro = signal('');
-  readonly pagina = signal(1);
-  readonly pageSize = 6;
   readonly errorPreview = signal(false);
   readonly archivoSeleccionado = signal<File | null>(null);
+  readonly previewLocalUrl = signal<string | null>(null);
   readonly subiendo = signal(false);
   readonly progreso = signal(0);
   readonly errorImagen = signal('');
   readonly resumenCartelera = signal<{ desde: string; hasta: string; dias: number } | null>(null);
-
-  readonly peliculasFiltradas = computed(() => {
-    const termino = this.filtro().trim().toLowerCase();
-    if (!termino) return this.peliculas();
-    return this.peliculas().filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(termino) ||
-        etiquetaGenero(p.genero).toLowerCase().includes(termino)
-    );
-  });
-
-  readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.peliculasFiltradas().length / this.pageSize))
-  );
-
-  readonly peliculasPagina = computed(() => {
-    const start = (this.pagina() - 1) * this.pageSize;
-    return this.peliculasFiltradas().slice(start, start + this.pageSize);
-  });
-
-  readonly rangoDesde = computed(() => {
-    if (!this.peliculasFiltradas().length) return 0;
-    return (this.pagina() - 1) * this.pageSize + 1;
-  });
-
-  readonly rangoHasta = computed(() =>
-    Math.min(this.pagina() * this.pageSize, this.peliculasFiltradas().length)
-  );
 
   readonly sinopsisPorDefecto =
     'Sinopsis pendiente. Próximamente se publicará la descripción oficial de la película.';
@@ -128,45 +97,35 @@ export class PeliculasComponent {
     { validators: [rangoDeFechas] }
   );
 
-  private readonly initLoad = afterNextRender(() => this.cargarPeliculas());
-
   constructor() {
     this.form.controls.rutaImagen.valueChanges.subscribe(() => this.errorPreview.set(false));
     this.form.valueChanges.subscribe(() => this.actualizarResumenCartelera());
     this.actualizarResumenCartelera();
+
+    this.destroyRef.onDestroy(() => this.limpiarPreviewLocal());
+
+    this.route.queryParamMap
+      .pipe(
+        map((params) => params.get('id')),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((idParam) => this.cargarEdicionDesdeQuery(idParam));
   }
 
-  cargarPeliculas(): void {
-    this.cargando.set(true);
-    this.peliculaService.listarTodas().subscribe({
-      next: (peliculas) => {
-        this.peliculas.set(peliculas);
-        this.ajustarPagina();
-        this.cargando.set(false);
-      },
-      error: (error) => {
-        this.errorCarga.set(getErrorMessage(error, 'No se pudieron cargar las películas.'));
-        this.cargando.set(false);
-      },
-    });
-  }
+  previewPosterSrc(): string | null {
+    const local = this.previewLocalUrl();
+    if (local) return local;
 
-  actualizarFiltro(valor: string): void {
-    this.filtro.set(valor);
-    this.pagina.set(1);
-  }
+    const ruta = (this.form.controls.rutaImagen.value ?? '').trim();
+    if (ruta) return this.imageService.getImageUrl(ruta);
 
-  irAPagina(page: number): void {
-    const total = this.totalPaginas();
-    if (page < 1 || page > total) return;
-    this.pagina.set(page);
-  }
-
-  private ajustarPagina(): void {
-    const total = this.totalPaginas();
-    if (this.pagina() > total) {
-      this.pagina.set(total);
+    const seleccionada = this.peliculaSeleccionada();
+    if (seleccionada?.rutaImagen) {
+      return this.imageService.getImageUrl(seleccionada.rutaImagen);
     }
+
+    return null;
   }
 
   guardar(): void {
@@ -179,6 +138,7 @@ export class PeliculasComponent {
     const seleccionada = this.peliculaSeleccionada();
     const payload = this.construirPayload();
     const url = (this.form.controls.rutaImagen.value ?? '').trim();
+    const archivoLocal = this.archivoSeleccionado();
 
     this.guardando.set(true);
     const peticion$ = seleccionada?.id
@@ -195,9 +155,10 @@ export class PeliculasComponent {
 
         const id = guardada.id ?? seleccionada?.id;
         this.cancelarEdicion();
-        this.cargarPeliculas();
 
-        if (id && this.esUrlHttp(url)) {
+        if (id && archivoLocal) {
+          this.subirArchivo(id, archivoLocal);
+        } else if (id && this.esUrlHttp(url)) {
           this.importarImagenDesdeUrl(id, url);
         }
       },
@@ -233,7 +194,7 @@ export class PeliculasComponent {
       urlTrailer: pelicula.urlTrailer ?? '',
       rutaImagen: pelicula.rutaImagen ?? '',
     });
-    this.archivoSeleccionado.set(null);
+    this.limpiarArchivoSeleccionado();
     this.errorImagen.set('');
     this.progreso.set(0);
     this.errorPreview.set(false);
@@ -243,40 +204,28 @@ export class PeliculasComponent {
 
   cancelarEdicion(): void {
     this.peliculaSeleccionada.set(null);
-    this.archivoSeleccionado.set(null);
+    this.limpiarArchivoSeleccionado();
     this.errorImagen.set('');
     this.progreso.set(0);
     this.subiendo.set(false);
     this.resetFormulario();
-  }
-
-  eliminar(pelicula: Pelicula): void {
-    if (!pelicula.id) return;
-
-    this.confirmDialog
-      .confirmDanger(
-        'Eliminar película',
-        `¿Seguro que querés eliminar «${pelicula.nombre}»? Esta acción no se puede deshacer.`
-      )
-      .subscribe((confirmado) => {
-        if (!confirmado) return;
-
-        this.peliculaService.eliminar(pelicula.id!).subscribe({
-          next: () => {
-            this.toastr.success('Película eliminada', 'Éxito');
-            if (this.peliculaSeleccionada()?.id === pelicula.id) {
-              this.cancelarEdicion();
-            }
-            this.cargarPeliculas();
-          },
-        });
-      });
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
+    });
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.archivoSeleccionado.set(input.files?.[0] ?? null);
+    const archivo = input.files?.[0] ?? null;
+    this.limpiarPreviewLocal();
+    this.archivoSeleccionado.set(archivo);
     this.errorImagen.set('');
+    this.errorPreview.set(false);
+    if (archivo) {
+      this.previewLocalUrl.set(URL.createObjectURL(archivo));
+    }
   }
 
   subirImagen(): void {
@@ -293,6 +242,44 @@ export class PeliculasComponent {
   esInvalido(campo: string): boolean {
     const control = this.form.get(campo);
     return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  private cargarEdicionDesdeQuery(idParam: string | null): void {
+    if (!idParam) {
+      if (this.peliculaSeleccionada()) {
+        this.peliculaSeleccionada.set(null);
+        this.resetFormulario();
+      }
+      return;
+    }
+
+    const id = Number(idParam);
+    if (!Number.isFinite(id) || id <= 0) {
+      this.toastr.error('Identificador de película inválido.', 'Error');
+      this.limpiarQueryId();
+      return;
+    }
+
+    if (this.peliculaSeleccionada()?.id === id) return;
+
+    this.peliculaService.obtenerPorId(id).subscribe({
+      next: (pelicula) => this.editar(pelicula),
+      error: (error) => {
+        this.toastr.error(
+          getErrorMessage(error, 'No se pudo cargar la película para editar.'),
+          'Error'
+        );
+        this.limpiarQueryId();
+      },
+    });
+  }
+
+  private limpiarQueryId(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
+    });
   }
 
   private actualizarResumenCartelera(): void {
@@ -333,23 +320,41 @@ export class PeliculasComponent {
         } else if (event.type === HttpEventType.Response) {
           this.subiendo.set(false);
           this.progreso.set(0);
-          this.archivoSeleccionado.set(null);
+          this.limpiarArchivoSeleccionado();
           this.toastr.success('Póster guardado correctamente', 'Éxito');
-          this.peliculaService.obtenerPorId(id).subscribe({
-            next: (pelicula) => {
-              this.peliculaSeleccionada.set(pelicula);
-              this.form.patchValue({ rutaImagen: pelicula.rutaImagen ?? '' });
-              this.cargarPeliculas();
-            },
-          });
+          if (this.peliculaSeleccionada()?.id === id) {
+            this.peliculaService.obtenerPorId(id).subscribe({
+              next: (pelicula) => {
+                this.peliculaSeleccionada.set(pelicula);
+                this.form.patchValue({ rutaImagen: pelicula.rutaImagen ?? '' });
+              },
+            });
+          }
         }
       },
       error: (error) => {
         this.subiendo.set(false);
         this.progreso.set(0);
         this.errorImagen.set(getErrorMessage(error, 'No se pudo subir la imagen.'));
+        this.toastr.warning(
+          'La película se guardó, pero el póster no. Podés subirlo editando la película.',
+          'Póster'
+        );
       },
     });
+  }
+
+  private limpiarPreviewLocal(): void {
+    const url = this.previewLocalUrl();
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+    this.previewLocalUrl.set(null);
+  }
+
+  private limpiarArchivoSeleccionado(): void {
+    this.limpiarPreviewLocal();
+    this.archivoSeleccionado.set(null);
   }
 
   private importarImagenDesdeUrl(id: number, url: string): void {
@@ -384,7 +389,6 @@ export class PeliculasComponent {
               next: (event) => {
                 if (event.type === HttpEventType.Response) {
                   this.toastr.success('Póster guardado correctamente', 'Éxito');
-                  this.cargarPeliculas();
                   resolve();
                 }
               },
