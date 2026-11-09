@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { MensajeResponse, Usuario } from '../models/usuario';
+import { ActualizarNombreUsuarioRequest, MensajeResponse, Usuario } from '../models/usuario';
 import { skipErrorToastContext } from '../utils/http.context';
 
 /**
@@ -60,6 +60,11 @@ export class UsuarioService {
   /** GET /api/usuarios/me */
   obtenerMiPerfil(): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.apiUrl}/me`);
+  }
+
+  /** PUT /api/usuarios/mi-nombre — nombre, apellido y teléfono. */
+  actualizarMiPerfil(data: ActualizarNombreUsuarioRequest): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.apiUrl}/mi-nombre`, data);
   }
 
   /** POST /api/usuarios/me/foto (multipart field `foto`) */
