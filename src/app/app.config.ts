@@ -30,6 +30,9 @@ const providersList: ApplicationConfig['providers'] = [
       timeOut: 3500,
       preventDuplicates: true,
       closeButton: true,
+      progressBar: true,
+      newestOnTop: true,
+      tapToDismiss: true,
     })
   ),
 ];

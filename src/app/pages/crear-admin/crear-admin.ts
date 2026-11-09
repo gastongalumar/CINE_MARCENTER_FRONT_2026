@@ -13,6 +13,7 @@ import { UsuarioService } from '../../services/usuario';
 import { RegistroRequest } from '../../models/auth';
 import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
 import { refreshView } from '../../utils/refresh-view';
 
 function passwordsIguales(group: AbstractControl): ValidationErrors | null {
@@ -82,12 +83,14 @@ export class CrearAdminComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   passwordsNoCoinciden(): boolean {
-    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+    return (
+      this.form.hasError('passwordsNoCoinciden') &&
+      (!!this.form.get('confirmPassword')?.touched || !!this.form.get('confirmPassword')?.dirty)
+    );
   }
 
   onCampoBlur(): void {
@@ -109,7 +112,7 @@ export class CrearAdminComponent {
     this.errorCarga = '';
     refreshView(this.cdr);
 
-    this.usuarioService.listarPorRol('ADMINISTRADOR').subscribe({
+    this.usuarioService.listarPorRol('ADMINISTRADOR', { skipErrorToast: true }).subscribe({
       next: (data) => {
         this.administradores = data;
         this.pagina = 1;
@@ -131,13 +134,15 @@ export class CrearAdminComponent {
   }
 
   onSubmit(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      refreshView(this.cdr);
       return;
     }
 
     this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
     refreshView(this.cdr);
 
     const { confirmPassword: _, ...valores } = this.form.getRawValue();

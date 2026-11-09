@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { Reserva, ReservaRequest } from '../models/reserva';
 import { ValidacionTicketResponse } from '../models/validacion-ticket';
 import { MensajeResponse } from '../models/usuario';
+import { skipErrorToastContext } from '../utils/http.context';
 
 /**
  * Servicio HTTP de reservas y tickets.
@@ -45,7 +46,10 @@ export class ReservaService {
     return this.http.post<ValidacionTicketResponse>(
       `${this.apiUrl}/validar/${numeroTicket}`,
       null,
-      { params: { marcarUsado: String(marcarUsado) } }
+      {
+        params: { marcarUsado: String(marcarUsado) },
+        context: skipErrorToastContext(),
+      }
     );
   }
 

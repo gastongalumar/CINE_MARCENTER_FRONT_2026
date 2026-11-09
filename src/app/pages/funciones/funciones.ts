@@ -25,7 +25,7 @@ import { FuncionRangoRequest, FuncionRequest } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Sala } from '../../models/sala';
 import { getErrorMessage } from '../../utils/api-error';
-import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
+import { aplicarErroresDeCampos, esControlInvalido, limpiarErroresDeCampos } from '../../utils/form-error';
 import {
   PreviewHorariosDia,
   calcularHorariosPorDia,
@@ -71,7 +71,7 @@ function rangoConsistente(group: AbstractControl): ValidationErrors | null {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './funciones.html',
-  styleUrls: ['./funciones.css'],
+  styleUrls: ['./funciones.css', '../../styles/cine-picker.shared.css'],
 })
 export class FuncionesComponent {
   private readonly funcionService = inject(FuncionService);
@@ -276,8 +276,7 @@ export class FuncionesComponent {
   }
 
   esInvalido(form: FormGroup, campo: string): boolean {
-    const control = form.get(campo);
-    return !!control && control.invalid && (control.touched || control.dirty);
+    return esControlInvalido(form.get(campo));
   }
 
   // ------------------------------------------------------------------ privados

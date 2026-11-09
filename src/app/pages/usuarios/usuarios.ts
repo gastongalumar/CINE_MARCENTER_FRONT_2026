@@ -70,7 +70,7 @@ export class UsuariosComponent {
     this.errorCarga.set('');
     refreshView(this.cdr);
 
-    this.usuarioService.listar().subscribe({
+    this.usuarioService.listar({ skipErrorToast: true }).subscribe({
       next: (data) => {
         this.usuarios.set(data);
         this.pagina.set(1);
@@ -96,7 +96,7 @@ export class UsuariosComponent {
     this.errorCarga.set('');
     refreshView(this.cdr);
 
-    this.usuarioService.buscar(texto).subscribe({
+    this.usuarioService.buscar(texto, { skipErrorToast: true }).subscribe({
       next: (data) => {
         this.usuarios.set(data);
         this.pagina.set(1);
@@ -170,8 +170,8 @@ export class UsuariosComponent {
             this.toastr.success('Usuario dado de baja', 'Listo');
             refreshView(this.cdr);
           },
-          error: (error) => {
-            this.toastr.error(getErrorMessage(error, 'No se pudo dar de baja.'), 'Error');
+          error: () => {
+            /* El interceptor muestra el toast de error. */
           },
         });
       });
@@ -186,8 +186,8 @@ export class UsuariosComponent {
         this.toastr.success('Usuario reactivado', 'Listo');
         refreshView(this.cdr);
       },
-      error: (error) => {
-        this.toastr.error(getErrorMessage(error, 'No se pudo reactivar.'), 'Error');
+      error: () => {
+        /* El interceptor muestra el toast de error. */
       },
     });
   }
@@ -211,8 +211,8 @@ export class UsuariosComponent {
             this.toastr.success('Administrador eliminado', 'Listo');
             refreshView(this.cdr);
           },
-          error: (error) => {
-            this.toastr.error(getErrorMessage(error, 'No se pudo eliminar.'), 'Error');
+          error: () => {
+            /* El interceptor muestra el toast de error. */
           },
         });
       });

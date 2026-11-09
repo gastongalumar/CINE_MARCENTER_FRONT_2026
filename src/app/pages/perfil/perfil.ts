@@ -108,9 +108,7 @@ export class PerfilComponent {
       },
       error: (error) => {
         this.cargandoFoto.set(false);
-        const msg = getErrorMessage(error, 'No se pudo subir la foto.');
-        this.errorFoto.set(msg);
-        this.toastr.error(msg, 'Error');
+        this.errorFoto.set(getErrorMessage(error, 'No se pudo subir la foto.'));
         refreshView(this.cd);
       },
     });
@@ -133,9 +131,7 @@ export class PerfilComponent {
       },
       error: (error) => {
         this.cargandoFoto.set(false);
-        const msg = getErrorMessage(error, 'No se pudo eliminar la foto.');
-        this.errorFoto.set(msg);
-        this.toastr.error(msg, 'Error');
+        this.errorFoto.set(getErrorMessage(error, 'No se pudo eliminar la foto.'));
         refreshView(this.cd);
       },
     });

@@ -73,7 +73,7 @@ export class ListadoPeliculasComponent {
 
   cargarPeliculas(): void {
     this.cargando.set(true);
-    this.peliculaService.listarTodas().subscribe({
+    this.peliculaService.listarTodas({ skipErrorToast: true }).subscribe({
       next: (peliculas) => {
         this.peliculas.set(peliculas);
         this.ajustarPagina();

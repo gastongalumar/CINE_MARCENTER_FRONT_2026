@@ -140,11 +140,15 @@
           </div>
         </div>
 
+        @if (errorMessage) {
+          <div class="alert alert-danger py-2 small mb-3">{{ errorMessage }}</div>
+        }
+
         <div class="d-grid gap-2">
           <button
             type="submit"
             class="btn btn-primary py-2 btn-register-submit"
-            [disabled]="form.invalid || loading">
+            [disabled]="loading">
             {{ loading ? 'Registrando...' : 'Registrarse' }} <span class="material-icons font-icon-sm">how_to_reg</span>
           </button>
 

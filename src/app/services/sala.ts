@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { Sala, SalaRequest } from '../models/sala';
 import { Asiento } from '../models/asiento';
 import { MensajeResponse } from '../models/usuario';
+import { skipErrorToastContext } from '../utils/http.context';
 
 /** Servicio HTTP de salas (CRUD completo: alta, lectura, edición y baja). */
 @Injectable({
@@ -15,8 +16,10 @@ export class SalaService {
   private readonly apiUrl = `${environment.apiUrl}/salas`;
 
   /** GET /api/salas */
-  listarTodas(): Observable<Sala[]> {
-    return this.http.get<Sala[]>(this.apiUrl);
+  listarTodas(opciones?: { skipErrorToast?: boolean }): Observable<Sala[]> {
+    return this.http.get<Sala[]>(this.apiUrl, {
+      context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
+    });
   }
 
   /** GET /api/salas/{id} */
@@ -31,12 +34,16 @@ export class SalaService {
 
   /** POST /api/salas — crear sala (ADMIN). */
   crear(sala: SalaRequest): Observable<Sala> {
-    return this.http.post<Sala>(this.apiUrl, sala);
+    return this.http.post<Sala>(this.apiUrl, sala, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** PUT /api/salas/{id} — actualizar sala (ADMIN). */
   actualizar(id: number, sala: SalaRequest): Observable<Sala> {
-    return this.http.put<Sala>(`${this.apiUrl}/${id}`, sala);
+    return this.http.put<Sala>(`${this.apiUrl}/${id}`, sala, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** DELETE /api/salas/{id} — eliminar sala (ADMIN). */

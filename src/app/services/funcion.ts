@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Funcion, FuncionRangoRequest, FuncionRequest } from '../models/funcion';
 import { MensajeResponse } from '../models/usuario';
 import { EstadoAsientos } from '../models/estado-asientos.model';
-import { SKIP_ERROR_TOAST } from '../utils/http.context';
+import { skipErrorToastContext } from '../utils/http.context';
 
 /**
  * Servicio HTTP de funciones.
@@ -22,8 +22,10 @@ export class FuncionService {
   private readonly apiUrl = `${environment.apiUrl}/funciones`;
 
   /** GET /api/funciones — todas las funciones (público). */
-  listarTodas(): Observable<Funcion[]> {
-    return this.http.get<Funcion[]>(this.apiUrl);
+  listarTodas(opciones?: { skipErrorToast?: boolean }): Observable<Funcion[]> {
+    return this.http.get<Funcion[]>(this.apiUrl, {
+      context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
+    });
   }
 
   /** GET /api/funciones/vigentes — funciones futuras o en curso (público). */
@@ -49,18 +51,22 @@ export class FuncionService {
   /** GET /api/funciones/{funcionId}/estado-asientos → estado y holds vigentes. */
   obtenerEstadoAsientos(funcionId: number): Observable<EstadoAsientos> {
     return this.http.get<EstadoAsientos>(`${this.apiUrl}/${funcionId}/estado-asientos`, {
-      context: new HttpContext().set(SKIP_ERROR_TOAST, true),
+      context: skipErrorToastContext(),
     });
   }
 
   /** POST /api/funciones — crear una función (ADMIN). */
   crear(funcion: FuncionRequest): Observable<Funcion> {
-    return this.http.post<Funcion>(this.apiUrl, funcion);
+    return this.http.post<Funcion>(this.apiUrl, funcion, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** POST /api/funciones/por-rango — generar funciones consecutivas (ADMIN). */
   crearPorRango(payload: FuncionRangoRequest): Observable<Funcion[]> {
-    return this.http.post<Funcion[]>(`${this.apiUrl}/por-rango`, payload);
+    return this.http.post<Funcion[]>(`${this.apiUrl}/por-rango`, payload, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** DELETE /api/funciones/{id} — eliminar una función (ADMIN). */

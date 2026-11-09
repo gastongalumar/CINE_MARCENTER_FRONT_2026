@@ -5,6 +5,7 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthResponse, LoginRequest, RegistroRequest, TipoUsuario } from '../models/auth';
 import { decodeJwtPayload, isJwtExpired } from '../utils/jwt';
+import { skipErrorToastContext } from '../utils/http.context';
 
 /** Clave del token aislado por pestaña en sessionStorage. */
 export const TOKEN_STORAGE_KEY = 'access_token';
@@ -93,16 +94,20 @@ export class AuthService {
 
   /** Inicia sesión. `POST /api/auth/login`. */
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response) => this.guardarSesion(response))
-    );
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/login`, credentials, {
+        context: skipErrorToastContext(),
+      })
+      .pipe(tap((response) => this.guardarSesion(response)));
   }
 
   /** Registra un cliente e inicia sesión automáticamente. `POST /api/auth/registro`. */
   registro(data: RegistroRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/registro`, data).pipe(
-      tap((response) => this.guardarSesion(response))
-    );
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/registro`, data, {
+        context: skipErrorToastContext(),
+      })
+      .pipe(tap((response) => this.guardarSesion(response)));
   }
 
   /**
@@ -110,7 +115,9 @@ export class AuthService {
    * NO cambia la sesión actual (quien lo crea sigue siendo el que está conectado).
    */
   registrarAdmin(data: RegistroRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/registro-admin`, data);
+    return this.http.post<AuthResponse>(`${this.apiUrl}/registro-admin`, data, {
+      context: skipErrorToastContext(),
+    });
   }
 
   /** Cierra sesión y limpia el estado. */
