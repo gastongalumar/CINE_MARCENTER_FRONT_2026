@@ -7,7 +7,6 @@ import { ReservaService } from '../../services/reserva';
 import { AuthService } from '../../services/auth';
 import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { Reserva } from '../../models/reserva';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 import { FechaApiPipe } from '../../pipes/fecha-api';
 import { EstadoReservaPipe, ClaseEstadoReservaPipe } from '../../pipes/estado-reserva';
@@ -54,9 +53,8 @@ export class MisReservasComponent {
         this.loading = false;
         refreshView(this.cd);
       },
-      error: (error: unknown) => {
+      error: () => {
         this.loading = false;
-        this.toastr.error(getErrorMessage(error, 'No se pudieron cargar tus compras.'), 'Error');
         refreshView(this.cd);
       }
     });
@@ -94,9 +92,8 @@ export class MisReservasComponent {
             this.toastr.success('Reserva cancelada correctamente.', 'Éxito');
             this.cargarReservas();
           },
-          error: (error: unknown) => {
+          error: () => {
             this.cancelando = false;
-            this.toastr.error(getErrorMessage(error, 'No se pudo cancelar la reserva.'), 'Error');
           }
         });
       });

@@ -1,4 +1,4 @@
-import { FormGroup } from '@angular/forms';
+import { AbstractControl, FormGroup } from '@angular/forms';
 import { getFieldErrorsFromError } from './api-error';
 
 /**
@@ -10,6 +10,13 @@ import { getFieldErrorsFromError } from './api-error';
  * controles del formulario para que el usuario vea el error debajo del
  * campo correspondiente.
  */
+
+/** true si el control es inválido y el usuario ya interactuó con él. */
+export function esControlInvalido(
+  control: AbstractControl | null | undefined
+): boolean {
+  return !!control && control.invalid && (control.touched || control.dirty);
+}
 
 /**
  * Marca los controles indicados con el error devuelto por el backend.
@@ -40,7 +47,6 @@ export function aplicarErroresDeCampos(
     control.setErrors({ ...(control.errors ?? {}), backend: mensaje });
     control.markAsTouched();
     control.markAsDirty();
-    control.updateValueAndValidity();
     aplicados = true;
   }
 

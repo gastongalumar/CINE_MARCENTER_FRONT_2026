@@ -48,11 +48,62 @@
   box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
 }
 .form-control::placeholder { color: var(--color-muted); }
-.form-select option { color: #000; background-color: #fff; }
-.form-control.is-invalid, .form-select.is-invalid {
-  border-color: #f87171;
-  background-image: none;
+
+/* Select de género alineado al look glass (sin blanco default del navegador) */
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.35rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath fill='%23f5c518' d='M1.5 1.5 8 8l6.5-6.5' stroke='%23f5c518' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px 8px;
+  cursor: pointer;
 }
+.form-select option {
+  background-color: #0f1524;
+  color: #f3f6ff;
+}
+.form-select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath fill='none' stroke='%23f5c518' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1.5 1.5 8 8l6.5-6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px 8px;
+}
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: #f87171;
+}
+.form-select.is-invalid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath fill='none' stroke='%23f87171' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1.5 1.5 8 8l6.5-6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px 8px;
+}
+
+:host-context(.light-theme) .form-control,
+:host-context(.light-theme) .form-select {
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #0d121f;
+}
+:host-context(.light-theme) .form-control:focus,
+:host-context(.light-theme) .form-select:focus {
+  background-color: #ffffff;
+  border-color: var(--color-slider);
+  box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.12);
+}
+:host-context(.light-theme) .form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath fill='none' stroke='%231a237e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1.5 1.5 8 8l6.5-6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 12px 8px;
+}
+:host-context(.light-theme) .form-select option {
+  background-color: #ffffff;
+  color: #0d121f;
+}
+
 .form-text { color: var(--color-muted); }
 
 .btn-primary {

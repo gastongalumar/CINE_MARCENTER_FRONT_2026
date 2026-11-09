@@ -10,6 +10,8 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { RegistroRequest } from '../../models/auth';
+import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
 import {
   CODIGO_AREA_PATTERN,
   NUMERO_LOCAL_PATTERN,
@@ -52,6 +54,7 @@ export class RegistroComponent {
   );
 
   loading = false;
+  errorMessage = '';
   mostrarPassword = false;
   mostrarConfirmPassword = false;
 
@@ -62,12 +65,14 @@ export class RegistroComponent {
   ) {}
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   passwordsNoCoinciden(): boolean {
-    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+    return (
+      this.form.hasError('passwordsNoCoinciden') &&
+      (!!this.form.get('confirmPassword')?.touched || !!this.form.get('confirmPassword')?.dirty)
+    );
   }
 
   alternarPassword(): void {
@@ -79,7 +84,9 @@ export class RegistroComponent {
   }
 
   onSubmit(): void {
+    this.errorMessage = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
@@ -98,8 +105,9 @@ export class RegistroComponent {
           queryParams: { registered: 'true' }
         });
       },
-      error: () => {
+      error: (error: unknown) => {
         this.loading = false;
+        this.errorMessage = getErrorMessage(error, 'No se pudo completar el registro.');
         setTimeout(() => this.cdr.detectChanges());
       }
     });

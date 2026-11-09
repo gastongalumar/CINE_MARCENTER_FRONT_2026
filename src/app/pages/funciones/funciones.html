@@ -57,7 +57,13 @@
                   }
                 </select>
                 @if (esInvalido(formIndividual, 'peliculaId')) {
-                  <div class="invalid-feedback d-block">Seleccioná una película.</div>
+                  <div class="invalid-feedback d-block">
+                    @if (formIndividual.controls.peliculaId.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      Seleccioná una película.
+                    }
+                  </div>
                 }
               </div>
 
@@ -74,7 +80,13 @@
                   }
                 </select>
                 @if (esInvalido(formIndividual, 'salaId')) {
-                  <div class="invalid-feedback d-block">Seleccioná una sala.</div>
+                  <div class="invalid-feedback d-block">
+                    @if (formIndividual.controls.salaId.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      Seleccioná una sala.
+                    }
+                  </div>
                 }
               </div>
 
@@ -91,7 +103,13 @@
                       placeholder="Elegir fecha"
                       formControlName="fecha" />
                     @if (esInvalido(formIndividual, 'fecha')) {
-                      <div class="invalid-feedback d-block">Indicá la fecha de la función.</div>
+                      <div class="invalid-feedback d-block">
+                        @if (formIndividual.controls.fecha.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          Indicá la fecha de la función.
+                        }
+                      </div>
                     }
                   </div>
                   <div class="cine-picker-field">
@@ -102,7 +120,13 @@
                       [stepMinutos]="5"
                       formControlName="hora" />
                     @if (esInvalido(formIndividual, 'hora')) {
-                      <div class="invalid-feedback d-block">Indicá la hora de la función.</div>
+                      <div class="invalid-feedback d-block">
+                        @if (formIndividual.controls.hora.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          Indicá la hora de la función.
+                        }
+                      </div>
                     }
                   </div>
                 </div>
@@ -127,7 +151,11 @@
                   [class.is-invalid]="esInvalido(formIndividual, 'precio')" />
                 @if (esInvalido(formIndividual, 'precio')) {
                   <div class="invalid-feedback d-block">
-                    El precio debe ser mayor a 0.
+                    @if (formIndividual.controls.precio.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      El precio debe ser mayor a 0.
+                    }
                   </div>
                 }
               </div>
@@ -163,6 +191,15 @@
                     <option [ngValue]="pelicula.id">{{ pelicula.nombre }}</option>
                   }
                 </select>
+                @if (esInvalido(formRango, 'peliculaId')) {
+                  <div class="invalid-feedback d-block">
+                    @if (formRango.controls.peliculaId.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      Seleccioná una película.
+                    }
+                  </div>
+                }
                 @if (peliculaRangoSeleccionada(); as pelicula) {
                   <div class="form-text">
                     Cartelera: {{ pelicula.fechaEstreno | date: 'dd/MM/yyyy' }} –
@@ -184,6 +221,15 @@
                     <option [ngValue]="sala.id">{{ sala.nombre }}</option>
                   }
                 </select>
+                @if (esInvalido(formRango, 'salaId')) {
+                  <div class="invalid-feedback d-block">
+                    @if (formRango.controls.salaId.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      Seleccioná una sala.
+                    }
+                  </div>
+                }
               </div>
 
               <div class="cine-picker-panel">
@@ -200,7 +246,11 @@
                       formControlName="fechaDesde" />
                     @if (esInvalido(formRango, 'fechaDesde')) {
                       <div class="invalid-feedback d-block">
-                        La fecha desde no puede ser pasada.
+                        @if (formRango.controls.fechaDesde.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          La fecha desde no puede ser pasada.
+                        }
                       </div>
                     }
                   </div>
@@ -212,7 +262,11 @@
                       formControlName="fechaHasta" />
                     @if (esInvalido(formRango, 'fechaHasta') || formRango.errors?.['fechasInvertidas']) {
                       <div class="invalid-feedback d-block">
-                        La fecha hasta debe ser igual o posterior a la fecha desde.
+                        @if (formRango.controls.fechaHasta.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          La fecha hasta debe ser igual o posterior a la fecha desde.
+                        }
                       </div>
                     }
                   </div>
@@ -240,7 +294,13 @@
                       [stepMinutos]="5"
                       formControlName="horaInicio" />
                     @if (esInvalido(formRango, 'horaInicio')) {
-                      <div class="invalid-feedback d-block">La hora de inicio es obligatoria.</div>
+                      <div class="invalid-feedback d-block">
+                        @if (formRango.controls.horaInicio.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          La hora de inicio es obligatoria.
+                        }
+                      </div>
                     }
                   </div>
                   <div class="cine-picker-field">
@@ -252,7 +312,11 @@
                       formControlName="horaFin" />
                     @if (esInvalido(formRango, 'horaFin') || formRango.errors?.['horasInvertidas']) {
                       <div class="invalid-feedback d-block">
-                        La hora de fin debe ser posterior a la hora de inicio.
+                        @if (formRango.controls.horaFin.errors?.['backend']; as backend) {
+                          {{ backend }}
+                        } @else {
+                          La hora de fin debe ser posterior a la hora de inicio.
+                        }
                       </div>
                     }
                   </div>
@@ -270,7 +334,13 @@
                   step="0.01"
                   [class.is-invalid]="esInvalido(formRango, 'precio')" />
                 @if (esInvalido(formRango, 'precio')) {
-                  <div class="invalid-feedback d-block">El precio debe ser mayor a 0.</div>
+                  <div class="invalid-feedback d-block">
+                    @if (formRango.controls.precio.errors?.['backend']; as backend) {
+                      {{ backend }}
+                    } @else {
+                      El precio debe ser mayor a 0.
+                    }
+                  </div>
                 }
               </div>
 

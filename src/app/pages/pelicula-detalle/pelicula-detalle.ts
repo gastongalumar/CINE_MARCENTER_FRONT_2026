@@ -8,8 +8,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ToastrService } from 'ngx-toastr';
-
 import { PeliculaService } from '../../services/pelicula';
 import { ImageService } from '../../services/image';
 import { AuthService } from '../../services/auth';
@@ -33,7 +31,6 @@ export class PeliculaDetalleComponent {
   private readonly router = inject(Router);
   private readonly peliculaService = inject(PeliculaService);
   private readonly authService = inject(AuthService);
-  private readonly toastr = inject(ToastrService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -81,7 +78,7 @@ export class PeliculaDetalleComponent {
   private cargar(id: number): void {
     this.cargando = true;
     this.errorCarga = '';
-    this.peliculaService.obtenerPorId(id).subscribe({
+    this.peliculaService.obtenerPorId(id, { skipErrorToast: true }).subscribe({
       next: (pelicula) => {
         this.pelicula = pelicula;
         this.trailerYoutubeId = this.extraerYoutubeId(pelicula.urlTrailer);
@@ -97,7 +94,6 @@ export class PeliculaDetalleComponent {
         this.trailerReproduciendo = false;
         this.cargando = false;
         this.errorCarga = getErrorMessage(error, 'No se pudo cargar la película.');
-        this.toastr.error(this.errorCarga, 'Error');
         refreshView(this.cdr);
       },
     });

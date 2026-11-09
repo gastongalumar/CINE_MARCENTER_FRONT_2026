@@ -57,7 +57,7 @@ export class ListadoSalasComponent {
 
   cargarSalas(): void {
     this.cargando.set(true);
-    this.salaService.listarTodas().subscribe({
+    this.salaService.listarTodas({ skipErrorToast: true }).subscribe({
       next: (salas) => {
         this.salas.set(salas);
         this.ajustarPagina();

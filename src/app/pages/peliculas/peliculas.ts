@@ -24,7 +24,7 @@ import { ImageService } from '../../services/image';
 import { Pelicula, PeliculaRequest } from '../../models/pelicula';
 import { GENEROS_PELICULA, GeneroPelicula, etiquetaGenero } from '../../models/genero-pelicula';
 import { getErrorMessage } from '../../utils/api-error';
-import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
+import { aplicarErroresDeCampos, esControlInvalido, limpiarErroresDeCampos } from '../../utils/form-error';
 import { diasInclusive, fechaLocalIso, formatearFechaCorta } from '../../utils/datetime';
 import { CineDatePickerComponent } from '../../components/cine-date-picker/cine-date-picker';
 
@@ -49,7 +49,7 @@ function rangoDeFechas(group: AbstractControl): ValidationErrors | null {
   imports: [CommonModule, ReactiveFormsModule, RouterModule, CineDatePickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './peliculas.html',
-  styleUrls: ['./peliculas.css'],
+  styleUrls: ['./peliculas.css', '../../styles/cine-picker.shared.css'],
 })
 export class PeliculasComponent {
   private readonly peliculaService = inject(PeliculaService);
@@ -240,8 +240,7 @@ export class PeliculasComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && (control.touched || control.dirty);
+    return esControlInvalido(this.form.get(campo));
   }
 
   private cargarEdicionDesdeQuery(idParam: string | null): void {
@@ -264,11 +263,7 @@ export class PeliculasComponent {
 
     this.peliculaService.obtenerPorId(id).subscribe({
       next: (pelicula) => this.editar(pelicula),
-      error: (error) => {
-        this.toastr.error(
-          getErrorMessage(error, 'No se pudo cargar la película para editar.'),
-          'Error'
-        );
+      error: () => {
         this.limpiarQueryId();
       },
     });

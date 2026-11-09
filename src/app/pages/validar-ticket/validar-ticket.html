@@ -47,12 +47,14 @@
               </label>
             </div>
 
-            <div *ngIf="error" class="alert alert-danger py-2 small">{{ error }}</div>
+            @if (error) {
+              <div class="alert alert-danger py-2 small">{{ error }}</div>
+            }
 
             <button
               type="submit"
               class="btn btn-primary w-100"
-              [disabled]="form.invalid || validando">
+              [disabled]="validando">
               {{ validando ? 'Validando...' : 'Validar ticket' }}
             </button>
           </form>

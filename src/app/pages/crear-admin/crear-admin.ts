@@ -15,6 +15,7 @@ import { UsuarioService } from '../../services/usuario';
 import { RegistroRequest, TipoUsuario } from '../../models/auth';
 import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
 import { refreshView } from '../../utils/refresh-view';
 import {
   CODIGO_AREA_PATTERN,
@@ -96,12 +97,14 @@ export class CrearAdminComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   passwordsNoCoinciden(): boolean {
-    return this.form.hasError('passwordsNoCoinciden') && !!this.form.get('confirmPassword')?.touched;
+    return (
+      this.form.hasError('passwordsNoCoinciden') &&
+      (!!this.form.get('confirmPassword')?.touched || !!this.form.get('confirmPassword')?.dirty)
+    );
   }
 
   onCampoBlur(): void {
@@ -130,8 +133,12 @@ export class CrearAdminComponent {
     refreshView(this.cdr);
 
     forkJoin({
-      admins: this.usuarioService.listarPorRol('ADMINISTRADOR').pipe(catchError(() => of([] as Usuario[]))),
-      supers: this.usuarioService.listarPorRol('SUPERADMIN').pipe(catchError(() => of([] as Usuario[]))),
+      admins: this.usuarioService
+        .listarPorRol('ADMINISTRADOR', { skipErrorToast: true })
+        .pipe(catchError(() => of([] as Usuario[]))),
+      supers: this.usuarioService
+        .listarPorRol('SUPERADMIN', { skipErrorToast: true })
+        .pipe(catchError(() => of([] as Usuario[]))),
     }).subscribe({
       next: ({ admins, supers }) => {
         this.administradores = [...supers, ...admins].sort((a, b) =>
@@ -156,13 +163,15 @@ export class CrearAdminComponent {
   }
 
   onSubmit(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      refreshView(this.cdr);
       return;
     }
 
     this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
     refreshView(this.cdr);
 
     const { confirmPassword: _, codigoArea, numeroLocal, ...valores } = this.form.getRawValue();
