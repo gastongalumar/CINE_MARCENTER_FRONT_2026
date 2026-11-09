@@ -26,7 +26,7 @@ export class UsuarioService {
 
   /** GET /api/usuarios/rol/{rol} */
   listarPorRol(
-    rol: 'ADMINISTRADOR' | 'CLIENTE',
+    rol: 'ADMINISTRADOR' | 'SUPERADMIN' | 'CLIENTE',
     opciones?: { skipErrorToast?: boolean }
   ): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(`${this.apiUrl}/rol/${rol}`, {

@@ -32,12 +32,18 @@
           <h3 class="h5 mb-3">{{ nombreVisible() }}</h3>
 
           <span class="badge role-badge"
-            [class.badge-admin]="user()?.tipo === 'ADMINISTRADOR'"
+            [class.badge-admin]="user()?.tipo === 'ADMINISTRADOR' || user()?.tipo === 'SUPERADMIN'"
             [class.badge-cliente]="user()?.tipo === 'CLIENTE'">
             <span class="material-icons align-middle me-1">
-              {{ user()?.tipo === 'ADMINISTRADOR' ? 'admin_panel_settings' : 'person' }}
+              {{ user()?.tipo === 'CLIENTE' ? 'person' : 'admin_panel_settings' }}
             </span>
-            {{ user()?.tipo === 'ADMINISTRADOR' ? 'Administrador' : 'Cliente' }}
+            {{
+              user()?.tipo === 'SUPERADMIN'
+                ? 'SuperAdmin'
+                : user()?.tipo === 'ADMINISTRADOR'
+                  ? 'Administrador'
+                  : 'Cliente'
+            }}
           </span>
 
           <div class="foto-actions mt-3 d-flex flex-column gap-2">

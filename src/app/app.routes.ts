@@ -8,7 +8,7 @@ import { roleGuard } from './guards/role';
  *
  * Todas las features se cargan de forma diferida (`loadComponent`) para no
  * penalizar el bundle inicial. Las rutas `/admin/**` exigen rol
- * ADMINISTRADOR mediante `roleGuard`.
+ * ADMINISTRADOR o SUPERADMIN mediante `roleGuard`.
  */
 export const routes: Routes = [
     // ---------------------------------------------------------------- públicas
@@ -124,7 +124,7 @@ export const routes: Routes = [
         path: 'admin',
         title: 'Panel de administración | Cinemacenter',
         loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.DashboardComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/peliculas/listado',
@@ -133,14 +133,14 @@ export const routes: Routes = [
             import('./components/listado-peliculas/listado-peliculas').then(
                 (m) => m.ListadoPeliculasComponent
             ),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/peliculas',
         title: 'Gestión de películas | Cinemacenter',
         loadComponent: () =>
             import('./pages/peliculas/peliculas').then((m) => m.PeliculasComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/funciones/listado',
@@ -149,60 +149,60 @@ export const routes: Routes = [
             import('./components/listado-funciones/listado-funciones').then(
                 (m) => m.ListadoFuncionesComponent
             ),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/funciones',
         title: 'Gestión de funciones | Cinemacenter',
         loadComponent: () =>
             import('./pages/funciones/funciones').then((m) => m.FuncionesComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/salas/listado',
         title: 'Listado de salas | Cinemacenter',
         loadComponent: () =>
             import('./components/listado-salas/listado-salas').then((m) => m.ListadoSalasComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/salas',
         title: 'Gestión de salas | Cinemacenter',
         loadComponent: () => import('./pages/salas/salas').then((m) => m.SalasComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/usuarios',
         title: 'Gestión de usuarios | Cinemacenter',
         loadComponent: () => import('./pages/usuarios/usuarios').then((m) => m.UsuariosComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/validar-ticket',
         title: 'Validar ticket | Cinemacenter',
         loadComponent: () =>
             import('./pages/validar-ticket/validar-ticket').then((m) => m.ValidarTicketComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/crear-admin',
         title: 'Crear administrador | Cinemacenter',
         loadComponent: () =>
             import('./pages/crear-admin/crear-admin').then((m) => m.CrearAdminComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('SUPERADMIN')],
     },
     {
         path: 'admin/tema',
         title: 'Personalizar tema | Cinemacenter',
         loadComponent: () => import('./pages/tema/tema').then((m) => m.TemaComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
         path: 'admin/estadisticas',
         title: 'Estadísticas | Cinemacenter',
         loadComponent: () =>
             import('./pages/estadisticas/estadisticas').then((m) => m.EstadisticasComponent),
-        canActivate: [authGuard, roleGuard('ADMINISTRADOR')],
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
 
     // --------------------------------------------------------- redirecciones
