@@ -20,7 +20,6 @@ export class HeaderComponent implements OnInit {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   tema$: Observable<Customizacion | null>;
-  isLightTheme = false;
   logoUnavailable = false;
 
   /** URL absoluta de la foto de perfil, o null. */
@@ -40,20 +39,18 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Limpiar resto del antiguo toggle claro/oscuro (localStorage + clase)
+    try {
+      localStorage.removeItem('app-theme');
+      document.body.classList.remove('light-theme');
+    } catch (e) { /* no bloquear si hay error */ }
+
     this.tema$.subscribe(tema => {
       if (tema?.logoUrl) {
         this.logoUnavailable = false;
       }
     });
     this.customizacionService.obtenerTema().subscribe();
-    // Inicializar tema desde localStorage
-    try {
-      const t = localStorage.getItem('app-theme');
-      if (t === 'light') {
-        document.body.classList.add('light-theme');
-        this.isLightTheme = true;
-      }
-    } catch (e) { /* no bloquear si hay error */ }
   }
 
   onLogoError(): void {
@@ -75,20 +72,5 @@ export class HeaderComponent implements OnInit {
         this.authService.logout();
         this.router.navigate(['/cartelera']);
       });
-  }
-
-  toggleTheme(): void {
-    try {
-      this.isLightTheme = !this.isLightTheme;
-      if (this.isLightTheme) {
-        document.body.classList.add('light-theme');
-        localStorage.setItem('app-theme', 'light');
-      } else {
-        document.body.classList.remove('light-theme');
-        localStorage.setItem('app-theme', 'dark');
-      }
-    } catch (e) {
-      console.warn('toggleTheme error', e);
-    }
   }
 }

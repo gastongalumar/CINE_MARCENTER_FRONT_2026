@@ -22,7 +22,7 @@ import { distinctUntilChanged, map } from 'rxjs';
 import { SalaService } from '../../services/sala';
 import { Sala, SalaRequest } from '../../models/sala';
 import { getErrorMessage } from '../../utils/api-error';
-import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
+import { aplicarErroresDeCampos, esControlInvalido, limpiarErroresDeCampos } from '../../utils/form-error';
 
 /** Capacidad total de la sala ≤ 320 butacas (CapacidadSalaValidator del backend). */
 function capacidadValida(group: AbstractControl): ValidationErrors | null {
@@ -145,8 +145,7 @@ export class SalasComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && (control.touched || control.dirty);
+    return esControlInvalido(this.form.get(campo));
   }
 
   // ------------------------------------------------------------------ privados
@@ -173,11 +172,7 @@ export class SalasComponent {
 
     this.salaService.obtenerPorId(id).subscribe({
       next: (sala) => this.editar(sala),
-      error: (error) => {
-        this.toastr.error(
-          getErrorMessage(error, 'No se pudo cargar la sala para editar.'),
-          'Error'
-        );
+      error: () => {
         this.limpiarQueryId();
       },
     });

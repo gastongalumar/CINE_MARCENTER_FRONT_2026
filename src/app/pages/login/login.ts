@@ -7,6 +7,8 @@ import { CustomizacionService } from '../../services/customizacion';
 import { Customizacion } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
 import { autorizarButacas, peliculaIdDesdeButacasUrl } from '../../utils/butacas-access';
+import { esControlInvalido } from '../../utils/form-error';
+import { getErrorMessage } from '../../utils/api-error';
 
 @Component({
   selector: 'app-login',
@@ -84,8 +86,7 @@ export class LoginComponent {
   }
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   onCampoBlur(): void {
@@ -126,12 +127,14 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
+    this.loginError = '';
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.cdr.markForCheck();
       return;
     }
 
     this.loading = true;
-    this.loginError = '';
     this.cdr.markForCheck();
 
     const credentials = this.form.getRawValue();
@@ -146,11 +149,10 @@ export class LoginComponent {
           this.router.navigateByUrl(this.returnUrl);
         }
       },
-      error: (error) => {
+      error: (error: unknown) => {
         this.loading = false;
-        this.loginError = error?.message || 'No se pudo iniciar sesión.';
+        this.loginError = getErrorMessage(error, 'No se pudo iniciar sesión.');
         this.cdr.markForCheck();
-        console.error('Login error:', error);
       }
     });
   }

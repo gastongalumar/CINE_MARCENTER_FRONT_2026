@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ReservaService } from '../../services/reserva';
 import { ValidacionTicketResponse } from '../../models/validacion-ticket';
 import { getErrorMessage } from '../../utils/api-error';
+import { esControlInvalido } from '../../utils/form-error';
 
 @Component({
   selector: 'app-validar-ticket',
@@ -34,8 +35,7 @@ export class ValidarTicketComponent {
   ) {}
 
   esInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!control && control.invalid && control.touched;
+    return esControlInvalido(this.form.get(campo));
   }
 
   onCampoBlur(): void {
@@ -43,7 +43,11 @@ export class ValidarTicketComponent {
   }
 
   validar(): void {
+    this.error = '';
+    this.resultado = null;
     if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -51,8 +55,6 @@ export class ValidarTicketComponent {
     const marcarUsado = this.form.controls.marcarUsado.value;
 
     this.validando = true;
-    this.error = '';
-    this.resultado = null;
     this.form.disable({ emitEvent: false });
     this.cdr.markForCheck();
 

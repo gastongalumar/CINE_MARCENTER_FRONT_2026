@@ -139,13 +139,12 @@ export class SeleccionAsientosComponent implements OnDestroy {
         this.loadingFunciones = false;
         refreshView(this.cdr);
       },
-      error: (error: unknown) => {
+      error: () => {
         this.funciones = [];
         this.funcionesPorDia = [];
         this.diaSeleccionado = '';
         this.mostrandoOtrosDias = false;
         this.loadingFunciones = false;
-        this.toastr.error(getErrorMessage(error, 'No se pudieron cargar las funciones.'), 'Error');
         refreshView(this.cdr);
       }
     });
@@ -454,11 +453,8 @@ export class SeleccionAsientosComponent implements OnDestroy {
                 this.toastr.info('Redirigiendo a Mercado Pago…', 'Pago');
                 window.location.href = initPoint;
               },
-              error: (error: unknown) => {
-                this.toastr.error(
-                  getErrorMessage(error, 'No se pudo iniciar el pago con Mercado Pago.'),
-                  'Error'
-                );
+              error: () => {
+                /* El interceptor muestra el toast de error HTTP. */
               },
             });
             return;
@@ -474,12 +470,13 @@ export class SeleccionAsientosComponent implements OnDestroy {
         },
         error: (error: unknown) => {
           const esTimeout = (error as { name?: string })?.name === 'TimeoutError';
-          this.toastr.error(
-            esTimeout
-              ? 'El servidor no respondió. Verifique que el backend esté en ejecución (puerto 8080).'
-              : getErrorMessage(error, 'No se pudo confirmar la compra.'),
-            'Error'
-          );
+          if (esTimeout) {
+            this.toastr.error(
+              'El servidor no respondió. Verifique que el backend esté en ejecución (puerto 8080).',
+              'Error'
+            );
+          }
+          /* Los errores HTTP los muestra el interceptor. */
         },
       });
   }

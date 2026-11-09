@@ -5,6 +5,7 @@ import { tap, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Customizacion } from '../models/customizacion';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { skipErrorToastContext } from '../utils/http.context';
 
 @Injectable({
   providedIn: 'root'
@@ -25,15 +26,19 @@ export class CustomizacionService {
   }
 
   guardarTema(customizacion: Customizacion): Observable<Customizacion> {
-    return this.http.post<Customizacion>(this.apiUrl, customizacion).pipe(
-      tap(tema => this.actualizarTema(tema))
-    );
+    return this.http
+      .post<Customizacion>(this.apiUrl, customizacion, {
+        context: skipErrorToastContext(),
+      })
+      .pipe(tap((tema) => this.actualizarTema(tema)));
   }
 
   subirLogo(file: File): Observable<Customizacion> {
     const formData = new FormData();
     formData.append('logo', file);
-    return this.http.post<any>(`${this.apiUrl}/logo`, formData).pipe(
+    return this.http.post<any>(`${this.apiUrl}/logo`, formData, {
+      context: skipErrorToastContext(),
+    }).pipe(
       map(res => {
         if (res && res.logoUrl !== undefined) {
           return res as Customizacion;
@@ -49,7 +54,9 @@ export class CustomizacionService {
   subirFondo(file: File): Observable<Customizacion> {
     const formData = new FormData();
     formData.append('fondo', file);
-    return this.http.post<any>(`${this.apiUrl}/fondo`, formData).pipe(
+    return this.http.post<any>(`${this.apiUrl}/fondo`, formData, {
+      context: skipErrorToastContext(),
+    }).pipe(
       map(res => {
         if (res && res.fondoUrl !== undefined) {
           return res as Customizacion;
@@ -63,11 +70,27 @@ export class CustomizacionService {
   }
 
   eliminarLogo(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/logo`);
+    return this.http.delete(`${this.apiUrl}/logo`).pipe(
+      tap(() => {
+        const current = this.temaSubject.value;
+        if (!current) return;
+        const updated = { ...current, logoUrl: '' };
+        this.temaSubject.next(updated);
+        this.aplicarTema(updated);
+      })
+    );
   }
 
   eliminarFondo(): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/fondo`);
+    return this.http.delete(`${this.apiUrl}/fondo`).pipe(
+      tap(() => {
+        const current = this.temaSubject.value;
+        if (!current) return;
+        const updated = { ...current, fondoUrl: '' };
+        this.temaSubject.next(updated);
+        this.aplicarTema(updated);
+      })
+    );
   }
 
   private actualizarTema(tema: Customizacion): void {

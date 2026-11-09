@@ -66,7 +66,7 @@ export class ListadoFuncionesComponent {
     this.cargando.set(true);
     this.errorCarga.set('');
 
-    this.funcionService.listarTodas().subscribe({
+    this.funcionService.listarTodas({ skipErrorToast: true }).subscribe({
       next: (funciones) => {
         this.funciones.set(funciones);
         this.ajustarPagina();

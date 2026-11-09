@@ -67,11 +67,15 @@
           </div>
         </div>
 
-        <div *ngIf="loginSuccess" class="alert alert-success py-2 small mb-3">{{ loginSuccess }}</div>
-        <div *ngIf="loginError" class="alert alert-danger py-2 small mb-3">{{ loginError }}</div>
+        @if (loginSuccess) {
+          <div class="alert alert-success py-2 small mb-3">{{ loginSuccess }}</div>
+        }
+        @if (loginError) {
+          <div class="alert alert-danger py-2 small mb-3">{{ loginError }}</div>
+        }
 
         <div class="d-grid mb-3">
-          <button type="submit" class="btn btn-primary py-2 btn-login-submit" [disabled]="form.invalid || loading">
+          <button type="submit" class="btn btn-primary py-2 btn-login-submit" [disabled]="loading">
             {{ loading ? 'Iniciando...' : 'Ingresar' }} <span class="material-icons font-icon-sm">login</span>
           </button>
         </div>
