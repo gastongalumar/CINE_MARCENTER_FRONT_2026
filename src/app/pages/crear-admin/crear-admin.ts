@@ -16,12 +16,22 @@ import { RegistroRequest, TipoUsuario } from '../../models/auth';
 import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
+import {
+  CODIGO_AREA_PATTERN,
+  NUMERO_LOCAL_PATTERN,
+  armarTelefonoLocal,
+  telefonoLocalCompleto,
+} from '../../utils/telefono';
 
 function passwordsIguales(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
   if (!password || !confirm) return null;
   return password === confirm ? null : { passwordsNoCoinciden: true };
+}
+
+function crearAdminExtras(group: AbstractControl): ValidationErrors | null {
+  return passwordsIguales(group) ?? telefonoLocalCompleto(group);
 }
 
 @Component({
@@ -41,12 +51,13 @@ export class CrearAdminComponent {
       nombre: ['', Validators.required],
       apellido: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      telefono: [''],
+      codigoArea: ['', Validators.pattern(CODIGO_AREA_PATTERN)],
+      numeroLocal: ['', Validators.pattern(NUMERO_LOCAL_PATTERN)],
       tipo: ['ADMINISTRADOR' as TipoUsuario, Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
     },
-    { validators: passwordsIguales }
+    { validators: crearAdminExtras }
   );
 
   loading = false;
@@ -154,12 +165,12 @@ export class CrearAdminComponent {
     this.successMessage = '';
     refreshView(this.cdr);
 
-    const { confirmPassword: _, ...valores } = this.form.getRawValue();
+    const { confirmPassword: _, codigoArea, numeroLocal, ...valores } = this.form.getRawValue();
     const tipo = valores.tipo === 'SUPERADMIN' ? 'SUPERADMIN' : 'ADMINISTRADOR';
     const adminData: RegistroRequest = {
       ...valores,
       tipo,
-      telefono: valores.telefono?.trim() || undefined,
+      telefono: armarTelefonoLocal(codigoArea, numeroLocal),
     };
 
     this.authService.registrarAdmin(adminData).subscribe({
@@ -170,7 +181,8 @@ export class CrearAdminComponent {
           nombre: '',
           apellido: '',
           email: '',
-          telefono: '',
+          codigoArea: '',
+          numeroLocal: '',
           tipo: 'ADMINISTRADOR',
           password: '',
           confirmPassword: '',

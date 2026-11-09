@@ -20,6 +20,8 @@ export interface Usuario {
 export interface ActualizarNombreUsuarioRequest {
   nombre: string;
   apellido: string;
+  /** Nacional 10 dígitos; omitir o vacío para borrarlo. */
+  telefono?: string | null;
 }
 
 /** Cuerpo genérico de las respuestas del backend: { "message": "..." } */

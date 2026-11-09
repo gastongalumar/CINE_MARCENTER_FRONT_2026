@@ -69,16 +69,38 @@
           }
         </div>
 
-        <div class="mb-3">
-          <label for="telefono" class="form-label small">Teléfono (Opcional)</label>
-          <div class="input-group">
-            <span class="input-group-text"><span class="material-icons font-icon-sm">phone</span></span>
+        <div class="row g-3 mb-3">
+          <div class="col-4">
+            <label for="codigoArea" class="form-label small">Cód. área</label>
             <input
               type="tel"
               class="form-control"
-              id="telefono"
-              formControlName="telefono"
-              placeholder="+54 9 11 1234-5678" />
+              id="codigoArea"
+              formControlName="codigoArea"
+              placeholder="0223"
+              inputmode="numeric"
+              [class.is-invalid]="esInvalido('codigoArea')" />
+            @if (esInvalido('codigoArea')) {
+              <div class="invalid-feedback d-block">Ej.: 0223</div>
+            }
+          </div>
+          <div class="col-8">
+            <label for="numeroLocal" class="form-label small">Teléfono (sin 15)</label>
+            <div class="input-group">
+              <span class="input-group-text"><span class="material-icons font-icon-sm">phone</span></span>
+              <input
+                type="tel"
+                class="form-control"
+                id="numeroLocal"
+                formControlName="numeroLocal"
+                placeholder="5678912"
+                inputmode="numeric"
+                [class.is-invalid]="esInvalido('numeroLocal')" />
+            </div>
+            @if (esInvalido('numeroLocal')) {
+              <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+            }
+            <small class="text-muted">Opcional. Ej.: 0223 / 5678912</small>
           </div>
         </div>
 

@@ -76,14 +76,37 @@
                 <small class="form-hint">SuperAdmin puede crear y eliminar otros admins</small>
               </div>
 
-              <div class="col-12">
-                <label class="form-label" for="telefono">Teléfono</label>
+              <div class="col-md-4">
+                <label class="form-label" for="codigoArea">Cód. área</label>
                 <input
                   type="tel"
                   class="form-control"
-                  id="telefono"
-                  formControlName="telefono"
-                  placeholder="+54 9 11 1234-5678" />
+                  id="codigoArea"
+                  formControlName="codigoArea"
+                  placeholder="0223"
+                  inputmode="numeric"
+                  (blur)="onCampoBlur()"
+                  [class.is-invalid]="esInvalido('codigoArea')" />
+                @if (esInvalido('codigoArea')) {
+                  <div class="invalid-feedback d-block">Ej.: 0223</div>
+                }
+              </div>
+
+              <div class="col-md-8">
+                <label class="form-label" for="numeroLocal">Teléfono (sin 15)</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="numeroLocal"
+                  formControlName="numeroLocal"
+                  placeholder="5678912"
+                  inputmode="numeric"
+                  (blur)="onCampoBlur()"
+                  [class.is-invalid]="esInvalido('numeroLocal')" />
+                @if (esInvalido('numeroLocal')) {
+                  <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+                }
+                <small class="form-hint">Ej.: 0223 / 5678912</small>
               </div>
 
               <div class="col-md-6">
