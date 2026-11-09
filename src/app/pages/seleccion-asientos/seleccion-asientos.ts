@@ -45,7 +45,7 @@ export class SeleccionAsientosComponent implements OnDestroy {
   private readonly initLoad = afterNextRender(() => {
     const id = this.route.snapshot.paramMap.get('id');
     this.peliculaId = id ? Number(id) : 0;
-    this.esAdmin = this.authService.getTipoUsuario() === 'ADMINISTRADOR';
+    this.esAdmin = this.authService.isAdmin();
     this.cargarFunciones();
   });
 
@@ -401,7 +401,7 @@ export class SeleccionAsientosComponent implements OnDestroy {
       return;
     }
 
-    if (tipo === 'ADMINISTRADOR') {
+    if (tipo === 'ADMINISTRADOR' || tipo === 'SUPERADMIN') {
       this.toastr.warning(
         'Para comprar entradas debés iniciar sesión con una cuenta de cliente.',
         'Acceso restringido'

@@ -3,7 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AuthResponse, LoginRequest, RegistroRequest, TipoUsuario } from '../models/auth';
+import {
+  AuthResponse,
+  LoginRequest,
+  RegistroRequest,
+  TipoUsuario,
+  esStaff,
+  parseTipoUsuario,
+} from '../models/auth';
 import { decodeJwtPayload, isJwtExpired } from '../utils/jwt';
 import { skipErrorToastContext } from '../utils/http.context';
 
@@ -19,7 +26,7 @@ const FOTO_PERFIL_STORAGE_KEY = 'foto_perfil_url';
  * - Persiste el JWT en `sessionStorage` para aislar las sesiones por pestaña.
  * - Decodifica el payload para conocer el rol (`tipo`) del usuario.
  * - Expone el estado de sesión con **signals** (`currentUser`, `token`,
- *   `isAuthenticated`, `isAdmin`, `isCliente`).
+ *   `isAuthenticated`, `isAdmin`, `isSuperAdmin`, `isCliente`).
  */
 @Injectable({
   providedIn: 'root'
@@ -48,8 +55,11 @@ export class AuthService {
     return !!token && !isJwtExpired(token);
   });
 
-  /** true si el usuario autenticado es administrador. */
-  readonly isAdmin = computed(() => this.role() === 'ADMINISTRADOR');
+  /** true si es ADMINISTRADOR o SUPERADMIN (acceso al panel). */
+  readonly isAdmin = computed(() => esStaff(this.role()));
+
+  /** true si es SUPERADMIN (gestión de staff). */
+  readonly isSuperAdmin = computed(() => this.role() === 'SUPERADMIN');
 
   /** true si el usuario autenticado es cliente. */
   readonly isCliente = computed(() => this.role() === 'CLIENTE');
@@ -73,7 +83,7 @@ export class AuthService {
     }
 
     const claims = decodeJwtPayload(token);
-    const tipo = claims?.tipo === 'ADMINISTRADOR' ? 'ADMINISTRADOR' : 'CLIENTE';
+    const tipo = parseTipoUsuario(claims?.tipo);
     const nombreCompleto =
       (claims?.nombreCompleto || '').trim() ||
       `${claims?.nombre ?? ''} ${claims?.apellido ?? ''}`.trim() ||
@@ -111,8 +121,8 @@ export class AuthService {
   }
 
   /**
-   * Crea un administrador. `POST /api/auth/registro-admin`.
-   * NO cambia la sesión actual (quien lo crea sigue siendo el que está conectado).
+   * Crea un administrador o superadmin. `POST /api/auth/registro-admin`.
+   * Solo SUPERADMIN. NO cambia la sesión actual.
    */
   registrarAdmin(data: RegistroRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/registro-admin`, data, {
@@ -188,9 +198,12 @@ export class AuthService {
     if (this.isBrowser && response?.token) {
       sessionStorage.setItem(TOKEN_STORAGE_KEY, response.token);
     }
-    this._token.set(response?.token ?? null);
-    this._currentUser.set(response ?? null);
-    this.guardarFotoStorage(response?.fotoPerfilUrl || null);
+    const normalizado: AuthResponse | null = response
+      ? { ...response, tipo: parseTipoUsuario(response.tipo) }
+      : null;
+    this._token.set(normalizado?.token ?? null);
+    this._currentUser.set(normalizado);
+    this.guardarFotoStorage(normalizado?.fotoPerfilUrl || null);
   }
 
   private guardarFotoStorage(fotoPerfilUrl: string | null): void {

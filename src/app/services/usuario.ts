@@ -32,6 +32,8 @@ export class UsuarioService {
     return this.http.get<Usuario[]>(`${this.apiUrl}/rol/${rol}`, {
       context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
     });
+  listarPorRol(rol: 'ADMINISTRADOR' | 'SUPERADMIN' | 'CLIENTE'): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/rol/${rol}`);
   }
 
   /** GET /api/usuarios/buscar?nombre= */

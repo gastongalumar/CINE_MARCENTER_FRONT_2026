@@ -8,9 +8,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../services/auth';
 import { UsuarioService } from '../../services/usuario';
-import { RegistroRequest } from '../../models/auth';
+import { RegistroRequest, TipoUsuario } from '../../models/auth';
 import { Usuario } from '../../models/usuario';
 import { getErrorMessage } from '../../utils/api-error';
 import { esControlInvalido } from '../../utils/form-error';
@@ -41,6 +43,7 @@ export class CrearAdminComponent {
       apellido: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       telefono: [''],
+      tipo: ['ADMINISTRADOR' as TipoUsuario, Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
     },
@@ -107,6 +110,12 @@ export class CrearAdminComponent {
     refreshView(this.cdr);
   }
 
+  etiquetaRol(tipo: string): string {
+    if (tipo === 'SUPERADMIN') return 'SuperAdmin';
+    if (tipo === 'ADMINISTRADOR') return 'Administrador';
+    return tipo;
+  }
+
   cargarAdministradores(): void {
     this.cargandoLista = true;
     this.errorCarga = '';
@@ -115,6 +124,14 @@ export class CrearAdminComponent {
     this.usuarioService.listarPorRol('ADMINISTRADOR', { skipErrorToast: true }).subscribe({
       next: (data) => {
         this.administradores = data;
+    forkJoin({
+      admins: this.usuarioService.listarPorRol('ADMINISTRADOR').pipe(catchError(() => of([] as Usuario[]))),
+      supers: this.usuarioService.listarPorRol('SUPERADMIN').pipe(catchError(() => of([] as Usuario[]))),
+    }).subscribe({
+      next: ({ admins, supers }) => {
+        this.administradores = [...supers, ...admins].sort((a, b) =>
+          `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, 'es')
+        );
         this.pagina = 1;
         this.cargandoLista = false;
         refreshView(this.cdr);
@@ -123,7 +140,7 @@ export class CrearAdminComponent {
         this.errorCarga = getErrorMessage(error, 'No se pudo cargar el listado de administradores.');
         this.cargandoLista = false;
         refreshView(this.cdr);
-      }
+      },
     });
   }
 
@@ -146,20 +163,23 @@ export class CrearAdminComponent {
     refreshView(this.cdr);
 
     const { confirmPassword: _, ...valores } = this.form.getRawValue();
+    const tipo = valores.tipo === 'SUPERADMIN' ? 'SUPERADMIN' : 'ADMINISTRADOR';
     const adminData: RegistroRequest = {
       ...valores,
+      tipo,
       telefono: valores.telefono?.trim() || undefined,
     };
 
     this.authService.registrarAdmin(adminData).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = `Administrador ${adminData.nombre} ${adminData.apellido} creado exitosamente.`;
+        this.successMessage = `${this.etiquetaRol(tipo)} ${adminData.nombre} ${adminData.apellido} creado exitosamente.`;
         this.form.reset({
           nombre: '',
           apellido: '',
           email: '',
           telefono: '',
+          tipo: 'ADMINISTRADOR',
           password: '',
           confirmPassword: '',
         });
@@ -174,12 +194,12 @@ export class CrearAdminComponent {
         if (status === 409) {
           this.errorMessage = 'Ya existe un usuario con este email';
         } else if (status === 403) {
-          this.errorMessage = 'No tienes permiso para crear administradores';
+          this.errorMessage = 'Solo un SuperAdmin puede crear administradores';
         } else {
           this.errorMessage = getErrorMessage(error, 'Error al crear el administrador');
         }
         refreshView(this.cdr);
-      }
+      },
     });
   }
 }

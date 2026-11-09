@@ -68,6 +68,15 @@
               </div>
 
               <div class="col-12">
+                <label class="form-label" for="tipo">Rol *</label>
+                <select class="form-select" id="tipo" formControlName="tipo" (blur)="onCampoBlur()">
+                  <option value="ADMINISTRADOR">Administrador</option>
+                  <option value="SUPERADMIN">SuperAdmin</option>
+                </select>
+                <small class="form-hint">SuperAdmin puede crear y eliminar otros admins</small>
+              </div>
+
+              <div class="col-12">
                 <label class="form-label" for="telefono">Teléfono</label>
                 <input
                   type="tel"
@@ -143,7 +152,7 @@
             <div class="d-flex gap-2 mt-4">
               <button type="submit" class="btn btn-primary" [disabled]="loading">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ loading ? 'Creando...' : 'Crear Administrador' }}
+                {{ loading ? 'Creando...' : (form.controls.tipo.value === 'SUPERADMIN' ? 'Crear SuperAdmin' : 'Crear Administrador') }}
                 <span class="material-icons ms-2">person_add</span>
               </button>
               <button type="button" class="btn btn-secondary" routerLink="/admin">Cancelar</button>
@@ -179,6 +188,7 @@
                   <tr>
                     <th>Nombre</th>
                     <th>Email</th>
+                    <th>Rol</th>
                     <th>Teléfono</th>
                     <th>Estado</th>
                     <th>Registro</th>
@@ -188,6 +198,13 @@
                   <tr *ngFor="let admin of administradoresPagina">
                     <td>{{ admin.nombre }} {{ admin.apellido }}</td>
                     <td>{{ admin.email }}</td>
+                    <td>
+                      <span class="badge"
+                        [class.bg-danger]="admin.tipo === 'SUPERADMIN'"
+                        [class.bg-warning]="admin.tipo === 'ADMINISTRADOR'">
+                        {{ etiquetaRol(admin.tipo) }}
+                      </span>
+                    </td>
                     <td>{{ admin.telefono || '—' }}</td>
                     <td>
                       <span class="badge"
