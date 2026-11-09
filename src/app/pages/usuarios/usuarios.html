@@ -40,8 +40,13 @@
 
       <div class="alert alert-info py-2 small mb-3">
         <span class="material-icons align-middle me-1">info</span>
-        Podés dar de baja usuarios, reactivarlos y eliminar administradores
-        (excepto <code>admin@mail.com</code>).
+        Podés dar de baja o reactivar clientes.
+        @if (authService.isSuperAdmin()) {
+          Como SuperAdmin también podés eliminar administradores y superadmins
+          (excepto <code>admin@mail.com</code>).
+        } @else {
+          Solo un SuperAdmin puede crear o eliminar cuentas de staff.
+        }
       </div>
 
       @if (cargando()) {
@@ -84,8 +89,9 @@
                     <span
                       class="badge"
                       [class.bg-info]="usuario.tipo === 'CLIENTE'"
-                      [class.bg-warning]="usuario.tipo === 'ADMINISTRADOR'">
-                      {{ usuario.tipo }}
+                      [class.bg-warning]="usuario.tipo === 'ADMINISTRADOR'"
+                      [class.bg-danger]="usuario.tipo === 'SUPERADMIN'">
+                      {{ etiquetaRol(usuario.tipo) }}
                     </span>
                   </td>
                   <td>
@@ -120,7 +126,7 @@
                       <button
                         type="button"
                         class="btn btn-sm btn-outline-danger"
-                        title="Eliminar administrador"
+                        title="Eliminar staff"
                         (click)="eliminarAdmin(usuario)">
                         <span class="material-icons">delete</span>
                       </button>

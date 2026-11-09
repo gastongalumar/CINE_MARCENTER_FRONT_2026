@@ -134,7 +134,7 @@ export class LoginComponent {
       next: (response) => {
         this.loading = false;
         this.cdr.markForCheck();
-        if (response.tipo === 'ADMINISTRADOR') {
+        if (response.tipo === 'ADMINISTRADOR' || response.tipo === 'SUPERADMIN') {
           this.router.navigate(['/admin']);
         } else {
           this.autorizarSiReturnButacas();

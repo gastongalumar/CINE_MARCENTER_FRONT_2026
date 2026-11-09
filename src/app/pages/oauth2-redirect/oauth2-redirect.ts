@@ -48,7 +48,8 @@ export class OAuth2RedirectComponent implements OnInit {
     }
 
     const claims = decodeJwtPayload(token);
-    const destino = claims?.tipo === 'ADMINISTRADOR' ? '/admin' : '/cartelera';
+    const destino =
+      claims?.tipo === 'ADMINISTRADOR' || claims?.tipo === 'SUPERADMIN' ? '/admin' : '/cartelera';
 
     // Quita el token de la barra de direcciones antes de recargar.
     window.history.replaceState({}, '', '/oauth2/redirect');
