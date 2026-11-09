@@ -15,7 +15,7 @@ export class ContactoComponent {
     nombre: 'Cine Marcenter',
     direccion: 'Av. Colón 3450, Mar del Plata',
     telefono: '(0223) 499-1200',
-    email: 'cines@cinespaseoaldrey.com.ar',
+    email: 'contacto@cinemarcenter.com.ar',
     horarios: 'Todos los días de 12:00 a 00:30 hs',
     redes: '@cinemarcenter',
   };

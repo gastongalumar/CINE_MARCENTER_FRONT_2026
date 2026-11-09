@@ -36,6 +36,7 @@ export class PeliculaDetalleComponent {
 
   readonly imageService = inject(ImageService);
   readonly etiquetaGenero = etiquetaGenero;
+  readonly esAdmin = this.authService.isAdmin;
 
   pelicula: Pelicula | null = null;
   cargando = true;
@@ -111,6 +112,14 @@ export class PeliculaDetalleComponent {
     this.trailerReproduciendo = false;
     this.trailerUrl = null;
     refreshView(this.cdr);
+  }
+
+  alternarTrailer(): void {
+    if (this.trailerReproduciendo) {
+      this.detenerTrailer();
+    } else {
+      this.iniciarTrailer();
+    }
   }
 
   volver(): void {

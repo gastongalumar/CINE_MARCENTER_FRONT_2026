@@ -460,22 +460,34 @@ a:hover:not(.btn) {
     color: #881337 !important;
 }
 
-/* Scrollbar personalizada */
-::-webkit-scrollbar {
+/* Scrollbar del documento oculto (scroll sigue con rueda/touch/teclado) */
+html,
+body {
+    scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Scrollbars internos (tablas, paneles, strips) */
+*:not(html):not(body)::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-::-webkit-scrollbar-track {
+*:not(html):not(body)::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
 }
 
-::-webkit-scrollbar-thumb {
+*:not(html):not(body)::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+*:not(html):not(body)::-webkit-scrollbar-thumb:hover {
     background: var(--color-accent);
 }
 
