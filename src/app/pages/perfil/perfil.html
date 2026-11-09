@@ -79,23 +79,114 @@
     <!-- Detalle -->
     <div class="col-lg-8">
       <div class="card glass-card">
-        <div class="card-header bg-transparent border-bottom">
+        <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between gap-2">
           <h3 class="mb-0 h5">
             <span class="material-icons align-middle me-2">badge</span>
             Datos de la cuenta
           </h3>
+          @if (!editando()) {
+            <button type="button" class="btn btn-outline-primary btn-sm" (click)="empezarEdicion()">
+              <span class="material-icons align-middle me-1 font-icon-sm">edit</span>
+              Editar
+            </button>
+          }
         </div>
         <div class="card-body">
-          <dl class="row mb-0 detail-list">
-            <dt class="col-sm-4">Nombre completo</dt>
-            <dd class="col-sm-8">{{ nombreVisible() || '—' }}</dd>
+          @if (!editando()) {
+            <dl class="row mb-0 detail-list">
+              <dt class="col-sm-4">Nombre completo</dt>
+              <dd class="col-sm-8">{{ nombreVisible() || '—' }}</dd>
 
-            <dt class="col-sm-4">Correo electrónico</dt>
-            <dd class="col-sm-8 text-break">{{ user()?.email || perfil()?.email || '—' }}</dd>
+              <dt class="col-sm-4">Correo electrónico</dt>
+              <dd class="col-sm-8 text-break">{{ user()?.email || perfil()?.email || '—' }}</dd>
 
-            <dt class="col-sm-4">Inicio de sesión</dt>
-            <dd class="col-sm-8">{{ loginAt() | fechaApi: 'dd/MM/yyyy HH:mm' }}</dd>
-          </dl>
+              <dt class="col-sm-4">Teléfono</dt>
+              <dd class="col-sm-8">{{ telefonoVisible() }}</dd>
+
+              <dt class="col-sm-4">Inicio de sesión</dt>
+              <dd class="col-sm-8 mb-0">{{ loginAt() | fechaApi: 'dd/MM/yyyy HH:mm' }}</dd>
+            </dl>
+          } @else {
+            <dl class="row mb-4 detail-list">
+              <dt class="col-sm-4">Correo electrónico</dt>
+              <dd class="col-sm-8 text-break mb-0">{{ user()?.email || perfil()?.email || '—' }}</dd>
+            </dl>
+
+            <form [formGroup]="form" (ngSubmit)="guardarDatos()" novalidate>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="nombre">Nombre *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nombre"
+                    formControlName="nombre"
+                    [class.is-invalid]="esInvalido('nombre')" />
+                  @if (esInvalido('nombre')) {
+                    <div class="invalid-feedback d-block">El nombre es obligatorio.</div>
+                  }
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label" for="apellido">Apellido *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="apellido"
+                    formControlName="apellido"
+                    [class.is-invalid]="esInvalido('apellido')" />
+                  @if (esInvalido('apellido')) {
+                    <div class="invalid-feedback d-block">El apellido es obligatorio.</div>
+                  }
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label" for="codigoArea">Cód. área</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="codigoArea"
+                    formControlName="codigoArea"
+                    placeholder="0223"
+                    inputmode="numeric"
+                    [class.is-invalid]="esInvalido('codigoArea') || telefonoIncompleto()" />
+                </div>
+
+                <div class="col-md-8">
+                  <label class="form-label" for="numeroLocal">Teléfono (sin 15)</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="numeroLocal"
+                    formControlName="numeroLocal"
+                    placeholder="5678912"
+                    inputmode="numeric"
+                    [class.is-invalid]="esInvalido('numeroLocal') || telefonoIncompleto()" />
+                  <small class="form-hint">Opcional. Ej.: 0223 / 5678912</small>
+                  @if (telefonoIncompleto()) {
+                    <div class="invalid-feedback d-block">Completá área y número (sin 15), o dejá ambos vacíos.</div>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-4 d-flex flex-wrap gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="form.invalid || cargandoDatos()">
+                  <span *ngIf="cargandoDatos()" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ cargandoDatos() ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="cargandoDatos()"
+                  (click)="cancelarEdicion()">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          }
         </div>
       </div>
 
