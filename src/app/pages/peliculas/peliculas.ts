@@ -88,7 +88,7 @@ export class PeliculasComponent {
       genero: ['', [Validators.required]],
       fechaEstreno: ['', [Validators.required, fechaFutura]],
       fechaSalida: ['', [Validators.required, fechaFutura]],
-      duracionMinutos: [120, [Validators.required, Validators.min(1), Validators.max(600)]],
+      duracionMinutos: [120, [Validators.required, Validators.min(60), Validators.max(600)]],
       sinopsis: [this.sinopsisPorDefecto, [Validators.maxLength(2000)]],
       descripcion: ['', [Validators.maxLength(5000)]],
       director: ['', [Validators.maxLength(200)]],

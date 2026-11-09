@@ -1,9 +1,18 @@
 <div class="container py-4 ficha-page">
-  <div class="d-flex align-items-center mb-4 gap-3">
+  <div class="d-flex flex-wrap align-items-center mb-4 gap-3">
     <button type="button" class="btn btn-secondary btn-sm" (click)="volver()">
       <span class="material-icons font-icon-sm">arrow_back</span> Cartelera
     </button>
-    <h2 class="mb-0 page-title">Ficha de la película</h2>
+    <h2 class="mb-0 page-title me-auto">Ficha de la película</h2>
+    @if (esAdmin() && pelicula?.id) {
+      <a
+        class="btn btn-primary btn-sm"
+        [routerLink]="['/admin/peliculas']"
+        [queryParams]="{ id: pelicula!.id }">
+        <span class="material-icons font-icon-sm">edit</span>
+        Editar
+      </a>
+    }
   </div>
 
   @if (cargando) {
@@ -126,26 +135,33 @@
     @if (trailerYoutubeId) {
       <section class="ficha-section">
         <h3>Tráiler</h3>
-        <p class="trailer-hint">Pasá el mouse para reproducir</p>
+        <p class="trailer-hint">Hacé click para reproducir o pausar</p>
         <div
           class="trailer-frame"
-          (mouseenter)="iniciarTrailer()"
-          (mouseleave)="detenerTrailer()">
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="trailerReproduciendo ? 'Pausar tráiler' : 'Reproducir tráiler'"
+          (click)="alternarTrailer()"
+          (keydown.enter)="alternarTrailer()"
+          (keydown.space)="$event.preventDefault(); alternarTrailer()">
           @if (trailerReproduciendo && trailerUrl) {
             <iframe
               [src]="trailerUrl"
               title="Tráiler de {{ pelicula.nombre }}"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowfullscreen></iframe>
+            <span class="trailer-play trailer-play-pause">
+              <span class="material-icons">pause_circle</span>
+            </span>
           } @else {
-            <button type="button" class="trailer-preview" (click)="iniciarTrailer()" aria-label="Reproducir tráiler">
+            <div class="trailer-preview">
               @if (trailerThumbnailUrl) {
                 <img [src]="trailerThumbnailUrl" [alt]="'Tráiler de ' + pelicula.nombre" />
               }
               <span class="trailer-play">
                 <span class="material-icons">play_circle</span>
               </span>
-            </button>
+            </div>
           }
         </div>
       </section>

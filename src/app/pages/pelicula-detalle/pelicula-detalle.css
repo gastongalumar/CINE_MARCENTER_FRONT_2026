@@ -202,6 +202,7 @@
   overflow: hidden;
   background: #000;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
 }
 
 .trailer-frame iframe,
@@ -214,7 +215,7 @@
   border: 0;
 }
 
-/* Evita que el iframe robe el hover y corte la reproducción */
+/* El click lo captura el contenedor (play/pause) */
 .trailer-frame iframe {
   pointer-events: none;
 }
@@ -224,7 +225,6 @@
   margin: 0;
   border: 0;
   background: #111;
-  cursor: pointer;
 }
 
 .trailer-preview img {
@@ -246,6 +246,17 @@
   justify-content: center;
   pointer-events: none;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 55%);
+}
+
+.trailer-play-pause {
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.trailer-frame:hover .trailer-play-pause {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.28);
 }
 
 .trailer-play .material-icons {

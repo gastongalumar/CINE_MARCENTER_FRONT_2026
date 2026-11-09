@@ -5,6 +5,14 @@
       Gestión de Películas
     </h2>
     <div class="d-flex flex-wrap gap-2">
+      @if (peliculaSeleccionada(); as seleccionada) {
+        <a
+          class="btn btn-outline-primary btn-sm"
+          [routerLink]="['/pelicula', seleccionada.id]">
+          <span class="material-icons">movie</span>
+          Ver ficha
+        </a>
+      }
       <a routerLink="/admin/peliculas/listado" class="btn btn-outline-primary btn-sm">
         <span class="material-icons">list</span>
         Ver listado
@@ -77,7 +85,7 @@
                       type="number"
                       class="form-control"
                       formControlName="duracionMinutos"
-                      min="1"
+                      min="60"
                       max="600"
                       [class.is-invalid]="esInvalido('duracionMinutos')" />
                     @if (esInvalido('duracionMinutos')) {
@@ -85,7 +93,7 @@
                         @if (form.controls.duracionMinutos.errors?.['required']) {
                           La duración es obligatoria.
                         } @else if (form.controls.duracionMinutos.errors?.['min']) {
-                          La duración debe ser mayor a 0.
+                          La duración mínima es de 60 minutos (1 hora).
                         } @else if (form.controls.duracionMinutos.errors?.['max']) {
                           La duración no puede superar 600 minutos.
                         } @else {

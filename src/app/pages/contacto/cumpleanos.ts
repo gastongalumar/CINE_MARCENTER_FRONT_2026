@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./cumpleanos.css'],
 })
 export class CumpleanosComponent {
-  readonly email = 'cinemancenter@gmail.com';
+  readonly email = 'contacto@cinemarcenter.com.ar';
 
   readonly incluye = [
     {
