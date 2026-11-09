@@ -17,7 +17,10 @@ import { ReservaService } from '../../services/reserva';
 import { HoldService } from '../../services/hold.service';
 import { AuthService } from '../../services/auth';
 import { PaymentService } from '../../services/payment';
+import { CandyComboService } from '../../services/candy-combo';
+import { CodigoDescuentoService } from '../../services/codigo-descuento';
 import { Funcion } from '../../models/funcion';
+import { CandyCombo } from '../../models/candy-combo';
 import { METODOS_PAGO, MetodoPago } from '../../models/metodo-pago';
 import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
@@ -47,6 +50,7 @@ export class SeleccionAsientosComponent implements OnDestroy {
     this.peliculaId = id ? Number(id) : 0;
     this.esAdmin = this.authService.isAdmin();
     this.cargarFunciones();
+    this.cargarCombos();
   });
 
   /** Opciones de método de pago (mock local, sin pasarela externa). */
@@ -67,6 +71,16 @@ export class SeleccionAsientosComponent implements OnDestroy {
   readonly pollMs = 2500;
   pollingSub: Subscription | null = null;
   metodoPago: MetodoPago = MetodoPago.MERCADO_PAGO;
+
+  candyCombos: CandyCombo[] = [];
+  /** cantidad por comboId */
+  combosElegidos: Record<number, number> = {};
+  codigoInput = '';
+  codigoAplicado: string | null = null;
+  descuentoMonto = 0;
+  codigoMensaje = '';
+  codigoError = '';
+  validandoCodigo = false;
 
   loadingFunciones = true;
   confirmando = false;
@@ -120,10 +134,53 @@ export class SeleccionAsientosComponent implements OnDestroy {
     private reservaService: ReservaService,
     private holdService: HoldService,
     private paymentService: PaymentService,
+    private candyComboService: CandyComboService,
+    private codigoDescuentoService: CodigoDescuentoService,
     public authService: AuthService,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef
   ) {}
+
+  cargarCombos(): void {
+    this.candyComboService.listarActivos().subscribe({
+      next: (combos) => {
+        this.candyCombos = combos;
+        refreshView(this.cdr);
+      },
+      error: () => {
+        this.candyCombos = [];
+        refreshView(this.cdr);
+      },
+    });
+  }
+
+  cantidadCombo(comboId: number): number {
+    return this.combosElegidos[comboId] ?? 0;
+  }
+
+  setCantidadCombo(comboId: number, cantidad: number): void {
+    const n = Math.max(0, Math.min(20, Math.floor(cantidad || 0)));
+    if (n <= 0) {
+      delete this.combosElegidos[comboId];
+    } else {
+      this.combosElegidos[comboId] = n;
+    }
+    this.revalidarCodigoSiHay();
+    refreshView(this.cdr);
+  }
+
+  get subtotalEntradas(): number {
+    if (!this.funcion) return 0;
+    return this.asientosSeleccionados.length * this.funcion.precio;
+  }
+
+  get subtotalCandy(): number {
+    return this.candyCombos.reduce((acc, c) => acc + c.precio * this.cantidadCombo(c.id), 0);
+  }
+
+  get subtotalBruto(): number {
+    return this.subtotalEntradas + this.subtotalCandy;
+  }
 
   cargarFunciones(): void {
     this.loadingFunciones = true;
@@ -278,6 +335,7 @@ export class SeleccionAsientosComponent implements OnDestroy {
     const quitados = [...anterior].filter((etiqueta) => !nueva.has(etiqueta));
 
     this.asientosSeleccionados = [...nueva].sort();
+    this.revalidarCodigoSiHay();
     refreshView(this.cdr);
 
     for (const etiqueta of agregados) {
@@ -385,8 +443,86 @@ export class SeleccionAsientosComponent implements OnDestroy {
   }
 
   calcularTotal(): number {
-    if (!this.funcion) return 0;
-    return this.asientosSeleccionados.length * this.funcion.precio;
+    return Math.max(0, this.subtotalBruto - this.descuentoMonto);
+  }
+
+  aplicarCodigo(): void {
+    const codigo = this.codigoInput.trim();
+    if (!codigo) {
+      this.codigoError = 'Ingresá un código';
+      return;
+    }
+    if (!this.authService.isAuthenticated() || this.authService.getTipoUsuario() !== 'CLIENTE') {
+      this.toastr.warning('Tenés que iniciar sesión como cliente para usar un código.', 'Descuento');
+      return;
+    }
+
+    this.validandoCodigo = true;
+    this.codigoError = '';
+    this.codigoMensaje = '';
+    refreshView(this.cdr);
+
+    this.codigoDescuentoService.validar(codigo, this.subtotalBruto).subscribe({
+      next: (res) => {
+        this.validandoCodigo = false;
+        if (!res.valido) {
+          this.codigoAplicado = null;
+          this.descuentoMonto = 0;
+          this.codigoError = res.mensaje || 'Código inválido';
+        } else {
+          this.codigoAplicado = res.codigo || codigo.toUpperCase();
+          this.descuentoMonto = res.descuentoMonto || 0;
+          this.codigoMensaje = res.mensaje || 'Código aplicado';
+          this.codigoError = '';
+        }
+        refreshView(this.cdr);
+      },
+      error: (err) => {
+        this.validandoCodigo = false;
+        this.codigoAplicado = null;
+        this.descuentoMonto = 0;
+        this.codigoError = getErrorMessage(err, 'No se pudo validar el código');
+        refreshView(this.cdr);
+      },
+    });
+  }
+
+  quitarCodigo(): void {
+    this.codigoAplicado = null;
+    this.descuentoMonto = 0;
+    this.codigoInput = '';
+    this.codigoMensaje = '';
+    this.codigoError = '';
+    refreshView(this.cdr);
+  }
+
+  private revalidarCodigoSiHay(): void {
+    if (!this.codigoAplicado) {
+      this.descuentoMonto = 0;
+      return;
+    }
+    this.codigoDescuentoService.validar(this.codigoAplicado, this.subtotalBruto).subscribe({
+      next: (res) => {
+        if (!res.valido) {
+          this.codigoAplicado = null;
+          this.descuentoMonto = 0;
+          this.codigoMensaje = '';
+          this.codigoError = res.mensaje || 'El código ya no aplica';
+        } else {
+          this.descuentoMonto = res.descuentoMonto || 0;
+        }
+        refreshView(this.cdr);
+      },
+      error: () => {
+        /* silencio: el back vuelve a validar al confirmar */
+      },
+    });
+  }
+
+  private combosParaRequest() {
+    return Object.entries(this.combosElegidos)
+      .filter(([, cantidad]) => cantidad > 0)
+      .map(([comboId, cantidad]) => ({ comboId: Number(comboId), cantidad }));
   }
 
   confirmarCompra(): void {
@@ -426,6 +562,8 @@ export class SeleccionAsientosComponent implements OnDestroy {
       funcionId: this.funcion.id,
       asientosSeleccionados: this.asientosSeleccionados,
       metodoPago: this.metodoPago,
+      combos: this.combosParaRequest(),
+      codigoDescuento: this.codigoAplicado || undefined,
     })
       .pipe(
         timeout(30000),

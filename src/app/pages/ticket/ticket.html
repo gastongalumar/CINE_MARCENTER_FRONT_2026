@@ -50,6 +50,14 @@
             <span>Fecha Emisión:</span>
             <span>{{ reserva?.fechaEmision | fechaApi:'dd/MM/yyyy HH:mm:ss' }}</span>
           </div>
+          <div class="sub-row" *ngIf="reserva?.combos?.length">
+            <span>Candy:</span>
+            <span>{{ candyResumen }}</span>
+          </div>
+          <div class="sub-row" *ngIf="reserva?.descuentoMonto">
+            <span>Descuento{{ reserva?.codigoDescuentoAplicado ? ' (' + reserva?.codigoDescuentoAplicado + ')' : '' }}:</span>
+            <span>−${{ reserva?.descuentoMonto | number:'1.0-0' }}</span>
+          </div>
           <div class="sub-row">
             <span>Método de Pago:</span>
             <span class="badge bg-dark-ticket text-uppercase">{{ reserva?.metodoPago }}</span>

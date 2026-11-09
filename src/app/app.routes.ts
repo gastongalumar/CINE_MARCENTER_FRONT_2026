@@ -194,6 +194,20 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {
+        path: 'admin/candy',
+        title: 'Combos Candy | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy/admin-candy').then((m) => m.AdminCandyComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos',
+        title: 'Códigos de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuentos/admin-descuentos').then((m) => m.AdminDescuentosComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
         path: 'admin/usuarios',
         title: 'Gestión de usuarios | Cinemacenter',
         loadComponent: () => import('./pages/usuarios/usuarios').then((m) => m.UsuariosComponent),

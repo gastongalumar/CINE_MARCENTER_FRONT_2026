@@ -18,40 +18,34 @@
     </div>
     <div class="card-body prose">
       <p>
-        Antes de la función pasá por el <strong>Candy Bar</strong> de planta baja y armá tu combo.
-        Los precios son de referencia para el TP y pueden variar según temporada; consultá en el local.
-      </p>
-      <p>
-        Horario del candy: mismo que boletería. Aceptamos efectivo y tarjetas. Pedidos listos en el momento.
+        Antes de la función pasá por el <strong>Candy Bar</strong> de planta baja o sumá tu combo
+        al confirmar el pago online. Los precios los administra el cine y pueden actualizarse.
       </p>
     </div>
   </div>
 
   <h3 class="section-title mb-3">Nuestros combos</h3>
-  <p class="section-lead mb-4">
-    Elegí el que más te guste. Todos se retiran en el Candy Bar antes o durante el intervalo.
-  </p>
+  <p class="section-lead mb-4">Elegí el que más te guste en el checkout o retiralos en el local.</p>
 
-  <div class="row g-3 mb-4">
-    @for (combo of combos; track combo.titulo) {
+  <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
+
+  <div class="row g-3 mb-4" *ngIf="!cargando">
+    @for (combo of combos; track combo.id) {
       <div class="col-md-6">
         <article class="include-card">
-          <span class="material-icons include-icon">{{ combo.icon }}</span>
+          <span class="material-icons include-icon">{{ combo.icono || 'fastfood' }}</span>
           <div>
-            <h4>{{ combo.titulo }} <span class="combo-precio">{{ combo.precio }}</span></h4>
-            <p><strong>{{ combo.detalle }}</strong></p>
-            <p>{{ combo.nota }}</p>
+            <h4>{{ combo.nombre }} <span class="combo-precio">$ {{ combo.precio | number:'1.0-0' }}</span></h4>
+            <p>{{ combo.descripcion }}</p>
           </div>
         </article>
       </div>
     }
   </div>
 
-  <div class="card glass-card cierre">
+  <div class="card glass-card cierre" *ngIf="!cargando && !combos.length">
     <div class="card-body text-center">
-      <p class="lead mb-0">
-        ¿Dudas sobre un combo? Preguntá en boletería o en el Candy Bar · Ref. CMB-2026
-      </p>
+      <p class="lead mb-0">Todavía no hay combos publicados.</p>
     </div>
   </div>
 </div>

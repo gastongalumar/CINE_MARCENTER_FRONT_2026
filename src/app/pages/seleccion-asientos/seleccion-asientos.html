@@ -203,92 +203,195 @@
   </div>
 
   <!-- PASO 3: Método de pago y confirmar -->
-  <div *ngIf="paso === 3">
-    <div class="d-flex align-items-center mb-4 gap-3">
-      <button class="btn btn-secondary btn-sm" (click)="paso = 2">
+  <div *ngIf="paso === 3" class="checkout">
+    <div class="checkout-top">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="paso = 2">
         <span class="material-icons font-icon-sm">arrow_back</span> Asientos
       </button>
-      <h2 class="mb-0 page-title-cinematic">Confirmar Pago</h2>
+      <div>
+        <h2 class="mb-0 page-title-cinematic">Confirmar pago</h2>
+        <p class="checkout-lead mb-0">Revisá el resumen, sumá candy si querés y elegí cómo pagar.</p>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <!-- Resumen de compra -->
-      <div class="col-lg-6">
-        <div class="card mb-4 h-100" *ngIf="funcion">
-          <div class="card-header"><strong class="fs-5">Resumen de tu Compra</strong></div>
-          <div class="card-body p-4">
-            <div class="row mb-3">
-              <div class="col-4 text-muted font-weight-bold">Película:</div>
-              <div class="col-8"><strong class="text-accent-gold fs-5">{{ funcion.peliculaNombre }}</strong></div>
+    <div class="checkout-grid" *ngIf="funcion">
+      <!-- Ticket / resumen -->
+      <aside class="checkout-ticket">
+        <div class="ticket-kicker">Resumen</div>
+        <h3 class="ticket-movie">{{ funcion.peliculaNombre }}</h3>
+
+        <div class="ticket-meta">
+          <div class="ticket-meta-item">
+            <span class="material-icons">meeting_room</span>
+            <div>
+              <small>Sala</small>
+              <strong>{{ funcion.salaNombre }}</strong>
             </div>
-            <div class="row mb-3">
-              <div class="col-4 text-muted">Sala:</div>
-              <div class="col-8">{{ funcion.salaNombre }}</div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-4 text-muted">Fecha y hora:</div>
-              <div class="col-8 fw-bold">{{ funcion.horario | fechaApi:'dd/MM/yyyy HH:mm' }} hs</div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-4 text-muted">Asientos:</div>
-              <div class="col-8"><span class="badge bg-secondary fs-6 px-3">{{ asientosSeleccionados.join(', ') }}</span></div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-4 text-muted">Cantidad:</div>
-              <div class="col-8 fw-bold">{{ asientosSeleccionados.length }} entrada(s)</div>
-            </div>
-            <hr class="my-4 rgba-white-light">
-            <div class="row">
-              <div class="col-4 text-muted d-flex align-items-center">Total:</div>
-              <div class="col-8"><strong class="total-text fs-3">$ {{ calcularTotal() | number:'1.0-0' }}</strong></div>
+          </div>
+          <div class="ticket-meta-item">
+            <span class="material-icons">schedule</span>
+            <div>
+              <small>Función</small>
+              <strong>{{ funcion.horario | fechaApi:'dd/MM/yyyy HH:mm' }} hs</strong>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Método de pago -->
-      <div class="col-lg-6">
-        <div class="card mb-4 h-100">
-          <div class="card-header"><strong class="fs-5">Método de Pago</strong></div>
-          <div class="card-body p-4 d-flex flex-column justify-content-between">
-            <div class="row g-3">
-              <div class="col-12" *ngFor="let metodo of metodosPago">
-                <div class="metodo-pago-card d-flex align-items-center gap-3"
-                  [class.active]="metodoPago === metodo.valor"
-                  (click)="metodoPago = metodo.valor"
-                  role="button"
-                  tabindex="0"
-                  (keydown.enter)="metodoPago = metodo.valor"
-                  [attr.aria-pressed]="metodoPago === metodo.valor">
-                  <div class="metodo-icon text-accent-gold">
-                    <span class="material-icons">{{ metodo.icono }}</span>
-                  </div>
-                  <div class="text-start">
-                    <div class="metodo-nombre text-uppercase fw-bold">{{ metodo.etiqueta }}</div>
-                    <div class="metodo-desc">{{ metodo.descripcion }}</div>
-                  </div>
-                  <span class="material-icons ms-auto metodo-check" *ngIf="metodoPago === metodo.valor">
-                    check_circle
-                  </span>
+        <div class="ticket-seats">
+          <small>Asientos · {{ asientosSeleccionados.length }}</small>
+          <div class="seat-pills">
+            <span class="seat-pill" *ngFor="let asiento of asientosSeleccionados">{{ asiento }}</span>
+          </div>
+        </div>
+
+        <div class="ticket-lines">
+          <div class="ticket-line">
+            <span>{{ asientosSeleccionados.length }} entrada{{ asientosSeleccionados.length === 1 ? '' : 's' }}</span>
+            <span>$ {{ subtotalEntradas | number:'1.0-0' }}</span>
+          </div>
+
+          <ng-container *ngIf="subtotalCandy > 0">
+            <div class="ticket-section-label">Candy</div>
+            <ng-container *ngFor="let combo of candyCombos">
+              <div class="ticket-line ticket-line-sub" *ngIf="cantidadCombo(combo.id) > 0">
+                <span>{{ cantidadCombo(combo.id) }}× {{ combo.nombre }}</span>
+                <span>$ {{ combo.precio * cantidadCombo(combo.id) | number:'1.0-0' }}</span>
+              </div>
+            </ng-container>
+            <div class="ticket-line">
+              <span>Subtotal candy</span>
+              <span>$ {{ subtotalCandy | number:'1.0-0' }}</span>
+            </div>
+          </ng-container>
+
+          <div class="ticket-line ticket-line-discount" *ngIf="descuentoMonto > 0">
+            <span>Descuento <em *ngIf="codigoAplicado">{{ codigoAplicado }}</em></span>
+            <span>− $ {{ descuentoMonto | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="ticket-total">
+          <span>Total</span>
+          <strong>$ {{ calcularTotal() | number:'1.0-0' }}</strong>
+        </div>
+      </aside>
+
+      <!-- Acciones -->
+      <div class="checkout-actions">
+        <section class="checkout-panel">
+          <header class="checkout-panel-head">
+            <div>
+              <h3>Candy Bar</h3>
+              <p>Opcional · se suma al total</p>
+            </div>
+          </header>
+
+          <p class="checkout-empty" *ngIf="!candyCombos.length">No hay combos disponibles por ahora.</p>
+
+          <div class="combo-checkout-list" *ngIf="candyCombos.length">
+            <div
+              class="combo-checkout-row"
+              *ngFor="let combo of candyCombos"
+              [class.is-selected]="cantidadCombo(combo.id) > 0">
+              <div class="combo-checkout-info">
+                <span class="combo-icon material-icons">{{ combo.icono || 'fastfood' }}</span>
+                <div class="combo-copy">
+                  <div class="combo-name">{{ combo.nombre }}</div>
+                  <div class="combo-desc">{{ combo.descripcion }}</div>
+                  <div class="combo-price">$ {{ combo.precio | number:'1.0-0' }}</div>
                 </div>
               </div>
-            </div>
-
-            <div class="d-grid gap-2 mt-4 pt-2">
-              <button
-                class="btn btn-primary btn-lg py-3 w-100"
-                [disabled]="!metodoPago || confirmando"
-                (click)="confirmarCompra()">
-                <span *ngIf="confirmando" class="spinner-border spinner-border-sm me-2"></span>
-                {{ confirmando ? 'Procesando...' : '' }}
-                <span *ngIf="!confirmando" class="d-flex align-items-center justify-content-center gap-2">
-                  <span class="material-icons">check_circle</span> Confirmar Compra
-                </span>
-              </button>
-              <button class="btn btn-secondary py-3" (click)="cancelarCompra()">Cancelar Compra</button>
+              <div class="combo-qty" aria-label="Cantidad">
+                <button
+                  type="button"
+                  class="qty-btn"
+                  [disabled]="cantidadCombo(combo.id) === 0"
+                  (click)="setCantidadCombo(combo.id, cantidadCombo(combo.id) - 1)">−</button>
+                <span class="qty-val">{{ cantidadCombo(combo.id) }}</span>
+                <button
+                  type="button"
+                  class="qty-btn"
+                  (click)="setCantidadCombo(combo.id, cantidadCombo(combo.id) + 1)">+</button>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section class="checkout-panel checkout-panel-compact">
+          <header class="checkout-panel-head">
+            <div>
+              <h3>Código de descuento</h3>
+              <p>Si tenés uno, aplicarlo acá</p>
+            </div>
+          </header>
+
+          <div class="coupon-row" *ngIf="!codigoAplicado">
+            <input
+              type="text"
+              class="form-control coupon-input"
+              [(ngModel)]="codigoInput"
+              placeholder="Ej. MARCENTER10"
+              (keyup.enter)="aplicarCodigo()" />
+            <button type="button" class="btn btn-primary" [disabled]="validandoCodigo" (click)="aplicarCodigo()">
+              {{ validandoCodigo ? '…' : 'Aplicar' }}
+            </button>
+          </div>
+
+          <div class="coupon-applied" *ngIf="codigoAplicado">
+            <div>
+              <span class="material-icons">local_offer</span>
+              <div>
+                <strong>{{ codigoAplicado }}</strong>
+                <small>{{ codigoMensaje || 'Código aplicado' }}</small>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="quitarCodigo()">Quitar</button>
+          </div>
+          <div class="coupon-error" *ngIf="codigoError">{{ codigoError }}</div>
+        </section>
+
+        <section class="checkout-panel">
+          <header class="checkout-panel-head">
+            <div>
+              <h3>Método de pago</h3>
+              <p>Elegí una opción para confirmar</p>
+            </div>
+          </header>
+
+          <div class="metodo-list">
+            <button
+              type="button"
+              class="metodo-pago-card"
+              *ngFor="let metodo of metodosPago"
+              [class.active]="metodoPago === metodo.valor"
+              (click)="metodoPago = metodo.valor"
+              [attr.aria-pressed]="metodoPago === metodo.valor">
+              <span class="metodo-icon material-icons">{{ metodo.icono }}</span>
+              <span class="text-start">
+                <span class="metodo-nombre">{{ metodo.etiqueta }}</span>
+                <span class="metodo-desc">{{ metodo.descripcion }}</span>
+              </span>
+              <span class="material-icons metodo-check" *ngIf="metodoPago === metodo.valor">check_circle</span>
+            </button>
+          </div>
+
+          <div class="checkout-cta">
+            <button
+              type="button"
+              class="btn btn-primary btn-lg checkout-confirm"
+              [disabled]="!metodoPago || confirmando"
+              (click)="confirmarCompra()">
+              <span *ngIf="confirmando" class="spinner-border spinner-border-sm me-2"></span>
+              <ng-container *ngIf="!confirmando">
+                Confirmar · $ {{ calcularTotal() | number:'1.0-0' }}
+              </ng-container>
+              <ng-container *ngIf="confirmando">Procesando…</ng-container>
+            </button>
+            <button type="button" class="btn btn-link checkout-cancel" (click)="cancelarCompra()">
+              Cancelar compra
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   </div>

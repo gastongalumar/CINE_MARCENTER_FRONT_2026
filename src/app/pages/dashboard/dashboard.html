@@ -247,6 +247,22 @@
           <div class="menu-action">Ingresar →</div>
         </a>
       </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/candy" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">fastfood</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Candy Combos</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-xl-3">
+        <a routerLink="/admin/descuentos" class="menu-card">
+          <div class="menu-icon"><span class="material-icons">sell</span></div>
+          <div class="menu-num">—</div>
+          <div class="menu-label">Descuentos</div>
+          <div class="menu-action">Gestionar →</div>
+        </a>
+      </div>
       @if (authService.isSuperAdmin()) {
       <div class="col-6 col-md-4 col-xl-3">
         <a routerLink="/admin/crear-admin" class="menu-card">

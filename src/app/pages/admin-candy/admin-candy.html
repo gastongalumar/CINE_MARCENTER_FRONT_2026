@@ -1,0 +1,88 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Panel</button>
+    <h2 class="mb-0">Candy · Combos</h2>
+    <button type="button" class="btn btn-sm btn-outline-primary ms-auto" (click)="nuevo()">Nuevo</button>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card glass-admin">
+        <div class="card-header bg-transparent">{{ editandoId ? 'Editar combo' : 'Nuevo combo' }}</div>
+        <div class="card-body">
+          <form [formGroup]="form" (ngSubmit)="guardar()" class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nombre *</label>
+              <input class="form-control" formControlName="nombre" />
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <input class="form-control" formControlName="descripcion" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Precio *</label>
+              <input type="number" class="form-control" formControlName="precio" min="1" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Ícono Material</label>
+              <input class="form-control" formControlName="icono" placeholder="fastfood" />
+            </div>
+            <div class="col-12 form-check ms-1">
+              <input class="form-check-input" type="checkbox" formControlName="activo" id="activoCombo" />
+              <label class="form-check-label" for="activoCombo">Activo (visible en checkout)</label>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || guardando">
+                {{ guardando ? 'Guardando…' : (editandoId ? 'Actualizar' : 'Crear') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card glass-admin">
+        <div class="card-header bg-transparent d-flex justify-content-between">
+          <span>Listado</span>
+          <span class="badge bg-secondary">{{ combos.length }}</span>
+        </div>
+        <div class="card-body p-0">
+          <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
+          <div class="table-responsive" *ngIf="!cargando">
+            <table class="table table-hover mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Nombre</th>
+                  <th>Precio</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of combos">
+                  <td><span class="material-icons">{{ c.icono || 'fastfood' }}</span></td>
+                  <td>
+                    <div class="fw-bold">{{ c.nombre }}</div>
+                    <div class="small text-muted">{{ c.descripcion }}</div>
+                  </td>
+                  <td>$ {{ c.precio | number:'1.0-0' }}</td>
+                  <td>
+                    <span class="badge" [class.bg-success]="c.activo" [class.bg-secondary]="!c.activo">
+                      {{ c.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="text-end text-nowrap">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editar(c)">Editar</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(c)">Borrar</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,13 @@
 import { EstadoReserva } from './estado-reserva';
+import { ComboSeleccionado } from './candy-combo';
+
+export interface ReservaComboItem {
+  comboId: number;
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
 
 /** Respuesta de /api/reservas (ReservaResponseDTO). */
 export interface Reserva {
@@ -13,6 +22,11 @@ export interface Reserva {
   /** ISO local: "2026-06-15T20:00:00" */
   horarioFuncion?: string;
   montoTotal: number;
+  subtotalEntradas?: number;
+  subtotalCandy?: number;
+  descuentoMonto?: number;
+  codigoDescuentoAplicado?: string | null;
+  combos?: ReservaComboItem[];
   metodoPago: string;
   fechaEmision?: string;
   fechaValidacion?: string;
@@ -27,4 +41,6 @@ export interface ReservaRequest {
   funcionId: number;
   metodoPago: string;
   asientosSeleccionados: string[];
+  combos?: ComboSeleccionado[];
+  codigoDescuento?: string;
 }

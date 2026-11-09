@@ -1,0 +1,56 @@
+.glass-admin {
+  background: rgba(10, 15, 29, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: var(--color-fuente);
+}
+
+.glass-admin .card-header {
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-admin .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--color-fuente);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
+  color: var(--color-fuente);
+  margin-bottom: 0;
+}
+
+.glass-admin .table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.glass-admin .table td {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.glass-admin .form-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.glass-admin .form-control,
+.glass-admin .form-select {
+  background: rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-fuente);
+}
+
+.glass-admin .form-control:focus,
+.glass-admin .form-select:focus {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(245, 197, 24, 0.45);
+  box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
+  color: var(--color-fuente);
+}
+
+.glass-admin .material-icons {
+  vertical-align: middle;
+  color: var(--color-slider, #f5c518);
+}
