@@ -25,7 +25,7 @@ import { getErrorMessage } from '../../utils/api-error';
   imports: [CommonModule, RouterModule, BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './dashboard.css'],
 })
 export class DashboardComponent implements OnInit {
   private readonly estadisticas = inject(EstadisticasService);

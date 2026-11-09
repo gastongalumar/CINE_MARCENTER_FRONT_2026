@@ -1,0 +1,51 @@
+<div class="container py-4 cumple-page">
+  <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary btn-sm" routerLink="/cartelera">
+      <span class="material-icons align-middle me-1">arrow_back</span> Volver
+    </button>
+    <h2 class="mb-0">Candy Bar · Combos</h2>
+  </div>
+
+  <div class="card glass-card mb-4">
+    <div class="cumple-hero">
+      <img
+        src="assets/images/promos/promo-combo.jpg"
+        alt="Candy Bar Marcenter"
+        loading="lazy" />
+      <div class="cumple-hero-overlay">
+        <h3>Candy Bar Marcenter</h3>
+      </div>
+    </div>
+    <div class="card-body prose">
+      <p>
+        Antes de la función pasá por el <strong>Candy Bar</strong> de planta baja o sumá tu combo
+        al confirmar el pago online. Los precios los administra el cine y pueden actualizarse.
+      </p>
+    </div>
+  </div>
+
+  <h3 class="section-title mb-3">Nuestros combos</h3>
+  <p class="section-lead mb-4">Elegí el que más te guste en el checkout o retiralos en el local.</p>
+
+  <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
+
+  <div class="row g-3 mb-4" *ngIf="!cargando">
+    @for (combo of combos; track combo.id) {
+      <div class="col-md-6">
+        <article class="include-card">
+          <span class="material-icons include-icon">{{ combo.icono || 'fastfood' }}</span>
+          <div>
+            <h4>{{ combo.nombre }} <span class="combo-precio">$ {{ combo.precio | number:'1.0-0' }}</span></h4>
+            <p>{{ combo.descripcion }}</p>
+          </div>
+        </article>
+      </div>
+    }
+  </div>
+
+  <div class="card glass-card cierre" *ngIf="!cargando && !combos.length">
+    <div class="card-body text-center">
+      <p class="lead mb-0">Todavía no hay combos publicados.</p>
+    </div>
+  </div>
+</div>

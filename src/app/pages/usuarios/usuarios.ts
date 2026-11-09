@@ -28,7 +28,7 @@ const EMAIL_ADMIN_PROTEGIDO = 'admin@mail.com';
   imports: [CommonModule, FormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './usuarios.html',
-  styleUrls: ['./usuarios.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './usuarios.css'],
 })
 export class UsuariosComponent {
   readonly authService = inject(AuthService);

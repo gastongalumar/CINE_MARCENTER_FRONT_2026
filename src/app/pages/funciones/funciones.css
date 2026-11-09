@@ -1,65 +1,16 @@
-.app-card {
-  background: rgba(10, 15, 29, 0.88) !important;
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  color: var(--color-fuente);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: var(--border-radius-md, 12px);
-  overflow: visible !important;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-}
-:host-context(.light-theme) .app-card {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
-}
-.app-card .card-body {
-  overflow: visible;
-  position: relative;
-}
+/* Específico de funciones — look base en admin-panel.shared.css */
+
 .app-card .cine-picker-panel {
   position: relative;
   z-index: 1;
 }
+
 .app-card .cine-picker-panel:has(.cdp-open),
 .app-card .cine-picker-panel:has(.ctp-open),
 .app-card .cine-picker-panel:has(.cdp-host-open),
 .app-card .cine-picker-panel:has(.ctp-host-open) {
   z-index: 20;
 }
-.app-card .card-header {
-  background: rgba(0, 0, 0, 0.25) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-:host-context(.light-theme) .app-card .card-header {
-  background: rgba(0, 0, 0, 0.04) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-.form-label { font-size: 0.85rem; font-weight: 600; }
-.form-control, .form-select {
-  color: var(--color-fuente);
-  background-color: rgba(0, 0, 0, 0.25);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-.form-control:focus, .form-select:focus {
-  color: var(--color-fuente);
-  background-color: rgba(0, 0, 0, 0.25);
-  border-color: var(--color-slider);
-  box-shadow: 0 0 0 0.2rem rgba(245, 197, 24, 0.15);
-}
-.form-control::placeholder { color: var(--color-muted); }
-.form-select option {
-  background-color: #101827;
-  color: var(--color-fuente, #fff);
-}
-:host-context(.light-theme) .form-select option {
-  background-color: #ffffff;
-  color: #0d121f;
-}
-.form-control.is-invalid, .form-select.is-invalid { border-color: #f87171; background-image: none; }
-.form-text { color: var(--color-muted); }
 
 .nav-tabs { border-bottom: none; }
 .nav-tabs .nav-link {
@@ -79,18 +30,8 @@
   font-weight: 700;
 }
 
-.btn-primary {
-  background-color: var(--color-slider);
-  border-color: var(--color-slider);
-  color: #0d121f;
-  font-weight: 700;
-}
-.btn-primary:hover { filter: brightness(1.08); }
-
 .alert-info {
   background: rgba(34, 211, 238, 0.1);
   border-color: rgba(34, 211, 238, 0.3);
   color: var(--color-fuente);
 }
-.material-icons { font-size: 1.1rem; vertical-align: middle; }
-.text-muted { color: var(--color-muted) !important; }

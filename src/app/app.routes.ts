@@ -36,6 +36,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/registro/registro').then((m) => m.RegistroComponent),
     },
     {
+        path: 'olvidar-password',
+        title: 'Recuperar contraseña | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/olvidar-password/olvidar-password').then((m) => m.OlvidarPasswordComponent),
+    },
+    {
+        path: 'reset-password',
+        title: 'Nueva contraseña | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
+    },
+    {
         path: 'cartelera',
         title: 'Inicio | Cinemacenter',
         loadComponent: () => import('./pages/cartelera/cartelera').then((m) => m.CarteleraComponent),
@@ -58,6 +70,16 @@ export const routes: Routes = [
         title: 'Cumpleaños | Cinemacenter',
         loadComponent: () =>
             import('./pages/contacto/cumpleanos').then((m) => m.CumpleanosComponent),
+    },
+    {
+        path: 'contacto/candy',
+        title: 'Candy Bar | Cinemacenter',
+        loadComponent: () => import('./pages/contacto/candy').then((m) => m.CandyComponent),
+    },
+    {
+        path: 'contacto/promos',
+        title: 'Promociones | Cinemacenter',
+        loadComponent: () => import('./pages/contacto/promos').then((m) => m.PromosComponent),
     },
     {
         path: 'welcome',
@@ -169,6 +191,52 @@ export const routes: Routes = [
         path: 'admin/salas',
         title: 'Gestión de salas | Cinemacenter',
         loadComponent: () => import('./pages/salas/salas').then((m) => m.SalasComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/candy',
+        title: 'Combos Candy | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy/admin-candy').then((m) => m.AdminCandyComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/candy/nuevo',
+        title: 'Nuevo combo | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy-form/admin-candy-form').then((m) => m.AdminCandyFormComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/candy/:id',
+        title: 'Editar combo | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-candy-form/admin-candy-form').then((m) => m.AdminCandyFormComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos',
+        title: 'Códigos de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuentos/admin-descuentos').then((m) => m.AdminDescuentosComponent),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos/nuevo',
+        title: 'Nuevo código de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuento-form/admin-descuento-form').then(
+                (m) => m.AdminDescuentoFormComponent
+            ),
+        canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
+    },
+    {
+        path: 'admin/descuentos/:id',
+        title: 'Editar código de descuento | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/admin-descuento-form/admin-descuento-form').then(
+                (m) => m.AdminDescuentoFormComponent
+            ),
         canActivate: [authGuard, roleGuard('ADMINISTRADOR', 'SUPERADMIN')],
     },
     {

@@ -21,7 +21,7 @@ import { getErrorMessage } from '../../utils/api-error';
   imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './listado-salas.html',
-  styleUrls: ['./listado-salas.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './listado-salas.css'],
 })
 export class ListadoSalasComponent {
   private readonly salaService = inject(SalaService);

@@ -14,7 +14,7 @@ import { esControlInvalido } from '../../utils/form-error';
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './validar-ticket.html',
-  styleUrls: ['./validar-ticket.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './validar-ticket.css'],
 })
 export class ValidarTicketComponent {
   private readonly fb = inject(FormBuilder);

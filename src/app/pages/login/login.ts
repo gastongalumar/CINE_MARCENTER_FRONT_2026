@@ -28,6 +28,7 @@ export class LoginComponent {
 
   loading = false;
   loginError = '';
+  loginSuccess = '';
   mostrarPassword = false;
 
   logoUrl: string = '';
@@ -50,6 +51,10 @@ export class LoginComponent {
 
     if (this.route.snapshot.queryParamMap.get('error') === 'google') {
       this.loginError = 'No se pudo iniciar sesión con Google. Intentá de nuevo.';
+    }
+
+    if (this.route.snapshot.queryParamMap.get('reset') === 'true') {
+      this.loginSuccess = 'Contraseña actualizada. Ya podés iniciar sesión.';
     }
 
     if (this.authService.isAuthenticated()) {

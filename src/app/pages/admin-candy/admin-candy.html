@@ -1,0 +1,66 @@
+<div class="py-4">
+  <header class="admin-page-header">
+    <div>
+      <h2 class="admin-page-title">
+        <span class="material-icons">fastfood</span>
+        Gestión de Combos
+      </h2>
+      <p class="admin-page-lead">Candy Bar disponible en checkout y en la página pública</p>
+    </div>
+    <div class="admin-page-actions">
+      <a routerLink="/admin/candy/nuevo" class="btn btn-primary btn-sm">
+        <span class="material-icons">add</span>
+        Nuevo combo
+      </a>
+      <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+    </div>
+  </header>
+
+  <div class="card app-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Listado de combos</h5>
+      <span class="badge bg-secondary">{{ combos.length }}</span>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="cargando" class="text-center py-4"><div class="spinner-border"></div></div>
+      <div class="table-responsive" *ngIf="!cargando">
+        <table class="table table-hover admin-table align-middle">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of combos">
+              <td><span class="material-icons">{{ c.icono || 'fastfood' }}</span></td>
+              <td>
+                <div class="fw-bold">{{ c.nombre }}</div>
+                <div class="small text-muted">{{ c.descripcion }}</div>
+              </td>
+              <td>$ {{ c.precio | number:'1.0-0' }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="c.activo" [class.bg-secondary]="!c.activo">
+                  {{ c.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editar(c)">Editar</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(c)">Borrar</button>
+              </td>
+            </tr>
+            <tr *ngIf="!combos.length">
+              <td colspan="5" class="text-center text-muted py-4">
+                Todavía no hay combos.
+                <a routerLink="/admin/candy/nuevo" class="d-block mt-2">Crear el primero →</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

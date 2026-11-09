@@ -23,7 +23,7 @@ import { parseApiDateTime } from '../../utils/datetime';
   imports: [CommonModule, RouterModule, FechaApiPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './listado-funciones.html',
-  styleUrls: ['./listado-funciones.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './listado-funciones.css'],
 })
 export class ListadoFuncionesComponent {
   private readonly funcionService = inject(FuncionService);

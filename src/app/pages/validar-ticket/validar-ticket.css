@@ -1,2 +1,3 @@
-.card { background-color: var(--color-contenedor); color: var(--color-fuente); }
-.btn-primary { background-color: var(--color-slider); border-color: var(--color-slider); color: #000; font-weight: bold; }
+code {
+  color: var(--color-slider, #f5c518);
+}
