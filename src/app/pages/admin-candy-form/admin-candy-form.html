@@ -1,17 +1,20 @@
 <div class="py-4">
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-    <h2 class="mb-0 admin-page-title">
-      <span class="material-icons align-middle me-1">fastfood</span>
-      {{ titulo }}
-    </h2>
-    <div class="d-flex flex-wrap gap-2">
+  <header class="admin-page-header">
+    <div>
+      <h2 class="admin-page-title">
+        <span class="material-icons">fastfood</span>
+        {{ titulo }}
+      </h2>
+      <p class="admin-page-lead">Nombre, precio e ícono del combo</p>
+    </div>
+    <div class="admin-page-actions">
       <a routerLink="/admin/candy" class="btn btn-outline-primary btn-sm">
         <span class="material-icons">list</span>
         Ver listado
       </a>
       <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
     </div>
-  </div>
+  </header>
 
   <div *ngIf="cargando" class="text-center py-5">
     <div class="spinner-border"></div>

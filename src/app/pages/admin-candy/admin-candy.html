@@ -1,17 +1,20 @@
 <div class="py-4">
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-    <h2 class="mb-0 admin-page-title">
-      <span class="material-icons align-middle me-1">fastfood</span>
-      Gestión de Combos
-    </h2>
-    <div class="d-flex flex-wrap gap-2">
+  <header class="admin-page-header">
+    <div>
+      <h2 class="admin-page-title">
+        <span class="material-icons">fastfood</span>
+        Gestión de Combos
+      </h2>
+      <p class="admin-page-lead">Candy Bar disponible en checkout y en la página pública</p>
+    </div>
+    <div class="admin-page-actions">
       <a routerLink="/admin/candy/nuevo" class="btn btn-primary btn-sm">
         <span class="material-icons">add</span>
         Nuevo combo
       </a>
       <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
     </div>
-  </div>
+  </header>
 
   <div class="card app-card">
     <div class="card-header d-flex justify-content-between align-items-center">
