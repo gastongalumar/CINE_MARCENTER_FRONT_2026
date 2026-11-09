@@ -21,13 +21,11 @@ import { ToastrService } from 'ngx-toastr';
 import { FuncionService } from '../../services/funcion';
 import { PeliculaService } from '../../services/pelicula';
 import { SalaService } from '../../services/sala';
-import { ConfirmDialogService } from '../../services/confirm-dialog';
-import { Funcion, FuncionRangoRequest, FuncionRequest } from '../../models/funcion';
+import { FuncionRangoRequest, FuncionRequest } from '../../models/funcion';
 import { Pelicula } from '../../models/pelicula';
 import { Sala } from '../../models/sala';
 import { getErrorMessage } from '../../utils/api-error';
 import { aplicarErroresDeCampos, limpiarErroresDeCampos } from '../../utils/form-error';
-import { FechaApiPipe } from '../../pipes/fecha-api';
 import {
   PreviewHorariosDia,
   calcularHorariosPorDia,
@@ -35,7 +33,6 @@ import {
   fechaLocalIso,
   formatearFechaCorta,
   horaLocalIso,
-  parseApiDateTime,
 } from '../../utils/datetime';
 import { CineDatePickerComponent } from '../../components/cine-date-picker/cine-date-picker';
 import { CineTimePickerComponent } from '../../components/cine-time-picker/cine-time-picker';
@@ -69,7 +66,6 @@ function rangoConsistente(group: AbstractControl): ValidationErrors | null {
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    FechaApiPipe,
     CineDatePickerComponent,
     CineTimePickerComponent,
   ],
@@ -81,23 +77,17 @@ export class FuncionesComponent {
   private readonly funcionService = inject(FuncionService);
   private readonly peliculaService = inject(PeliculaService);
   private readonly salaService = inject(SalaService);
-  private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toastr = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
 
-  readonly funciones = signal<Funcion[]>([]);
   readonly peliculas = signal<Pelicula[]>([]);
   readonly salas = signal<Sala[]>([]);
   readonly modo = signal<ModoCreacion>('individual');
   readonly cargando = signal(true);
   readonly creando = signal(false);
   readonly creandoRango = signal(false);
-  readonly soloVigentes = signal(false);
-  readonly pagina = signal(1);
-  readonly pageSize = 6;
   readonly errorIndividual = signal('');
   readonly errorRango = signal('');
-  readonly errorCarga = signal('');
 
   private readonly rangoValores = signal<{
     peliculaId: number | null;
@@ -147,29 +137,6 @@ export class FuncionesComponent {
     return calcularHorariosPorDia(horaInicio, horaFin, pelicula.duracionMinutos);
   });
 
-  readonly funcionesFiltradas = computed(() => {
-    if (!this.soloVigentes()) return this.funciones();
-    return this.funciones().filter((f) => this.esVigente(f));
-  });
-
-  readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.funcionesFiltradas().length / this.pageSize))
-  );
-
-  readonly funcionesPagina = computed(() => {
-    const start = (this.pagina() - 1) * this.pageSize;
-    return this.funcionesFiltradas().slice(start, start + this.pageSize);
-  });
-
-  readonly rangoDesde = computed(() => {
-    if (!this.funcionesFiltradas().length) return 0;
-    return (this.pagina() - 1) * this.pageSize + 1;
-  });
-
-  readonly rangoHasta = computed(() =>
-    Math.min(this.pagina() * this.pageSize, this.funcionesFiltradas().length)
-  );
-
   private readonly initLoad = afterNextRender(() => this.cargarDatos());
 
   constructor() {
@@ -213,44 +180,17 @@ export class FuncionesComponent {
     this.errorRango.set('');
   }
 
-  actualizarSoloVigentes(valor: boolean): void {
-    this.soloVigentes.set(valor);
-    this.pagina.set(1);
-  }
-
-  irAPagina(page: number): void {
-    const total = this.totalPaginas();
-    if (page < 1 || page > total) return;
-    this.pagina.set(page);
-  }
-
-  private ajustarPagina(): void {
-    const total = this.totalPaginas();
-    if (this.pagina() > total) {
-      this.pagina.set(total);
-    }
-  }
-
   cargarDatos(): void {
     this.cargando.set(true);
-    this.errorCarga.set('');
     this.limpiarErrores(this.formIndividual);
     this.limpiarErrores(this.formRango);
 
-    this.funcionService.listarTodas().subscribe({
-      next: (funciones) => {
-        this.funciones.set(funciones);
-        this.ajustarPagina();
-        this.cargando.set(false);
-      },
-      error: (error) => {
-        this.errorCarga.set(getErrorMessage(error, 'No se pudieron cargar las funciones.'));
-        this.cargando.set(false);
-      },
-    });
-
     this.peliculaService.listarTodas().subscribe({
-      next: (peliculas) => this.peliculas.set(peliculas),
+      next: (peliculas) => {
+        this.peliculas.set(peliculas);
+        this.cargando.set(false);
+      },
+      error: () => this.cargando.set(false),
     });
 
     this.salaService.listarTodas().subscribe({
@@ -286,7 +226,6 @@ export class FuncionesComponent {
           hora: horaLocalIso(),
           precio: 5000,
         });
-        this.cargarDatos();
       },
       error: (error) => {
         this.creando.set(false);
@@ -323,7 +262,6 @@ export class FuncionesComponent {
       next: (creadas) => {
         this.creandoRango.set(false);
         this.toastr.success(`${creadas.length} función(es) creada(s) correctamente`, 'Éxito');
-        this.cargarDatos();
       },
       error: (error) => {
         this.creandoRango.set(false);
@@ -335,32 +273,6 @@ export class FuncionesComponent {
         );
       },
     });
-  }
-
-  eliminarFuncion(funcion: Funcion): void {
-    if (!funcion.id) return;
-
-    this.confirmDialog
-      .confirmDanger(
-        'Eliminar función',
-        `¿Seguro que querés eliminar la función de «${funcion.peliculaNombre ?? 'la película'}» en ` +
-          `${funcion.salaNombre ?? 'la sala'}? Se eliminarán también sus reservas asociadas.`
-      )
-      .subscribe((confirmado) => {
-        if (!confirmado) return;
-
-        this.funcionService.eliminar(funcion.id!).subscribe({
-          next: () => {
-            this.toastr.success('Función eliminada', 'Éxito');
-            this.cargarDatos();
-          },
-        });
-      });
-  }
-
-  esVigente(funcion: Funcion): boolean {
-    const fecha = parseApiDateTime(funcion.horario);
-    return !!fecha && fecha.getTime() >= Date.now();
   }
 
   esInvalido(form: FormGroup, campo: string): boolean {

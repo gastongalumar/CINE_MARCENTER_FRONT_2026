@@ -4,12 +4,17 @@
       <span class="material-icons align-middle me-1">meeting_room</span>
       Gestión de Salas
     </h2>
-    <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+    <div class="d-flex flex-wrap gap-2">
+      <a routerLink="/admin/salas/listado" class="btn btn-outline-primary btn-sm">
+        <span class="material-icons">list</span>
+        Ver listado
+      </a>
+      <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
+    </div>
   </div>
 
-  <div class="row g-4">
-    <!-- Formulario -->
-    <div class="col-lg-5 col-xl-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
       <div class="card app-card">
         <div class="card-header">
           <h5 class="mb-0">{{ salaSeleccionada() ? 'Editar sala' : 'Nueva sala' }}</h5>
@@ -143,102 +148,6 @@
               }
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Listado -->
-    <div class="col-lg-7 col-xl-8">
-      <div class="card app-card">
-        <div class="card-header d-flex align-items-center">
-          <h5 class="mb-0 me-auto">Listado de salas</h5>
-          <span class="badge text-bg-secondary">{{ salas().length }}</span>
-        </div>
-        <div class="card-body">
-          @if (errorCarga()) {
-            <div class="alert alert-danger py-2 small">{{ errorCarga() }}</div>
-          }
-
-          @if (cargando()) {
-            <div class="text-center py-4">
-              <div class="spinner-border" role="status">
-                <span class="visually-hidden">Cargando…</span>
-              </div>
-            </div>
-          } @else if (salas().length === 0) {
-            <div class="alert alert-info mb-0">
-              Todavía no hay salas cargadas. Creá la primera con el formulario.
-            </div>
-          } @else {
-            <div class="table-responsive">
-              <table class="table align-middle tabla-salas mb-0">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th class="text-center">Filas</th>
-                    <th class="text-center">Columnas</th>
-                    <th class="text-center">Capacidad</th>
-                    <th class="text-end">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (sala of salasPagina(); track sala.id) {
-                    <tr [class.fila-activa]="salaSeleccionada()?.id === sala.id">
-                      <td class="text-muted">#{{ sala.id }}</td>
-                      <td class="fw-semibold">{{ sala.nombre }}</td>
-                      <td class="text-center">{{ sala.filas }}</td>
-                      <td class="text-center">{{ sala.columnas }}</td>
-                      <td class="text-center">
-                        <span class="badge capacidad-badge">{{ capacidadDe(sala) }}</span>
-                      </td>
-                      <td class="text-end text-nowrap">
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-outline-primary me-1"
-                          (click)="editar(sala)"
-                          title="Editar">
-                          <span class="material-icons">edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-outline-danger"
-                          (click)="eliminar(sala)"
-                          title="Eliminar">
-                          <span class="material-icons">delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
-              <span class="text-muted small">
-                Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ salas().length }}
-              </span>
-              <div class="btn-group btn-group-sm">
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  [disabled]="pagina() <= 1"
-                  (click)="irAPagina(pagina() - 1)">
-                  Anterior
-                </button>
-                <button type="button" class="btn btn-outline-secondary" disabled>
-                  {{ pagina() }} / {{ totalPaginas() }}
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  [disabled]="pagina() >= totalPaginas()"
-                  (click)="irAPagina(pagina() + 1)">
-                  Siguiente
-                </button>
-              </div>
-            </div>
-          }
         </div>
       </div>
     </div>
