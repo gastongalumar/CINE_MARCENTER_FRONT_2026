@@ -123,6 +123,19 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/registro-admin`, data);
   }
 
+  /** Solicita recuperación. `POST /api/auth/forgot-password`. */
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  /** Restablece contraseña con token. `POST /api/auth/reset-password`. */
+  resetPassword(token: string, passwordNueva: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, {
+      token,
+      passwordNueva,
+    });
+  }
+
   /** Cierra sesión y limpia el estado. */
   logout(): void {
     this.limpiarStorage();

@@ -62,8 +62,12 @@
               La contraseña es obligatoria.
             </div>
           }
+          <div class="text-end mt-1">
+            <a routerLink="/olvidar-password" class="text-muted small btn-register-link">¿Olvidaste tu contraseña?</a>
+          </div>
         </div>
 
+        <div *ngIf="loginSuccess" class="alert alert-success py-2 small mb-3">{{ loginSuccess }}</div>
         <div *ngIf="loginError" class="alert alert-danger py-2 small mb-3">{{ loginError }}</div>
 
         <div class="d-grid mb-3">
