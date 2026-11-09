@@ -1,31 +1,34 @@
 <!-- Pantalla del cine -->
-<div class="screen-container">
-  <div class="screen-glow"></div>
-  <div class="screen-label">Escenario / Pantalla</div>
+<div class="screen-container" role="img" aria-label="Pantalla de cine">
+  <div class="screen-frame" aria-hidden="true">
+    <div class="screen-glow"></div>
+    <div class="screen-surface"></div>
+  </div>
+  <div class="screen-label"><span></span>Pantalla<span></span></div>
 </div>
 
 <!-- Leyenda -->
-<div class="legend d-flex justify-content-center gap-4 flex-wrap">
-  <div class="d-flex align-items-center gap-2">
+<div class="legend" role="list" aria-label="Estados de los asientos">
+  <div class="legend-item" role="listitem">
     <div class="seat-preview disponible"></div>
     <span class="legend-label">Disponible</span>
   </div>
-  <div class="d-flex align-items-center gap-2" *ngIf="!soloLectura">
+  <div class="legend-item" role="listitem" *ngIf="!soloLectura">
     <div class="seat-preview seleccionado"></div>
     <span class="legend-label">Tu Selección</span>
   </div>
-  <div class="d-flex align-items-center gap-2">
+  <div class="legend-item" role="listitem">
     <div class="seat-preview bloqueado"></div>
     <span class="legend-label">Reservado por otro</span>
   </div>
-  <div class="d-flex align-items-center gap-2">
+  <div class="legend-item" role="listitem">
     <div class="seat-preview ocupado"></div>
     <span class="legend-label">Ocupado</span>
   </div>
 </div>
 
 <!-- Grid de asientos -->
-<div class="seats-grid-container">
+<div class="seats-grid-container" role="group" aria-label="Mapa de asientos" tabindex="0">
   <!-- Header de columnas -->
   <div class="seats-row header-row">
     <div class="seat-label"></div>
