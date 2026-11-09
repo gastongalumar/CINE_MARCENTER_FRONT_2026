@@ -1,6 +1,9 @@
 <div class="container tema-page">
   <div class="tema-toolbar">
-    <h2 class="mb-0">Personalizar Tema Visual</h2>
+    <h2 class="mb-0 admin-page-title">
+      <span class="material-icons align-middle me-1">palette</span>
+      Personalizar Tema Visual
+    </h2>
     <div class="tema-acciones">
       <button type="button" class="btn btn-secondary btn-sm" (click)="cancelar()">
         Cancelar
@@ -20,7 +23,7 @@
   <div class="row g-3 tema-layout">
     <!-- VISTA PREVIA (arriba en mobile, derecha en desktop) -->
     <div class="col-lg-7 order-1 order-lg-2">
-      <div class="card preview-sticky">
+      <div class="card app-card preview-sticky">
         <div class="card-header d-flex align-items-center justify-content-between">
           <h5 class="mb-0">Vista Previa</h5>
           <span class="preview-hint">Solo este panel · Guardá para aplicar a toda la app</span>
@@ -107,7 +110,7 @@
 
     <!-- CONFIGURACIÓN -->
     <div class="col-lg-5 order-2 order-lg-1">
-      <div class="card tema-form-card">
+      <div class="card app-card tema-form-card">
         <div class="card-body">
           <!-- Colores -->
           <section class="tema-section">

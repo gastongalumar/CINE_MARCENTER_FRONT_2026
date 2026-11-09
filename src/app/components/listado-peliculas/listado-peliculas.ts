@@ -23,7 +23,7 @@ import { getErrorMessage } from '../../utils/api-error';
   imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './listado-peliculas.html',
-  styleUrls: ['./listado-peliculas.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './listado-peliculas.css'],
 })
 export class ListadoPeliculasComponent {
   private readonly peliculaService = inject(PeliculaService);

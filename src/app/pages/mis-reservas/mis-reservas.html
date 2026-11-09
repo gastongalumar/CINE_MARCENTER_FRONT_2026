@@ -77,7 +77,14 @@
               <div class="col-md-3">
                 <div class="asientos-label">Asientos:</div>
                 <div class="asientos-val">{{ reserva.asientosSeleccionados.join(', ') }}</div>
-
+                <div class="asientos-label mt-2" *ngIf="reserva.combos?.length">Candy:</div>
+                <div class="asientos-val small" *ngFor="let c of reserva.combos">
+                  {{ c.cantidad }}× {{ c.nombre }}
+                </div>
+                <div class="text-success small mt-1" *ngIf="reserva.descuentoMonto">
+                  −$ {{ reserva.descuentoMonto | number:'1.0-0' }}
+                  <span *ngIf="reserva.codigoDescuentoAplicado">({{ reserva.codigoDescuentoAplicado }})</span>
+                </div>
                 <div class="metodo-pago mt-1">
                   <span class="badge bg-secondary">{{ reserva.metodoPago }}</span>
                 </div>

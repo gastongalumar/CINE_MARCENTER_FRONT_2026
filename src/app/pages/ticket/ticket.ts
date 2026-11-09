@@ -57,6 +57,14 @@ export class TicketComponent implements OnInit {
     }
   }
 
+  get candyResumen(): string {
+    const combos = this.reserva?.combos;
+    if (!Array.isArray(combos) || !combos.length) return '';
+    return combos
+      .map((c: { cantidad?: number; nombre?: string }) => `${c.cantidad ?? 0}× ${c.nombre ?? 'Combo'}`)
+      .join(' · ');
+  }
+
   print() {
     if (typeof window !== 'undefined' && window.print) {
       window.print();

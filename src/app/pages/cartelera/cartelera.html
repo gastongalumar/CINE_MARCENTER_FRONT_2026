@@ -291,8 +291,6 @@
                 <p>{{ evento.texto }}</p>
                 @if (evento.link) {
                   <a class="btn btn-promo-info" [routerLink]="evento.link">Más info</a>
-                } @else {
-                  <button type="button" class="btn btn-promo-info" disabled>Más info</button>
                 }
               </div>
             </article>
@@ -304,12 +302,44 @@
         <h3 class="section-heading">Beneficios · Promociones</h3>
         <p class="section-subtitle">Publicidad simulada para el TP</p>
 
-        <article class="sidebar-promo">
-          <img [src]="promoSidebar.src" [alt]="promoSidebar.titulo" loading="lazy" />
-          <div class="sidebar-promo-body">
-            <h4>{{ promoSidebar.titulo }}</h4>
-            <p>{{ promoSidebar.detalle }}</p>
-            <button type="button" class="btn btn-promo-info" disabled>Más info</button>
+        <article class="sidebar-promo-carousel" aria-label="Promociones">
+          <div class="promo-slide-viewport">
+            @for (promo of promoSlides; track promo.id; let i = $index) {
+              <div class="promo-slide" [class.active]="i === promoIndex">
+                <img [src]="promo.src" [alt]="promo.titulo" loading="lazy" />
+              </div>
+            }
+            <button type="button" class="promo-nav promo-nav-prev" (click)="promoAnterior()" aria-label="Promo anterior">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <button type="button" class="promo-nav promo-nav-next" (click)="promoSiguiente()" aria-label="Promo siguiente">
+              <span class="material-icons">chevron_right</span>
+            </button>
+          </div>
+
+          <div class="promo-bar">
+            <div class="promo-bar-text">
+              <strong>{{ promoActual.titulo }}</strong>
+              <span>{{ promoActual.barra }}</span>
+            </div>
+            <a
+              class="promo-mas-info"
+              [routerLink]="['/contacto/promos']"
+              [queryParams]="{ p: promoActual.id }">
+              Click acá para <em>Más info</em>
+            </a>
+            <div class="promo-nums" role="tablist" aria-label="Elegir promoción">
+              @for (promo of promoSlides; track promo.id; let i = $index) {
+                <button
+                  type="button"
+                  class="promo-num"
+                  [class.active]="i === promoIndex"
+                  (click)="irAPromo(i)"
+                  [attr.aria-label]="'Promoción ' + (i + 1)">
+                  {{ i + 1 }}
+                </button>
+              }
+            </div>
           </div>
         </article>
 

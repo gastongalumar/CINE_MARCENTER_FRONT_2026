@@ -71,7 +71,11 @@ function rangoConsistente(group: AbstractControl): ValidationErrors | null {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './funciones.html',
-  styleUrls: ['./funciones.css', '../../styles/cine-picker.shared.css'],
+  styleUrls: [
+    '../../styles/admin-panel.shared.css',
+    '../../styles/cine-picker.shared.css',
+    './funciones.css',
+  ],
 })
 export class FuncionesComponent {
   private readonly funcionService = inject(FuncionService);

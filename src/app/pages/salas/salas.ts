@@ -38,7 +38,7 @@ function capacidadValida(group: AbstractControl): ValidationErrors | null {
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './salas.html',
-  styleUrls: ['./salas.css'],
+  styleUrls: ['../../styles/admin-panel.shared.css', './salas.css'],
 })
 export class SalasComponent {
   private readonly salaService = inject(SalaService);

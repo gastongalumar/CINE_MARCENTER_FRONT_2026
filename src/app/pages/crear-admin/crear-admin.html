@@ -1,18 +1,18 @@
-<div class="container py-4">
-  <div class="d-flex align-items-center mb-4 gap-3">
-    <button class="btn btn-outline-secondary btn-sm" routerLink="/admin">← Volver</button>
-    <h2 class="mb-0">Administradores</h2>
+<div class="py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+    <h2 class="mb-0 admin-page-title">
+      <span class="material-icons align-middle me-1">admin_panel_settings</span>
+      Administradores
+    </h2>
+    <a routerLink="/admin" class="btn btn-outline-secondary btn-sm">← Volver al panel</a>
   </div>
 
   <div class="row g-4">
     <div class="col-lg-5">
-      <div class="card shadow-lg glass-card">
-        <div class="card-header bg-transparent border-bottom">
-          <h3 class="mb-0 h5">
-            <span class="material-icons align-middle me-2">admin_panel_settings</span>
-            Crear Nuevo Administrador
-          </h3>
-          <p class="card-subtitle mt-2 mb-0">La sesión actual se mantiene activa al crear otro admin</p>
+      <div class="card app-card">
+        <div class="card-header">
+          <h5 class="mb-0">Crear nuevo administrador</h5>
+          <p class="text-muted mb-0 small mt-1">La sesión actual se mantiene activa al crear otro admin</p>
         </div>
 
         <div class="card-body">
@@ -186,12 +186,9 @@
     </div>
 
     <div class="col-lg-7">
-      <div class="card shadow-lg glass-card h-100">
-        <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
-          <h3 class="mb-0 h5">
-            <span class="material-icons align-middle me-2">group</span>
-            Administradores registrados
-          </h3>
+      <div class="card app-card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Administradores registrados</h5>
           <span class="badge bg-secondary">{{ administradores.length }}</span>
         </div>
 
