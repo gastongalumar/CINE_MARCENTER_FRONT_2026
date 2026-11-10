@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth';
 import { butacasAccessGuard } from './guards/butacas-access';
+import { compraPagoGuard } from './guards/compra-pago';
+import { funcionAccessGuard } from './guards/funcion-access';
 import { roleGuard } from './guards/role';
 
 /**
@@ -89,12 +91,24 @@ export const routes: Routes = [
 
     // ------------------------------------------------------- clientes (auth)
     {
-        path: 'butacas/:id',
+        path: 'butacas/:peliculaId/funcion/:funcionId/pago',
+        title: 'Confirmar pago | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/compra/compra-checkout').then((m) => m.CompraCheckoutComponent),
+        canActivate: [authGuard, butacasAccessGuard, funcionAccessGuard, compraPagoGuard],
+    },
+    {
+        path: 'butacas/:peliculaId/funcion/:funcionId',
         title: 'Elegir asientos | Cinemacenter',
         loadComponent: () =>
-            import('./pages/seleccion-asientos/seleccion-asientos').then(
-                (m) => m.SeleccionAsientosComponent
-            ),
+            import('./pages/compra/compra-asientos').then((m) => m.CompraAsientosComponent),
+        canActivate: [authGuard, butacasAccessGuard, funcionAccessGuard],
+    },
+    {
+        path: 'butacas/:peliculaId',
+        title: 'Seleccionar horario | Cinemacenter',
+        loadComponent: () =>
+            import('./pages/compra/compra-horarios').then((m) => m.CompraHorariosComponent),
         canActivate: [authGuard, butacasAccessGuard],
     },
     {

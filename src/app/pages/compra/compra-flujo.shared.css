@@ -199,6 +199,17 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 .total-text { font-size: 1.6rem; color: var(--color-slider); font-weight: 800; }
+.entradas-contador {
+  font-size: 0.85rem;
+  color: var(--color-fuente);
+}
+.entradas-contador strong {
+  color: var(--color-slider);
+}
+.entradas-contador-max {
+  color: #f87171;
+  font-weight: 600;
+}
 
 /* Reporte de ocupación (admin) */
 .ocupacion-report {

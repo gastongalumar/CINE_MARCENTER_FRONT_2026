@@ -103,13 +103,20 @@
 
             <div
               class="capacidad-box mb-3"
-              [class.excedida]="form.errors?.['capacidad']">
+              [class.excedida]="form.errors?.['capacidad'] || form.errors?.['capacidadMinima']">
               <span class="material-icons">event_seat</span>
               <span>
                 Capacidad: <strong>{{ capacidad() }}</strong> butacas
-                <small class="d-block text-muted">Máximo permitido: 320 ({{ filas() }} × {{ columnas() }})</small>
+                <small class="d-block text-muted">Mínimo 50 / Máximo 320 ({{ filas() }} × {{ columnas() }})</small>
               </span>
             </div>
+
+            @if (form.errors?.['capacidadMinima']) {
+              <div class="alert alert-danger py-2 small">
+                La capacidad total debe ser de al menos 50 butacas.
+                Estás intentando crear {{ capacidad() }}.
+              </div>
+            }
 
             @if (form.errors?.['capacidad']) {
               <div class="alert alert-danger py-2 small">
@@ -118,7 +125,7 @@
               </div>
             }
 
-            @if (filas() > 0 && columnas() > 0 && !form.errors?.['capacidad']) {
+            @if (filas() > 0 && columnas() > 0 && !form.errors?.['capacidad'] && !form.errors?.['capacidadMinima']) {
               <div class="preview-mapa mb-3" aria-hidden="true">
                 @for (fila of filasPreview(); track fila) {
                   <div class="preview-fila">
