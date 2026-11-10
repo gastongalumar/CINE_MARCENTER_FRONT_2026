@@ -3,9 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { Customizacion } from '../models/customizacion';
+import { Customizacion, EfectoFestivo } from '../models/customizacion';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { skipErrorToastContext } from '../utils/http.context';
+import {
+  optionsParaEfecto,
+  optionsParaPreview,
+  prefersReducedMotion,
+} from '../effects/efecto-festivo.presets';
+import type { Container, Engine } from '@tsparticles/engine';
+
+const EFECTOS_FESTIVOS: EfectoFestivo[] = ['ninguno', 'navidad', 'halloween', 'ano-nuevo'];
+const PARTICLES_GLOBAL_ID = 'cinema-efecto-particles';
+const PARTICLES_PREVIEW_ID = 'cinema-efecto-particles-preview';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +24,11 @@ export class CustomizacionService {
   private apiUrl = `${environment.apiUrl}/customizacion`;
   private temaSubject = new BehaviorSubject<Customizacion | null>(null);
   public tema$ = this.temaSubject.asObservable();
+  private efectoFestivoActual: EfectoFestivo = 'ninguno';
+  private particlesEngine: Engine | null = null;
+  private particlesInitPromise: Promise<Engine> | null = null;
+  private particlesGlobal: Container | null = null;
+  private particlesPreview: Container | null = null;
 
   constructor(private http: HttpClient,
               @Inject(DOCUMENT) private document: Document,
@@ -174,6 +189,199 @@ export class CustomizacionService {
       if (rgbFondo) {
         this.document.body.style.backgroundColor = `rgba(${rgbFondo.r}, ${rgbFondo.g}, ${rgbFondo.b}, ${globalOpacity})`;
       }
+    }
+
+    this.aplicarEfectoFestivo(tema.efectoFestivo);
+  }
+
+  /** Normaliza el valor del backend / UI a un preset válido. */
+  normalizarEfectoFestivo(valor?: string | null): EfectoFestivo {
+    if (valor && EFECTOS_FESTIVOS.includes(valor as EfectoFestivo)) {
+      return valor as EfectoFestivo;
+    }
+    return 'ninguno';
+  }
+
+  private aplicarEfectoFestivo(valor?: string | null): void {
+    const efecto = this.normalizarEfectoFestivo(valor);
+    const root = this.document.documentElement;
+
+    if (efecto === 'ninguno') {
+      root.removeAttribute('data-efecto');
+      void this.quitarEfectoFestivo();
+      this.efectoFestivoActual = 'ninguno';
+      return;
+    }
+
+    root.setAttribute('data-efecto', efecto);
+    void this.montarEfectoFestivo(efecto);
+    this.efectoFestivoActual = efecto;
+  }
+
+  /**
+   * Overlay festivo (atmósfera + props + tsparticles).
+   * Se recrea solo si cambia el preset.
+   */
+  private async montarEfectoFestivo(efecto: EfectoFestivo): Promise<void> {
+    if (efecto === 'ninguno') {
+      await this.quitarEfectoFestivo();
+      return;
+    }
+
+    let capa = this.document.getElementById('cinema-efecto-festivo');
+    if (!capa || this.efectoFestivoActual !== efecto) {
+      await this.quitarEfectoFestivo();
+      capa = this.crearCapaEfectoFestivo(efecto);
+      this.document.body.appendChild(capa);
+      await this.cargarParticlesGlobal(efecto);
+    } else {
+      capa.className = `cinema-efecto-festivo cinema-efecto-${efecto}`;
+      capa.setAttribute('data-efecto', efecto);
+    }
+  }
+
+  /** Construye el DOM de escena (sin spans de partículas; las pinta tsparticles). */
+  private crearCapaEfectoFestivo(efecto: EfectoFestivo): HTMLDivElement {
+    const capa = this.document.createElement('div');
+    capa.id = 'cinema-efecto-festivo';
+    capa.className = `cinema-efecto-festivo cinema-efecto-${efecto}`;
+    capa.setAttribute('aria-hidden', 'true');
+    capa.setAttribute('data-efecto', efecto);
+
+    const atmosfera = this.document.createElement('div');
+    atmosfera.className = 'efecto-atmosfera';
+    capa.appendChild(atmosfera);
+
+    const props = this.document.createElement('div');
+    props.className = 'efecto-props';
+    this.rellenarPropsEfecto(props, efecto);
+    capa.appendChild(props);
+
+    const particlesHost = this.document.createElement('div');
+    particlesHost.id = PARTICLES_GLOBAL_ID;
+    particlesHost.className = 'cinema-efecto-particles-host';
+    capa.appendChild(particlesHost);
+
+    return capa;
+  }
+
+  /** Preview local del panel tema (no aplica overlay global). */
+  async montarPreviewEfectoFestivo(
+    host: HTMLElement,
+    efecto: EfectoFestivo
+  ): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+    await this.destruirParticlesPreview();
+    if (efecto === 'ninguno' || prefersReducedMotion()) {
+      return;
+    }
+
+    const engine = await this.ensureParticlesEngine();
+    this.particlesPreview = (await engine.load({
+      id: PARTICLES_PREVIEW_ID,
+      element: host,
+      options: optionsParaPreview(efecto),
+    })) ?? null;
+  }
+
+  async quitarPreviewEfectoFestivo(): Promise<void> {
+    await this.destruirParticlesPreview();
+  }
+
+  private async ensureParticlesEngine(): Promise<Engine> {
+    if (this.particlesEngine) {
+      return this.particlesEngine;
+    }
+    if (!this.particlesInitPromise) {
+      this.particlesInitPromise = (async () => {
+        const { tsParticles } = await import('@tsparticles/engine');
+        const { loadSlim } = await import('@tsparticles/slim');
+        const { loadEmittersPlugin } = await import('@tsparticles/plugin-emitters');
+        const { loadWobbleUpdater } = await import('@tsparticles/updater-wobble');
+        await loadSlim(tsParticles);
+        await loadEmittersPlugin(tsParticles as never);
+        await loadWobbleUpdater(tsParticles);
+        this.particlesEngine = tsParticles;
+        return tsParticles;
+      })();
+    }
+    return this.particlesInitPromise;
+  }
+
+  private async cargarParticlesGlobal(efecto: EfectoFestivo): Promise<void> {
+    if (efecto === 'ninguno' || prefersReducedMotion()) {
+      return;
+    }
+    const host = this.document.getElementById(PARTICLES_GLOBAL_ID);
+    if (!host) {
+      return;
+    }
+    const engine = await this.ensureParticlesEngine();
+    // fullScreen false: el canvas vive dentro del overlay fijo
+    this.particlesGlobal = (await engine.load({
+      id: PARTICLES_GLOBAL_ID,
+      element: host,
+      options: optionsParaEfecto(efecto, false),
+    })) ?? null;
+  }
+
+  private async destruirParticlesGlobal(): Promise<void> {
+    if (this.particlesGlobal) {
+      this.particlesGlobal.destroy(true);
+      this.particlesGlobal = null;
+    }
+  }
+
+  private async destruirParticlesPreview(): Promise<void> {
+    if (this.particlesPreview) {
+      this.particlesPreview.destroy(true);
+      this.particlesPreview = null;
+    }
+  }
+
+  private rellenarPropsEfecto(props: HTMLElement, efecto: EfectoFestivo): void {
+    if (efecto === 'navidad') {
+      const guirnalda = this.document.createElement('div');
+      guirnalda.className = 'efecto-prop efecto-guirnalda';
+      for (let i = 0; i < 18; i++) {
+        const luz = this.document.createElement('span');
+        luz.className = `efecto-luz color-${i % 4}`;
+        luz.style.setProperty('--i', String(i));
+        guirnalda.appendChild(luz);
+      }
+      props.appendChild(guirnalda);
+      return;
+    }
+
+    if (efecto === 'halloween') {
+      ['tl', 'tr'].forEach((corner) => {
+        const web = this.document.createElement('div');
+        web.className = `efecto-prop efecto-telarana corner-${corner}`;
+        props.appendChild(web);
+      });
+      const luna = this.document.createElement('div');
+      luna.className = 'efecto-prop efecto-luna';
+      props.appendChild(luna);
+      return;
+    }
+
+    if (efecto === 'ano-nuevo') {
+      for (let i = 0; i < 8; i++) {
+        const spark = this.document.createElement('span');
+        spark.className = `efecto-prop efecto-destello d-${i % 4}`;
+        spark.style.setProperty('--i', String(i));
+        spark.style.left = `${8 + i * 11}%`;
+        spark.style.top = `${12 + ((i * 17) % 55)}%`;
+        props.appendChild(spark);
+      }
+    }
+  }
+
+  private async quitarEfectoFestivo(): Promise<void> {
+    await this.destruirParticlesGlobal();
+    const capa = this.document.getElementById('cinema-efecto-festivo');
+    if (capa) {
+      capa.remove();
     }
   }
 

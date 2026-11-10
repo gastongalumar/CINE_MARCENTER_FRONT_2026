@@ -1,14 +1,24 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomizacionService } from '../../services/customizacion';
-import { Customizacion } from '../../models/customizacion';
+import { Customizacion, EfectoFestivo } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { getErrorMessage } from '../../utils/api-error';
 import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { refreshView } from '../../utils/refresh-view';
+
+type TemaSeccion = 'efectos' | 'colores' | 'tamanos' | 'media';
 
 @Component({
   selector: 'app-tema',
@@ -17,7 +27,7 @@ import { refreshView } from '../../utils/refresh-view';
   templateUrl: './tema.html',
   styleUrls: ['../../styles/admin-panel.shared.css', './tema.css'],
 })
-export class TemaComponent implements OnInit {
+export class TemaComponent implements OnInit, AfterViewChecked, OnDestroy {
   tema: any = {
     colorFondo: '#6E0A17',
     colorContenedor: '#0A6E61',
@@ -34,12 +44,33 @@ export class TemaComponent implements OnInit {
     logoOpacity: '1',
     logoOpacityPercent: 100,
     globalOpacity: '1',
-    globalOpacityPercent: 100
+    globalOpacityPercent: 100,
+    efectoFestivo: 'ninguno' as EfectoFestivo
   };
+
+  seccionAbierta: TemaSeccion = 'efectos';
+
+  readonly opcionesEfecto: { valor: EfectoFestivo; label: string; icon: string; hint: string }[] = [
+    { valor: 'ninguno', label: 'Ninguno', icon: 'block', hint: 'Sin decoración' },
+    { valor: 'navidad', label: 'Navidad', icon: 'ac_unit', hint: 'Nieve y luces' },
+    { valor: 'halloween', label: 'Halloween', icon: 'nights_stay', hint: 'Noche y murciélagos' },
+    { valor: 'ano-nuevo', label: 'Año Nuevo', icon: 'auto_awesome', hint: 'Confeti y brillos' },
+  ];
+
+  readonly previewLuces = Array.from({ length: 12 }, (_, i) => i);
+  readonly previewDestellos = Array.from({ length: 5 }, (_, i) => ({
+    i,
+    left: `${10 + i * 16}%`,
+    top: `${14 + ((i * 19) % 48)}%`,
+  }));
+
+  @ViewChild('previewParticlesHost') previewParticlesHost?: ElementRef<HTMLElement>;
 
   guardando = false;
   fondoUrlValido = false;
   errorMensaje = '';
+  private previewEfectoMontado: EfectoFestivo | null = null;
+  private previewParticlesPending = false;
 
   constructor(
     private customizacionService: CustomizacionService,
@@ -50,6 +81,29 @@ export class TemaComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarTema();
+  }
+
+  ngAfterViewChecked(): void {
+    if (!this.previewParticlesPending) {
+      return;
+    }
+    const host = this.previewParticlesHost?.nativeElement;
+    const efecto = this.customizacionService.normalizarEfectoFestivo(this.tema.efectoFestivo);
+    if (!host || efecto === 'ninguno') {
+      this.previewParticlesPending = false;
+      return;
+    }
+    if (this.previewEfectoMontado === efecto) {
+      this.previewParticlesPending = false;
+      return;
+    }
+    this.previewParticlesPending = false;
+    this.previewEfectoMontado = efecto;
+    void this.customizacionService.montarPreviewEfectoFestivo(host, efecto);
+  }
+
+  ngOnDestroy(): void {
+    void this.customizacionService.quitarPreviewEfectoFestivo();
   }
 
   cargarTema(): void {
@@ -70,10 +124,12 @@ export class TemaComponent implements OnInit {
           logoOpacityPercent: tema.logoOpacity ? Math.round(parseFloat(tema.logoOpacity) * 100) : 100,
           // El backend almacena globalOpacity en escala 0-100, usarlo directamente para el slider
           globalOpacity: tema.globalOpacity ? (Math.round(parseFloat(tema.globalOpacity)) / 100).toString() : '1',
-          globalOpacityPercent: tema.globalOpacity ? Math.round(parseFloat(tema.globalOpacity)) : 100
+          globalOpacityPercent: tema.globalOpacity ? Math.round(parseFloat(tema.globalOpacity)) : 100,
+          efectoFestivo: this.customizacionService.normalizarEfectoFestivo(tema.efectoFestivo)
         };
         this.verificarFondoUrl();
         this.aplicarTemaGlobal();
+        this.solicitarPreviewParticulas();
         refreshView(this.cdr);
       },
       error: (error) => {
@@ -141,6 +197,30 @@ export class TemaComponent implements OnInit {
   /** Solo actualiza el estado local / panel de preview (no reestiliza toda la app). */
   onCampoCambiado(): void {
     this.verificarFondoUrl();
+  }
+
+  toggleSeccion(seccion: TemaSeccion): void {
+    // Una sola sección abierta a la vez
+    this.seccionAbierta = seccion;
+  }
+
+  seleccionarEfecto(efecto: EfectoFestivo): void {
+    this.tema.efectoFestivo = efecto;
+    this.onCampoCambiado();
+    this.solicitarPreviewParticulas();
+  }
+
+  private solicitarPreviewParticulas(): void {
+    this.previewEfectoMontado = null;
+    this.previewParticlesPending = true;
+    if (this.customizacionService.normalizarEfectoFestivo(this.tema.efectoFestivo) === 'ninguno') {
+      void this.customizacionService.quitarPreviewEfectoFestivo();
+      this.previewParticlesPending = false;
+    }
+  }
+
+  etiquetaEfecto(efecto: EfectoFestivo): string {
+    return this.opcionesEfecto.find((o) => o.valor === efecto)?.label || efecto;
   }
 
   /** true si el fondo actual es un video (MP4/WEBM). */
@@ -281,7 +361,8 @@ export class TemaComponent implements OnInit {
       fondoUrl: this.tema.fondoUrl,
       logoTamano: this.tema.logoTamano,
       logoOpacity: this.tema.logoOpacity,
-      globalOpacity: this.tema.globalOpacity
+      globalOpacity: this.tema.globalOpacity,
+      efectoFestivo: this.customizacionService.normalizarEfectoFestivo(this.tema.efectoFestivo)
     };
   }
 

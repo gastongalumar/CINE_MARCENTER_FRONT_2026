@@ -31,6 +31,7 @@
         <div class="card-body p-0">
           <div
             class="preview-container"
+            [attr.data-efecto]="tema.efectoFestivo !== 'ninguno' ? tema.efectoFestivo : null"
             [style.backgroundImage]="tema.fondoUrl && !esVideoFondo() ? 'url(' + getAssetPath(tema.fondoUrl) + ')' : 'none'"
             [style.backgroundColor]="'rgba(' + hexToRgbStr(tema.colorFondo) + ', ' + tema.globalOpacity + ')'"
             [style.backgroundSize]="'cover'"
@@ -45,6 +46,43 @@
               loop
               playsinline
               preload="auto"></video>
+
+            <div
+              *ngIf="tema.efectoFestivo && tema.efectoFestivo !== 'ninguno'"
+              class="cinema-efecto-festivo"
+              [ngClass]="'cinema-efecto-' + tema.efectoFestivo"
+              aria-hidden="true">
+              <div class="efecto-atmosfera"></div>
+              <div class="efecto-props">
+                <ng-container *ngIf="tema.efectoFestivo === 'navidad'">
+                  <div class="efecto-prop efecto-guirnalda">
+                    <span
+                      *ngFor="let i of previewLuces"
+                      class="efecto-luz"
+                      [ngClass]="'color-' + (i % 4)"
+                      [style.--i]="i"></span>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="tema.efectoFestivo === 'halloween'">
+                  <div class="efecto-prop efecto-telarana corner-tl"></div>
+                  <div class="efecto-prop efecto-telarana corner-tr"></div>
+                  <div class="efecto-prop efecto-luna"></div>
+                </ng-container>
+                <ng-container *ngIf="tema.efectoFestivo === 'ano-nuevo'">
+                  <span
+                    *ngFor="let d of previewDestellos"
+                    class="efecto-prop efecto-destello"
+                    [ngClass]="'d-' + (d.i % 4)"
+                    [style.--i]="d.i"
+                    [style.left]="d.left"
+                    [style.top]="d.top"></span>
+                </ng-container>
+              </div>
+              <div
+                #previewParticlesHost
+                id="cinema-efecto-particles-preview"
+                class="cinema-efecto-particles-host"></div>
+            </div>
 
             <div class="preview-overlay"
                  [style.backgroundColor]="'rgba(' + hexToRgbStr(tema.colorFondo) + ', ' + opacidadPreview() + ')'">
@@ -66,7 +104,7 @@
                   [style.backgroundColor]="tema.colorContenedor"
                   [style.color]="tema.colorFuente">
                   <h4
-                    class="mb-2"
+                    class="mb-2 preview-deco-title"
                     [style.color]="tema.colorFuente"
                     [style.fontSize.px]="tema.tamanoFuenteTitulosPx">
                     {{ tema.logoUrl ? 'Título de Ejemplo' : 'Logo no configurado' }}
@@ -78,7 +116,7 @@
                     Este es un texto de ejemplo para mostrar cómo se verá la aplicación con la configuración actual.
                   </p>
                   <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-sm"
+                    <button class="btn btn-sm preview-deco-btn"
                             [style.backgroundColor]="tema.colorSlider"
                             [style.color]="'#000'"
                             [style.border]="'none'"
@@ -93,13 +131,17 @@
                   </div>
                 </div>
 
-                <div class="small" *ngIf="fondoUrlValido">
+                <div class="small d-flex flex-wrap gap-2 align-items-center" *ngIf="fondoUrlValido || (tema.efectoFestivo && tema.efectoFestivo !== 'ninguno')">
                   <span class="badge"
+                        *ngIf="fondoUrlValido"
                         [style.backgroundColor]="tema.colorSlider"
                         [style.color]="'#000'">
                     Fondo activo
                   </span>
-                  <span class="ms-2 preview-meta" *ngIf="esVideoFondo()">Video en loop</span>
+                  <span class="preview-meta" *ngIf="fondoUrlValido && esVideoFondo()">Video en loop</span>
+                  <span class="badge badge-efecto" *ngIf="tema.efectoFestivo && tema.efectoFestivo !== 'ninguno'">
+                    Efecto: {{ etiquetaEfecto(tema.efectoFestivo) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -112,218 +154,278 @@
     <div class="col-lg-5 order-2 order-lg-1">
       <div class="card app-card tema-form-card">
         <div class="card-body">
+          <!-- Efectos festivos -->
+          <section class="tema-section tema-accordion">
+            <button
+              type="button"
+              class="tema-accordion-toggle"
+              (click)="toggleSeccion('efectos')"
+              [attr.aria-expanded]="seccionAbierta === 'efectos'">
+              <h5 class="tema-section-title mb-0">Efectos festivos</h5>
+              <span class="material-icons tema-accordion-icon">{{ seccionAbierta === 'efectos' ? 'expand_less' : 'expand_more' }}</span>
+            </button>
+            <div class="tema-accordion-body" *ngIf="seccionAbierta === 'efectos'">
+              <p class="form-hint mb-2">Decoraciones globales (nieve, gorros, etc.). Solo se aplican a toda la app al guardar.</p>
+              <div class="tema-efecto-grid">
+                <button
+                  type="button"
+                  class="tema-efecto-chip"
+                  *ngFor="let opcion of opcionesEfecto"
+                  [class.active]="tema.efectoFestivo === opcion.valor"
+                  [attr.data-efecto-chip]="opcion.valor"
+                  (click)="seleccionarEfecto(opcion.valor)">
+                  <span class="material-icons tema-efecto-chip-icon" aria-hidden="true">{{ opcion.icon }}</span>
+                  <span class="tema-efecto-chip-text">
+                    <span class="tema-efecto-chip-label">{{ opcion.label }}</span>
+                    <span class="tema-efecto-chip-hint">{{ opcion.hint }}</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </section>
+
           <!-- Colores -->
-          <section class="tema-section">
-            <h5 class="tema-section-title">Colores</h5>
-            <div class="tema-color-grid">
-              <div class="tema-field">
-                <label class="form-label">Fondo general</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input
-                    type="color"
-                    class="form-control form-control-color"
-                    [(ngModel)]="tema.colorFondo"
-                    (input)="onCampoCambiado()">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="tema.colorFondo"
-                    (input)="onCampoCambiado()"
-                    placeholder="#6E0A17">
+          <section class="tema-section tema-accordion">
+            <button
+              type="button"
+              class="tema-accordion-toggle"
+              (click)="toggleSeccion('colores')"
+              [attr.aria-expanded]="seccionAbierta === 'colores'">
+              <h5 class="tema-section-title mb-0">Colores</h5>
+              <span class="material-icons tema-accordion-icon">{{ seccionAbierta === 'colores' ? 'expand_less' : 'expand_more' }}</span>
+            </button>
+            <div class="tema-accordion-body" *ngIf="seccionAbierta === 'colores'">
+              <div class="tema-color-grid">
+                <div class="tema-field">
+                  <label class="form-label">Fondo general</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input
+                      type="color"
+                      class="form-control form-control-color"
+                      [(ngModel)]="tema.colorFondo"
+                      (input)="onCampoCambiado()">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.colorFondo"
+                      (input)="onCampoCambiado()"
+                      placeholder="#6E0A17">
+                  </div>
                 </div>
-              </div>
 
-              <div class="tema-field">
-                <label class="form-label">Contenedores</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input
-                    type="color"
-                    class="form-control form-control-color"
-                    [(ngModel)]="tema.colorContenedor"
-                    (input)="onCampoCambiado()">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="tema.colorContenedor"
-                    (input)="onCampoCambiado()"
-                    placeholder="#0A6E61">
+                <div class="tema-field">
+                  <label class="form-label">Contenedores</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input
+                      type="color"
+                      class="form-control form-control-color"
+                      [(ngModel)]="tema.colorContenedor"
+                      (input)="onCampoCambiado()">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.colorContenedor"
+                      (input)="onCampoCambiado()"
+                      placeholder="#0A6E61">
+                  </div>
                 </div>
-              </div>
 
-              <div class="tema-field">
-                <label class="form-label">Texto</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input
-                    type="color"
-                    class="form-control form-control-color"
-                    [(ngModel)]="tema.colorFuente"
-                    (input)="onCampoCambiado()">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="tema.colorFuente"
-                    (input)="onCampoCambiado()"
-                    placeholder="#FFFFFF">
+                <div class="tema-field">
+                  <label class="form-label">Texto</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input
+                      type="color"
+                      class="form-control form-control-color"
+                      [(ngModel)]="tema.colorFuente"
+                      (input)="onCampoCambiado()">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.colorFuente"
+                      (input)="onCampoCambiado()"
+                      placeholder="#FFFFFF">
+                  </div>
                 </div>
-              </div>
 
-              <div class="tema-field">
-                <label class="form-label">Botones / acentos</label>
-                <div class="d-flex align-items-center gap-2">
-                  <input
-                    type="color"
-                    class="form-control form-control-color"
-                    [(ngModel)]="tema.colorSlider"
-                    (input)="onCampoCambiado()">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    [(ngModel)]="tema.colorSlider"
-                    (input)="onCampoCambiado()"
-                    placeholder="#ffcc00">
+                <div class="tema-field">
+                  <label class="form-label">Botones / acentos</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <input
+                      type="color"
+                      class="form-control form-control-color"
+                      [(ngModel)]="tema.colorSlider"
+                      (input)="onCampoCambiado()">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.colorSlider"
+                      (input)="onCampoCambiado()"
+                      placeholder="#ffcc00">
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
           <!-- Tamaños -->
-          <section class="tema-section">
-            <h5 class="tema-section-title">Tamaños de texto</h5>
-            <div class="tema-size-grid">
-              <div class="tema-field">
-                <label class="form-label">Títulos ({{ tema.tamanoFuenteTitulosPx }}px)</label>
-                <input
-                  type="range"
-                  class="form-range"
-                  [(ngModel)]="tema.tamanoFuenteTitulosPx"
-                  (input)="actualizarTitulos()"
-                  min="12"
-                  max="48">
-                <div class="tema-range-labels">
-                  <span>12</span>
-                  <span>48</span>
+          <section class="tema-section tema-accordion">
+            <button
+              type="button"
+              class="tema-accordion-toggle"
+              (click)="toggleSeccion('tamanos')"
+              [attr.aria-expanded]="seccionAbierta === 'tamanos'">
+              <h5 class="tema-section-title mb-0">Tamaños de texto</h5>
+              <span class="material-icons tema-accordion-icon">{{ seccionAbierta === 'tamanos' ? 'expand_less' : 'expand_more' }}</span>
+            </button>
+            <div class="tema-accordion-body" *ngIf="seccionAbierta === 'tamanos'">
+              <div class="tema-size-grid">
+                <div class="tema-field">
+                  <label class="form-label">Títulos ({{ tema.tamanoFuenteTitulosPx }}px)</label>
+                  <input
+                    type="range"
+                    class="form-range"
+                    [(ngModel)]="tema.tamanoFuenteTitulosPx"
+                    (input)="actualizarTitulos()"
+                    min="12"
+                    max="48">
+                  <div class="tema-range-labels">
+                    <span>12</span>
+                    <span>48</span>
+                  </div>
                 </div>
-              </div>
-              <div class="tema-field">
-                <label class="form-label">Texto ({{ tema.tamanoFuenteTextoPx }}px)</label>
-                <input
-                  type="range"
-                  class="form-range"
-                  [(ngModel)]="tema.tamanoFuenteTextoPx"
-                  (input)="actualizarTexto()"
-                  min="10"
-                  max="24">
-                <div class="tema-range-labels">
-                  <span>10</span>
-                  <span>24</span>
+                <div class="tema-field">
+                  <label class="form-label">Texto ({{ tema.tamanoFuenteTextoPx }}px)</label>
+                  <input
+                    type="range"
+                    class="form-range"
+                    [(ngModel)]="tema.tamanoFuenteTextoPx"
+                    (input)="actualizarTexto()"
+                    min="10"
+                    max="24">
+                  <div class="tema-range-labels">
+                    <span>10</span>
+                    <span>24</span>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
           <!-- Logo + Fondo -->
-          <div class="tema-media-grid">
-            <section class="tema-section tema-section-nested">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                <h5 class="tema-section-title mb-0">Logo</h5>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger btn-sm"
-                  (click)="eliminarLogo()"
-                  *ngIf="tema.logoUrl">
-                  Eliminar
-                </button>
-              </div>
+          <section class="tema-section tema-accordion">
+            <button
+              type="button"
+              class="tema-accordion-toggle"
+              (click)="toggleSeccion('media')"
+              [attr.aria-expanded]="seccionAbierta === 'media'">
+              <h5 class="tema-section-title mb-0">Logo y fondo</h5>
+              <span class="material-icons tema-accordion-icon">{{ seccionAbierta === 'media' ? 'expand_less' : 'expand_more' }}</span>
+            </button>
+            <div class="tema-accordion-body" *ngIf="seccionAbierta === 'media'">
+              <div class="tema-media-grid">
+                <section class="tema-section tema-section-nested">
+                  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                    <h5 class="tema-section-title mb-0">Logo</h5>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="eliminarLogo()"
+                      *ngIf="tema.logoUrl">
+                      Eliminar
+                    </button>
+                  </div>
 
-              <div class="tema-field mb-2">
-                <label class="form-label">URL o ruta</label>
-                <input
-                  type="text"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="tema.logoUrl"
-                  (input)="onCampoCambiado()"
-                  inputmode="url"
-                  placeholder="assets/images/logo.png">
-              </div>
+                  <div class="tema-field mb-2">
+                    <label class="form-label">URL o ruta</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.logoUrl"
+                      (input)="onCampoCambiado()"
+                      inputmode="url"
+                      placeholder="assets/images/logo.png">
+                  </div>
 
-              <div class="tema-field mb-2">
-                <label class="form-label">Tamaño ({{ tema.logoTamanoPx }}px)</label>
-                <input
-                  type="range"
-                  class="form-range"
-                  [(ngModel)]="tema.logoTamanoPx"
-                  (input)="actualizarLogoTamano()"
-                  min="40"
-                  max="200">
-              </div>
+                  <div class="tema-field mb-2">
+                    <label class="form-label">Tamaño ({{ tema.logoTamanoPx }}px)</label>
+                    <input
+                      type="range"
+                      class="form-range"
+                      [(ngModel)]="tema.logoTamanoPx"
+                      (input)="actualizarLogoTamano()"
+                      min="40"
+                      max="200">
+                  </div>
 
-              <div class="tema-field mb-2">
-                <label class="form-label">Opacidad ({{ tema.logoOpacityPercent }}%)</label>
-                <input
-                  type="range"
-                  class="form-range"
-                  [(ngModel)]="tema.logoOpacityPercent"
-                  (input)="actualizarLogoOpacity()"
-                  min="0"
-                  max="100">
-              </div>
+                  <div class="tema-field mb-2">
+                    <label class="form-label">Opacidad ({{ tema.logoOpacityPercent }}%)</label>
+                    <input
+                      type="range"
+                      class="form-range"
+                      [(ngModel)]="tema.logoOpacityPercent"
+                      (input)="actualizarLogoOpacity()"
+                      min="0"
+                      max="100">
+                  </div>
 
-              <div class="tema-field">
-                <label class="form-label">Subir archivo</label>
-                <input
-                  type="file"
-                  class="form-control form-control-sm"
-                  (change)="onLogoSelected($event)"
-                  accept="image/*">
-              </div>
-            </section>
+                  <div class="tema-field">
+                    <label class="form-label">Subir archivo</label>
+                    <input
+                      type="file"
+                      class="form-control form-control-sm"
+                      (change)="onLogoSelected($event)"
+                      accept="image/*">
+                  </div>
+                </section>
 
-            <section class="tema-section tema-section-nested">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                <h5 class="tema-section-title mb-0">Fondo</h5>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger btn-sm"
-                  (click)="eliminarFondo()"
-                  *ngIf="fondoUrlValido">
-                  Eliminar
-                </button>
-              </div>
+                <section class="tema-section tema-section-nested">
+                  <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                    <h5 class="tema-section-title mb-0">Fondo</h5>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      (click)="eliminarFondo()"
+                      *ngIf="fondoUrlValido">
+                      Eliminar
+                    </button>
+                  </div>
 
-              <div class="tema-field mb-2">
-                <label class="form-label">Opacidad global ({{ tema.globalOpacityPercent }}%)</label>
-                <input
-                  type="range"
-                  class="form-range"
-                  [(ngModel)]="tema.globalOpacityPercent"
-                  (input)="actualizarGlobalOpacity()"
-                  min="20"
-                  max="100">
-              </div>
+                  <div class="tema-field mb-2">
+                    <label class="form-label">Opacidad global ({{ tema.globalOpacityPercent }}%)</label>
+                    <input
+                      type="range"
+                      class="form-range"
+                      [(ngModel)]="tema.globalOpacityPercent"
+                      (input)="actualizarGlobalOpacity()"
+                      min="20"
+                      max="100">
+                  </div>
 
-              <div class="tema-field mb-2">
-                <label class="form-label">URL imagen/video</label>
-                <input
-                  type="text"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="tema.fondoUrl"
-                  (input)="onCampoCambiado()"
-                  inputmode="url"
-                  placeholder="assets/images/fondo.jpg o .mp4">
-                <small class="form-hint">JPG, PNG, WEBP o MP4/WEBM en loop.</small>
-              </div>
+                  <div class="tema-field mb-2">
+                    <label class="form-label">URL imagen/video</label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="tema.fondoUrl"
+                      (input)="onCampoCambiado()"
+                      inputmode="url"
+                      placeholder="assets/images/fondo.jpg o .mp4">
+                    <small class="form-hint">JPG, PNG, WEBP o MP4/WEBM en loop.</small>
+                  </div>
 
-              <div class="tema-field">
-                <label class="form-label">Subir archivo</label>
-                <input
-                  type="file"
-                  class="form-control form-control-sm"
-                  (change)="onFondoSelected($event)"
-                  accept="image/jpeg,image/png,image/webp,video/mp4,video/webm">
-                <small class="form-hint">Imágenes ≤5 MB · Videos ≤50 MB.</small>
+                  <div class="tema-field">
+                    <label class="form-label">Subir archivo</label>
+                    <input
+                      type="file"
+                      class="form-control form-control-sm"
+                      (change)="onFondoSelected($event)"
+                      accept="image/jpeg,image/png,image/webp,video/mp4,video/webm">
+                    <small class="form-hint">Imágenes ≤5 MB · Videos ≤50 MB.</small>
+                  </div>
+                </section>
               </div>
-            </section>
-          </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>

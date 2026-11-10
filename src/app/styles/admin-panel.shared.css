@@ -532,3 +532,27 @@
     text-align: center;
   }
 }
+
+/* Barra de filtros en listados admin */
+.filtros-listado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filtros-listado .buscador {
+  max-width: 190px;
+  min-width: 140px;
+}
+
+.filtros-listado .filtro-select,
+.filtros-listado .filtro-date {
+  max-width: 170px;
+  min-width: 120px;
+  width: auto;
+}
+
+.filtros-listado .btn-limpiar-filtros {
+  white-space: nowrap;
+}
