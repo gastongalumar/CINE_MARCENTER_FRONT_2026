@@ -74,8 +74,14 @@ export class SeatMapComponent {
   /** Modo sólo lectura (vista de ocupación para administradores). */
   @Input() soloLectura = false;
 
+  /** Máximo de asientos seleccionables en una compra (0 = sin límite). */
+  @Input() maxSeleccionados = 20;
+
   /** Emite el nuevo listado de asientos seleccionados. */
   @Output() readonly seleccionChange = new EventEmitter<string[]>();
+
+  /** Emite cuando se intenta superar el máximo de selección. */
+  @Output() readonly limiteAlcanzado = new EventEmitter<void>();
 
   private _filas = 0;
   private _columnas = 0;
@@ -134,6 +140,11 @@ export class SeatMapComponent {
     if (nueva.has(clave)) {
       nueva.delete(clave);
     } else {
+      const max = Number(this.maxSeleccionados) || 0;
+      if (max > 0 && nueva.size >= max) {
+        this.limiteAlcanzado.emit();
+        return;
+      }
       nueva.add(clave);
     }
 

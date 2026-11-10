@@ -16,16 +16,46 @@
   <div class="card app-card">
     <div class="card-header d-flex flex-wrap align-items-center gap-2">
       <h5 class="mb-0 me-auto">Funciones</h5>
-      <div class="form-check form-switch mb-0">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="soloVigentes"
-          [checked]="soloVigentes()"
-          (change)="actualizarSoloVigentes($any($event.target).checked)" />
-        <label class="form-check-label small" for="soloVigentes">Sólo vigentes</label>
-      </div>
       <span class="badge text-bg-secondary">{{ funcionesFiltradas().length }}</span>
+      <div class="filtros-listado">
+        <div class="form-check form-switch mb-0">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="soloVigentes"
+            [checked]="soloVigentes()"
+            (change)="actualizarSoloVigentes($any($event.target).checked)" />
+          <label class="form-check-label small" for="soloVigentes">Sólo vigentes</label>
+        </div>
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroDia()"
+          (change)="actualizarFiltroDia($any($event.target).value)"
+          aria-label="Filtrar por día">
+          <option value="">Todos los días</option>
+          @for (dia of diasOpciones(); track dia) {
+            <option [value]="dia">{{ dia | fechaApi: 'dd/MM/yyyy' }}</option>
+          }
+        </select>
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroHorario()"
+          (change)="actualizarFiltroHorario($any($event.target).value)"
+          aria-label="Filtrar por horario">
+          <option value="">Todos los horarios</option>
+          @for (hora of horariosOpciones(); track hora) {
+            <option [value]="hora">{{ hora }} hs</option>
+          }
+        </select>
+        @if (hayFiltrosActivos()) {
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm btn-limpiar-filtros"
+            (click)="limpiarFiltros()">
+            Limpiar
+          </button>
+        }
+      </div>
     </div>
     <div class="card-body">
       @if (errorCarga()) {

@@ -32,25 +32,52 @@ export class ListadoSalasComponent {
   readonly salas = signal<Sala[]>([]);
   readonly cargando = signal(true);
   readonly errorCarga = signal('');
+  readonly filtroNombre = signal('');
+  readonly filtroCapacidad = signal<number | null>(null);
   readonly pagina = signal(1);
   readonly pageSize = 6;
 
+  readonly nombresOpciones = computed(() =>
+    [...new Set(this.salas().map((s) => s.nombre).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, 'es')
+    )
+  );
+
+  readonly capacidadesOpciones = computed(() =>
+    [...new Set(this.salas().map((s) => this.capacidadDe(s)))].sort((a, b) => a - b)
+  );
+
+  readonly hayFiltrosActivos = computed(
+    () => !!this.filtroNombre() || this.filtroCapacidad() !== null
+  );
+
+  readonly salasFiltradas = computed(() => {
+    const nombre = this.filtroNombre();
+    const capacidad = this.filtroCapacidad();
+
+    return this.salas().filter((s) => {
+      if (nombre && s.nombre !== nombre) return false;
+      if (capacidad !== null && this.capacidadDe(s) !== capacidad) return false;
+      return true;
+    });
+  });
+
   readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.salas().length / this.pageSize))
+    Math.max(1, Math.ceil(this.salasFiltradas().length / this.pageSize))
   );
 
   readonly salasPagina = computed(() => {
     const start = (this.pagina() - 1) * this.pageSize;
-    return this.salas().slice(start, start + this.pageSize);
+    return this.salasFiltradas().slice(start, start + this.pageSize);
   });
 
   readonly rangoDesde = computed(() => {
-    if (!this.salas().length) return 0;
+    if (!this.salasFiltradas().length) return 0;
     return (this.pagina() - 1) * this.pageSize + 1;
   });
 
   readonly rangoHasta = computed(() =>
-    Math.min(this.pagina() * this.pageSize, this.salas().length)
+    Math.min(this.pagina() * this.pageSize, this.salasFiltradas().length)
   );
 
   private readonly initLoad = afterNextRender(() => this.cargarSalas());
@@ -68,6 +95,22 @@ export class ListadoSalasComponent {
         this.cargando.set(false);
       },
     });
+  }
+
+  actualizarFiltroNombre(valor: string): void {
+    this.filtroNombre.set(valor);
+    this.pagina.set(1);
+  }
+
+  actualizarFiltroCapacidad(valor: string): void {
+    this.filtroCapacidad.set(valor === '' ? null : Number(valor));
+    this.pagina.set(1);
+  }
+
+  limpiarFiltros(): void {
+    this.filtroNombre.set('');
+    this.filtroCapacidad.set(null);
+    this.pagina.set(1);
   }
 
   irAPagina(page: number): void {

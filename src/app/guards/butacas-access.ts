@@ -4,13 +4,15 @@ import { ToastrService } from 'ngx-toastr';
 import { puedeAccederButacas } from '../utils/butacas-access';
 
 /**
- * Solo deja pasar a `/butacas/:id` si la app autorizó ese id
+ * Solo deja pasar a `/butacas/:peliculaId/**` si la app autorizó ese id
  * (cartelera, ficha o login con returnUrl válido).
  */
 export const butacasAccessGuard: CanActivateFn = (route) => {
   const router = inject(Router);
   const toastr = inject(ToastrService);
-  const id = Number(route.paramMap.get('id'));
+  const id = Number(
+    route.paramMap.get('peliculaId') ?? route.parent?.paramMap.get('peliculaId')
+  );
 
   if (puedeAccederButacas(id)) {
     return true;

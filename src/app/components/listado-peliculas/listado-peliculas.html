@@ -16,13 +16,49 @@
   <div class="card app-card">
     <div class="card-header d-flex flex-wrap align-items-center gap-2">
       <h5 class="mb-0 me-auto">Películas</h5>
-      <span class="badge text-bg-secondary">{{ peliculas().length }}</span>
-      <input
-        type="search"
-        class="form-control form-control-sm buscador"
-        placeholder="Buscar…"
-        [value]="filtro()"
-        (input)="actualizarFiltro($any($event.target).value)" />
+      <span class="badge text-bg-secondary">{{ peliculasFiltradas().length }}</span>
+      <div class="filtros-listado">
+        <input
+          type="search"
+          class="form-control form-control-sm buscador"
+          placeholder="Buscar…"
+          list="peliculas-nombres"
+          [value]="filtro()"
+          (input)="actualizarFiltro($any($event.target).value)" />
+        <datalist id="peliculas-nombres">
+          @for (nombre of nombresOpciones(); track nombre) {
+            <option [value]="nombre"></option>
+          }
+        </datalist>
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroDuracion() ?? ''"
+          (change)="actualizarFiltroDuracion($any($event.target).value)"
+          aria-label="Filtrar por duración">
+          <option value="">Todas las duraciones</option>
+          @for (duracion of duracionesOpciones(); track duracion) {
+            <option [value]="duracion">{{ duracion }} min</option>
+          }
+        </select>
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroGenero()"
+          (change)="actualizarFiltroGenero($any($event.target).value)"
+          aria-label="Filtrar por género">
+          <option value="">Todos los géneros</option>
+          @for (genero of generosOpciones(); track genero) {
+            <option [value]="genero">{{ etiquetaGenero(genero) }}</option>
+          }
+        </select>
+        @if (hayFiltrosActivos()) {
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm btn-limpiar-filtros"
+            (click)="limpiarFiltros()">
+            Limpiar
+          </button>
+        }
+      </div>
     </div>
     <div class="card-body listado-body">
       @if (errorCarga()) {

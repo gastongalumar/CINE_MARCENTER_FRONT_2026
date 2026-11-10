@@ -6,7 +6,12 @@ import { AuthService } from '../../services/auth';
 import { CustomizacionService } from '../../services/customizacion';
 import { Customizacion } from '../../models/customizacion';
 import { environment } from '../../../environments/environment';
-import { autorizarButacas, peliculaIdDesdeButacasUrl } from '../../utils/butacas-access';
+import {
+  autorizarButacas,
+  autorizarFuncion,
+  funcionIdDesdeButacasUrl,
+  peliculaIdDesdeButacasUrl,
+} from '../../utils/butacas-access';
 import { esControlInvalido } from '../../utils/form-error';
 import { getErrorMessage } from '../../utils/api-error';
 
@@ -110,7 +115,8 @@ export class LoginComponent {
       fondoUrl: this.temaActual?.fondoUrl || '',
       logoTamano: this.logoSizePx + 'px',
       logoOpacity: (this.logoOpacityPercent / 100).toString(),
-      globalOpacity: this.temaActual?.globalOpacity
+      globalOpacity: this.temaActual?.globalOpacity,
+      efectoFestivo: this.temaActual?.efectoFestivo || 'ninguno'
     };
     this.customizacionService.aplicarTema(temaPreview);
   }
@@ -123,6 +129,10 @@ export class LoginComponent {
     const peliculaId = peliculaIdDesdeButacasUrl(this.returnUrl);
     if (peliculaId != null) {
       autorizarButacas(peliculaId);
+    }
+    const funcionId = funcionIdDesdeButacasUrl(this.returnUrl);
+    if (funcionId != null) {
+      autorizarFuncion(funcionId);
     }
   }
 
