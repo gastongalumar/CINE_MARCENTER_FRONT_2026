@@ -115,7 +115,8 @@ export class LoginComponent {
       fondoUrl: this.temaActual?.fondoUrl || '',
       logoTamano: this.logoSizePx + 'px',
       logoOpacity: (this.logoOpacityPercent / 100).toString(),
-      globalOpacity: this.temaActual?.globalOpacity
+      globalOpacity: this.temaActual?.globalOpacity,
+      efectoFestivo: this.temaActual?.efectoFestivo || 'ninguno'
     };
     this.customizacionService.aplicarTema(temaPreview);
   }

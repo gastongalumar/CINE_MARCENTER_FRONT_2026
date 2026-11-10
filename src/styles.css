@@ -1,6 +1,7 @@
 /* Global Stylesheet */
 @import 'ngx-toastr/toastr';
 @import './styles/toasts.css';
+@import './styles/efectos-festivos.css';
 
 /* Variables CSS del tema personalizable (dark por defecto) */
 :root {
