@@ -24,12 +24,15 @@ import { Sala, SalaRequest } from '../../models/sala';
 import { getErrorMessage } from '../../utils/api-error';
 import { aplicarErroresDeCampos, esControlInvalido, limpiarErroresDeCampos } from '../../utils/form-error';
 
-/** Capacidad total de la sala ≤ 320 butacas (CapacidadSalaValidator del backend). */
+/** Capacidad total: mínimo 50 y máximo 320 butacas (convive con max filas/columnas). */
 function capacidadValida(group: AbstractControl): ValidationErrors | null {
   const filas = Number(group.get('filas')?.value);
   const columnas = Number(group.get('columnas')?.value);
   if (!filas || !columnas) return null;
-  return filas * columnas <= 320 ? null : { capacidad: true };
+  const capacidad = filas * columnas;
+  if (capacidad < 50) return { capacidadMinima: true };
+  if (capacidad > 320) return { capacidad: true };
+  return null;
 }
 
 @Component({
