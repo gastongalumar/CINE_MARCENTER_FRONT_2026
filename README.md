@@ -8,6 +8,8 @@ La aplicación permite consultar la cartelera, seleccionar funciones y butacas, 
 
 > **Alcance de este repositorio:** cliente web Angular. Los datos, las reglas de negocio definitivas, la autenticación y la autorización de las operaciones protegidas dependen del backend configurado.
 
+> **Defensa oral:** ver [GUIA-DEFENSA.md](GUIA-DEFENSA.md) (mapa completo del frontend, flujo de compra, efectos festivos y frases listas).
+
 ---
 
 ## Contenido
@@ -26,12 +28,13 @@ La aplicación permite consultar la cartelera, seleccionar funciones y butacas, 
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Resolución de problemas](#resolución-de-problemas)
 - [Estado y limitaciones conocidas](#estado-y-limitaciones-conocidas)
+- [Guía de defensa](#guía-de-defensa)
 
 ## Descripción
 
-Cine Marcenter es una aplicación web para la experiencia de clientes y la operación administrativa de un cine. El cliente público puede explorar la cartelera y consultar películas. Los usuarios autenticados pueden continuar con la selección de asientos, gestionar sus reservas y acceder a las funciones de su cuenta. Los administradores disponen de un panel protegido para gestionar contenidos y consultar información operativa.
+Cine Marcenter es una aplicación web para la experiencia de clientes y la operación administrativa de un cine. El cliente público puede explorar la cartelera y consultar películas. Los usuarios autenticados pueden continuar con la selección de horarios y asientos, agregar combos o códigos de descuento, gestionar sus reservas y acceder a las funciones de su cuenta. Los administradores disponen de un panel protegido para gestionar contenidos, candy, descuentos, validación de tickets, estadísticas y la personalización visual (incluido un efecto festivo global).
 
-El frontend sigue una arquitectura de aplicación Angular basada en componentes standalone, rutas con carga diferida, servicios para comunicación HTTP, modelos TypeScript para los datos y guards para controlar el acceso de navegación según la sesión y el rol.
+El frontend sigue una arquitectura Angular basada en componentes standalone, rutas con carga diferida (`loadComponent`), change detection zoneless, servicios para comunicación HTTP y orquestación de flujos, modelos TypeScript, guards de autenticación/rol/flujo de compra e interceptores HTTP.
 
 ## Funcionalidades
 
@@ -39,12 +42,14 @@ El frontend sigue una arquitectura de aplicación Angular basada en componentes 
 
 - Consulta de cartelera, estrenos y próximas películas.
 - Visualización de la ficha y las funciones de una película.
-- Registro, inicio de sesión y autenticación mediante el flujo OAuth2 implementado por la aplicación y el backend.
-- Selección de función y butacas.
-- Reserva de entradas, inicio del flujo de pago y páginas de resultado.
+- Registro, inicio de sesión, recuperación de contraseña y autenticación OAuth2 (Google) con el backend.
+- Flujo de compra en tres pasos: horarios → asientos (con retención temporal / holds) → checkout.
+- Combos de candy y códigos de descuento en el checkout.
+- Reserva de entradas, Mercado Pago y páginas de resultado (`exito` / `error` / `pendiente`).
 - Consulta de tickets y reservas propias.
 - Visualización y edición de información de perfil.
-- Páginas informativas y de contacto.
+- Páginas informativas de contacto, cumpleaños, candy y promociones.
+- Splash/loading global (overlay, no es una ruta) alineado al tema del cine.
 
 ### Operación administrativa
 
@@ -52,11 +57,12 @@ El frontend sigue una arquitectura de aplicación Angular basada en componentes 
 - Gestión de películas: listado, creación, edición, eliminación y carga de imágenes.
 - Gestión de salas y su capacidad.
 - Gestión de funciones, incluyendo creación individual y generación por rango.
-- Administración de usuarios: búsqueda, baja, reactivación y eliminación de administradores, según las operaciones provistas por la API.
-- Creación de administradores.
-- Validación de tickets.
+- Administración de combos candy y códigos de descuento.
+- Administración de usuarios: búsqueda, baja, reactivación y operaciones sobre administradores, según la API.
+- Creación de administradores (**solo SUPERADMIN**).
+- Validación de tickets en puerta.
 - Consulta de estadísticas.
-- Personalización visual del tema.
+- Personalización visual del tema (colores, tipografías, logo, fondo imagen/video, nombre del cine) y **efectos festivos** (navidad, halloween, año nuevo).
 
 Las operaciones disponibles para cada módulo dependen de los endpoints expuestos por el backend. Por ejemplo, la API utilizada por este frontend ofrece alta, listado y baja de funciones; el cliente no implementa edición de funciones.
 
@@ -64,13 +70,14 @@ Las operaciones disponibles para cada módulo dependen de los endpoints expuesto
 
 | Área | Tecnología |
 |---|---|
-| Framework | Angular 22 |
+| Framework | Angular 22 (standalone, zoneless) |
 | Lenguaje | TypeScript |
 | Interfaz y estilos | Angular Material/CDK, Bootstrap 5, CSS y SCSS |
-| Formularios | Angular Reactive Forms en formularios de autenticación y gestión |
+| Formularios | Angular Reactive Forms en autenticación y gestión |
 | Comunicación | Angular `HttpClient`, RxJS e interceptores HTTP |
 | Visualización de datos | Chart.js y `ng2-charts` |
 | Notificaciones | `ngx-toastr` |
+| Efectos visuales | `@tsparticles/engine`, `slim`, `plugin-emitters`, `updater-wobble` |
 | Pruebas unitarias | Vitest, mediante Angular CLI |
 | Gestor de paquetes | npm |
 
@@ -81,20 +88,47 @@ Las versiones exactas de dependencias se encuentran en `package.json` y `package
 La aplicación separa las responsabilidades principales de la siguiente manera:
 
 - **Páginas y componentes:** presentan la interfaz y coordinan las interacciones.
-- **Servicios:** encapsulan las llamadas HTTP y la lógica transversal de autenticación, reservas, pagos y personalización.
+- **Servicios:** encapsulan las llamadas HTTP y la lógica transversal (autenticación, reservas, holds, pagos, compra, personalización).
 - **Modelos:** describen los DTO y entidades intercambiados con la API.
-- **Guards:** protegen rutas que requieren autenticación o un rol específico.
-- **Interceptors:** adjuntan las credenciales de sesión a las solicitudes y centralizan el tratamiento de errores HTTP.
-- **Pipes y utilidades:** reúnen transformaciones de presentación, manejo de fechas, JWT y errores de formularios.
+- **Guards:** protegen rutas por sesión, rol y continuidad del flujo de compra (`auth`, `role`, `butacasAccess`, `funcionAccess`, `compraPago`).
+- **Interceptors:** adjuntan el Bearer JWT y centralizan el tratamiento de errores HTTP (con opción de omitir toast por `HttpContext`).
+- **Effects:** presets de partículas para efectos festivos (`src/app/effects/`).
+- **Pipes y utilidades:** transformaciones de presentación, fechas, JWT, tickets de navegación a butacas y errores de formularios.
 - **Entornos:** contienen la dirección base de la API.
 
 Las páginas se cargan de forma diferida desde `src/app/app.routes.ts`. La configuración de Angular y los proveedores HTTP se encuentran en `src/app/app.config.ts`.
 
 ### Autenticación y autorización
 
-Los roles contemplados por el frontend son `CLIENTE` y `ADMINISTRADOR`. La aplicación conserva el token JWT en `sessionStorage`, aislando la sesión por pestaña, y deriva la información del rol de la respuesta de autenticación o de los claims del token.
+Los roles contemplados por el frontend son `CLIENTE`, `ADMINISTRADOR` y `SUPERADMIN`.
 
-`authGuard` limita el acceso a rutas que requieren una sesión vigente y `roleGuard` restringe las rutas administrativas a `ADMINISTRADOR`. Estos controles mejoran la navegación de la interfaz, pero **no sustituyen la autorización del servidor**: el backend debe validar el token, el rol y los permisos en cada endpoint protegido.
+- `ADMINISTRADOR` y `SUPERADMIN` acceden al panel (`/admin/**`).
+- Solo `SUPERADMIN` puede usar `/admin/crear-admin`.
+- El helper `esStaff` agrupa ambos roles de personal.
+
+La aplicación conserva el token JWT en `sessionStorage` (clave `access_token`), aislando la sesión por pestaña, y deriva el rol de la respuesta de autenticación o de los claims del token. El estado de sesión se expone con **signals** en `AuthService`.
+
+`authGuard` limita el acceso a rutas con sesión vigente y `roleGuard` restringe rutas administrativas. Los guards del flujo de compra (`butacasAccessGuard`, `funcionAccessGuard`, `compraPagoGuard`) evitan deep-links incompletos y bloquean la compra al personal. Estos controles mejoran la navegación de la interfaz, pero **no sustituyen la autorización del servidor**: el backend debe validar el token, el rol y los permisos en cada endpoint protegido.
+
+### Flujo de compra (resumen)
+
+```text
+/butacas/:peliculaId
+  → /butacas/:peliculaId/funcion/:funcionId
+  → /butacas/:peliculaId/funcion/:funcionId/pago
+```
+
+Estado compartido en memoria: `CompraFlujoService` (máx. 20 entradas). Concurrencia de asientos mediante `HoldService` y polling del estado de la función. Checkout opcional con candy y descuentos; pago con Mercado Pago o emisión directa de ticket.
+
+### Personalización y efectos festivos
+
+`CustomizacionService` carga y guarda el tema (`/customizacion`), aplica variables CSS, fondo imagen o video, y un efecto festivo opcional. El efecto combina:
+
+1. Atributo `data-efecto` en `<html>` + CSS (`src/styles/efectos-festivos.css`)
+2. Overlay DOM (atmósfera y props)
+3. Canvas tsparticles (presets en `src/app/effects/efecto-festivo.presets.ts`)
+
+La UI de administración está en `/admin/tema` (preview local hasta guardar).
 
 ## Requisitos previos
 
@@ -164,7 +198,7 @@ export const environment = {
 ```
 
 - `apiUrl` es el prefijo utilizado por los servicios, por ejemplo `http://localhost:8080/api/peliculas`.
-- `baseUrl` se utiliza cuando una integración necesita la raíz del servidor.
+- `baseUrl` se utiliza cuando una integración necesita la raíz del servidor (por ejemplo OAuth2 Google).
 
 Para desarrollo local, reemplazá host y puerto por los que correspondan a tu backend. Para desplegar en otro entorno, configurá la URL del servidor apropiada antes de compilar y revisá que el backend permita el origen del frontend mediante CORS.
 
@@ -232,28 +266,60 @@ El repositorio también define un workflow de GitHub Actions en `.github/workflo
 
 ## Rutas principales
 
+### Públicas
+
 | Ruta | Acceso | Propósito |
 |---|---|---|
 | `/cartelera` | Público | Cartelera y consulta de películas. |
 | `/pelicula/:id` | Público | Detalle de una película. |
 | `/login` | Público | Inicio de sesión. |
 | `/registro` | Público | Registro de clientes. |
+| `/olvidar-password` | Público | Solicitud de recuperación de contraseña. |
+| `/reset-password` | Público | Definir nueva contraseña. |
+| `/oauth2/redirect` | Público | Handoff del JWT tras login con Google. |
 | `/contacto` | Público | Información de contacto. |
-| `/butacas/:id` | Sesión requerida | Selección de asientos para una función. |
+| `/contacto/cumpleanos` | Público | Cumpleaños. |
+| `/contacto/candy` | Público | Candy bar informativo. |
+| `/contacto/promos` | Público | Promociones. |
+
+### Cliente autenticado
+
+| Ruta | Acceso | Propósito |
+|---|---|---|
+| `/butacas/:peliculaId` | Sesión + ticket butacas | Selección de horario. |
+| `/butacas/:peliculaId/funcion/:funcionId` | + ticket función | Selección de asientos (holds). |
+| `/butacas/:peliculaId/funcion/:funcionId/pago` | + `compraPagoGuard` | Checkout (candy, descuento, pago). |
 | `/mis-reservas` | Sesión requerida | Reservas del usuario. |
 | `/perfil` | Sesión requerida | Perfil de usuario. |
 | `/ticket/:numero` | Sesión requerida | Consulta del ticket. |
-| `/admin` | Solo administrador | Panel de administración. |
-| `/admin/peliculas` | Solo administrador | Gestión de películas. |
-| `/admin/funciones` | Solo administrador | Gestión de funciones. |
-| `/admin/salas` | Solo administrador | Gestión de salas. |
-| `/admin/usuarios` | Solo administrador | Administración de usuarios. |
-| `/admin/estadisticas` | Solo administrador | Indicadores y estadísticas. |
-| `/admin/validar-ticket` | Solo administrador | Validación de tickets. |
-| `/admin/crear-admin` | Solo administrador | Alta de administradores. |
-| `/admin/tema` | Solo administrador | Personalización visual. |
+| `/pago/exito` | Sesión requerida | Resultado de pago exitoso. |
+| `/pago/error` | Sesión requerida | Resultado de pago rechazado. |
+| `/pago/pendiente` | Sesión requerida | Resultado de pago pendiente. |
 
-Las rutas adicionales, estados de pago y condiciones de acceso se mantienen en `src/app/app.routes.ts`.
+### Administración
+
+| Ruta | Acceso | Propósito |
+|---|---|---|
+| `/admin` | ADMINISTRADOR o SUPERADMIN | Panel de administración. |
+| `/admin/peliculas` | Staff | Gestión de películas. |
+| `/admin/peliculas/listado` | Staff | Listado de películas. |
+| `/admin/funciones` | Staff | Gestión de funciones. |
+| `/admin/funciones/listado` | Staff | Listado de funciones. |
+| `/admin/salas` | Staff | Gestión de salas. |
+| `/admin/salas/listado` | Staff | Listado de salas. |
+| `/admin/candy` | Staff | Combos candy. |
+| `/admin/candy/nuevo` | Staff | Alta de combo. |
+| `/admin/candy/:id` | Staff | Edición de combo. |
+| `/admin/descuentos` | Staff | Códigos de descuento. |
+| `/admin/descuentos/nuevo` | Staff | Alta de código. |
+| `/admin/descuentos/:id` | Staff | Edición de código. |
+| `/admin/usuarios` | Staff | Administración de usuarios. |
+| `/admin/estadisticas` | Staff | Indicadores y estadísticas. |
+| `/admin/validar-ticket` | Staff | Validación de tickets. |
+| `/admin/tema` | Staff | Personalización visual y efectos festivos. |
+| `/admin/crear-admin` | Solo SUPERADMIN | Alta de administradores. |
+
+Las condiciones de acceso completas se mantienen en `src/app/app.routes.ts`.
 
 ## Integración con el backend
 
@@ -261,16 +327,22 @@ La comunicación se realiza con `HttpClient`; no se utiliza `json-server`. Entre
 
 | Servicio | Responsabilidad |
 |---|---|
-| `AuthService` | Inicio de sesión, registro, estado de sesión y rol. |
+| `AuthService` | Login, registro, sesión, roles, OAuth helpers y alta de admin. |
 | `PeliculaService` | Consulta y operaciones CRUD de películas, incluida la carga de póster. |
 | `SalaService` | Consulta y operaciones CRUD de salas y sus asientos. |
-| `FuncionService` | Consulta, creación individual o por rango y eliminación de funciones. |
+| `FuncionService` | Consulta, creación individual o por rango, baja y estado de asientos. |
 | `ReservaService` | Reservas, consulta de tickets, cancelación y validación. |
-| `HoldService` | Operaciones de retención temporal de asientos. |
-| `PaymentService` | Creación de preferencia de pago. |
+| `HoldService` | Retención temporal de asientos (crear / liberar). |
+| `CompraFlujoService` | Estado in-memory del funnel horarios → asientos → pago. |
+| `PaymentService` | Creación de preferencia de pago (Mercado Pago). |
+| `CandyComboService` | Combos candy (consulta y administración). |
+| `CodigoDescuentoService` | Códigos de descuento (CRUD y validación en checkout). |
 | `EstadisticasService` | Indicadores y estadísticas para administración. |
-| `UsuarioService` | Consulta y administración de usuarios. |
-| `CustomizacionService` | Lectura y persistencia de personalización visual. |
+| `UsuarioService` | Consulta y administración de usuarios / perfil. |
+| `CustomizacionService` | Tema visual, fondo y efectos festivos. |
+| `ImageService` | Resolución / manejo de URLs de imagen. |
+| `LoadingService` | Contador del splash/loading global. |
+| `ConfirmDialogService` | Diálogos de confirmación (Material). |
 
 Los servicios se encuentran en `src/app/services/`. Las rutas y contratos concretos deben mantenerse alineados con la versión del backend utilizada. Los endpoints administrativos requieren que el backend realice sus propias verificaciones de autenticación y autorización.
 
@@ -279,21 +351,23 @@ Los servicios se encuentran en `src/app/services/`. Las rutas y contratos concre
 ```text
 src/
 ├── app/
-│   ├── components/       # Componentes reutilizables de interfaz
-│   ├── guards/           # Guards de autenticación, rol y acceso a butacas
-│   ├── interceptors/     # Interceptores de autenticación y errores
+│   ├── components/       # Header, footer, listados, pickers, etc.
+│   ├── effects/          # Presets tsparticles de efectos festivos
+│   ├── guards/           # Auth, rol y acceso al flujo de compra
+│   ├── interceptors/     # Bearer JWT y errores HTTP
 │   ├── models/           # Tipos y modelos de datos
-│   ├── pages/            # Páginas organizadas por funcionalidad
-│   ├── pipes/            # Formateo y presentación de datos
-│   ├── services/         # Servicios de aplicación e integración HTTP
-│   ├── utils/            # Funciones auxiliares y utilidades
-│   ├── app.config.ts     # Proveedores y configuración de la aplicación
-│   └── app.routes.ts     # Definición de rutas
-├── assets/               # Imágenes y otros recursos estáticos
-├── environments/         # Configuración de API y entorno
+│   ├── pages/            # Páginas por funcionalidad (incl. compra/)
+│   ├── pipes/            # Formateo y presentación
+│   ├── services/         # HTTP y orquestación
+│   ├── utils/            # JWT, butacas-access, errores, fechas…
+│   ├── app.config.ts     # Proveedores y configuración
+│   └── app.routes.ts     # Definición de rutas lazy
+├── assets/               # Recursos estáticos
+├── environments/         # apiUrl / baseUrl
+├── styles/               # Estilos compartidos (p. ej. efectos-festivos.css)
 ├── index.html
-├── main.ts               # Punto de entrada del navegador
-└── styles.css            # Estilos globales
+├── main.ts
+└── styles.css            # Estilos globales y variables de tema
 ```
 
 Otros archivos relevantes:
@@ -303,6 +377,7 @@ Otros archivos relevantes:
 - `package-lock.json`: versiones reproducibles de dependencias.
 - `tsconfig*.json`: configuración de TypeScript.
 - `.github/workflows/build.yml`: compilación automatizada en GitHub Actions.
+- `GUIA-DEFENSA.md`: guía modo supervivencia para la defensa oral.
 
 ## Resolución de problemas
 
@@ -319,7 +394,11 @@ La política CORS debe configurarse en el backend para permitir el origen del fr
 
 ### Error de autenticación o rutas administrativas inaccesibles
 
-Verificá que el usuario exista en el backend, que el login devuelva un JWT válido y que el token contenga el rol esperado (`CLIENTE` o `ADMINISTRADOR`). Los guards del frontend no otorgan permisos en el servidor.
+Verificá que el usuario exista en el backend, que el login devuelva un JWT válido y que el token contenga el rol esperado (`CLIENTE`, `ADMINISTRADOR` o `SUPERADMIN`). Los guards del frontend no otorgan permisos en el servidor. Para crear administradores se requiere un usuario `SUPERADMIN`.
+
+### No puedo entrar directo a `/butacas/...`
+
+El flujo de compra usa tickets de navegación en `sessionStorage`. Hay que llegar desde cartelera/ficha (o un `returnUrl` de login válido). Pegar la URL no basta.
 
 ### Fallo al instalar dependencias
 
@@ -338,8 +417,17 @@ Ejecutá `npm run build` y revisá el primer error reportado por Angular o TypeS
 - El backend es un proyecto independiente y no se incluye aquí.
 - La URL configurada por defecto es local (`http://localhost:8080/api`); debe adaptarse al entorno de ejecución.
 - Las funciones no cuentan con operación de edición en la API utilizada por este frontend.
-- La protección del cliente debe complementarse con autorización en el servidor.
+- La protección del cliente (guards) debe complementarse con autorización en el servidor.
+- La concurrencia de butacas depende de holds y del estado expuesto por la API; el polling del mapa es UX, no fuente de verdad.
+- Los efectos festivos dependen de que la customización esté persistida y servida por `/customizacion`.
+- Existen carpetas legacy de selección de asientos sin rutas activas; el flujo productivo es `pages/compra/*`.
 - La compilación de producción aplica un presupuesto de tamaño al bundle inicial, definido en `angular.json`.
+
+## Guía de defensa
+
+Para preparar la defensa oral del proyecto (arquitectura, auth, compra, admin, tema y efectos festivos, preguntas típicas), usar:
+
+**[GUIA-DEFENSA.md](GUIA-DEFENSA.md)**
 
 ## Equipo y contexto académico
 
