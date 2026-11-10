@@ -14,9 +14,39 @@
   </div>
 
   <div class="card app-card">
-    <div class="card-header d-flex align-items-center">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2">
       <h5 class="mb-0 me-auto">Salas</h5>
-      <span class="badge text-bg-secondary">{{ salas().length }}</span>
+      <span class="badge text-bg-secondary">{{ salasFiltradas().length }}</span>
+      <div class="filtros-listado">
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroNombre()"
+          (change)="actualizarFiltroNombre($any($event.target).value)"
+          aria-label="Filtrar por nombre">
+          <option value="">Todos los nombres</option>
+          @for (nombre of nombresOpciones(); track nombre) {
+            <option [value]="nombre">{{ nombre }}</option>
+          }
+        </select>
+        <select
+          class="form-select form-select-sm filtro-select"
+          [value]="filtroCapacidad() ?? ''"
+          (change)="actualizarFiltroCapacidad($any($event.target).value)"
+          aria-label="Filtrar por capacidad">
+          <option value="">Todas las capacidades</option>
+          @for (capacidad of capacidadesOpciones(); track capacidad) {
+            <option [value]="capacidad">{{ capacidad }} butacas</option>
+          }
+        </select>
+        @if (hayFiltrosActivos()) {
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm btn-limpiar-filtros"
+            (click)="limpiarFiltros()">
+            Limpiar
+          </button>
+        }
+      </div>
     </div>
     <div class="card-body">
       @if (errorCarga()) {
@@ -29,9 +59,13 @@
             <span class="visually-hidden">Cargando…</span>
           </div>
         </div>
-      } @else if (salas().length === 0) {
+      } @else if (salasFiltradas().length === 0) {
         <div class="alert alert-info mb-0">
-          Todavía no hay salas cargadas. Creá la primera desde el formulario.
+          @if (salas().length === 0) {
+            Todavía no hay salas cargadas. Creá la primera desde el formulario.
+          } @else {
+            No hay salas que coincidan con el filtro.
+          }
         </div>
       } @else {
         <div class="table-responsive">
@@ -80,7 +114,7 @@
 
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 paginador">
           <span class="text-muted small">
-            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ salas().length }}
+            Mostrando {{ rangoDesde() }}–{{ rangoHasta() }} de {{ salasFiltradas().length }}
           </span>
           <div class="btn-group btn-group-sm">
             <button
