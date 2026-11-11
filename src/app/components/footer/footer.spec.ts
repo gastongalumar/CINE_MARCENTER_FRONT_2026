@@ -1,9 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { FooterComponent } from './footer';
 
 describe('FooterComponent', () => {
-  let component: FooterComponent;
   let fixture: ComponentFixture<FooterComponent>;
 
   beforeEach(async () => {
@@ -12,11 +10,15 @@ describe('FooterComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);
-    component = fixture.componentInstance;
     await fixture.whenStable();
+    fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('crea y muestra branding / soporte', () => {
+    expect(fixture.componentInstance).toBeTruthy();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('footer')).toBeTruthy();
+    expect(el.textContent).toContain('CineMarcenter');
+    expect(el.textContent).toContain('soporte@cineapp.local');
   });
 });

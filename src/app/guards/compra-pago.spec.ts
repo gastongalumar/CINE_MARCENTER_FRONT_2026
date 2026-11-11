@@ -73,4 +73,30 @@ describe('compraPagoGuard', () => {
     compra.setSeleccion(['A1', 'A2']);
     expect(runGuard('12', '5')).toBe(true);
   });
+
+  it('funcionId inválido (NaN) redirige a asientos con NaN en la URL', () => {
+    // Number('abc') === NaN; tieneSeleccionPara(NaN) es siempre false.
+    compra.setContexto(12, 5);
+    compra.setSeleccion(['A1']);
+    const result = runGuard('12', 'abc') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(
+      expect.objectContaining({ commands: ['/butacas', 12, 'funcion', NaN] })
+    );
+    expect(toastrMock.info).toHaveBeenCalled();
+  });
+
+  it('peliculaId inválido no bloquea si hay selección para la función', () => {
+    compra.setContexto(12, 5);
+    compra.setSeleccion(['A1']);
+    // El guard no valida peliculaId: solo admin + tieneSeleccionPara(funcionId).
+    expect(runGuard('xyz', '5')).toBe(true);
+  });
+
+  it('ambos ids inválidos sin selección redirige con NaN/NaN', () => {
+    const result = runGuard('nope', 'nope') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(
+      expect.objectContaining({ commands: ['/butacas', NaN, 'funcion', NaN] })
+    );
+    expect(toastrMock.info).toHaveBeenCalled();
+  });
 });

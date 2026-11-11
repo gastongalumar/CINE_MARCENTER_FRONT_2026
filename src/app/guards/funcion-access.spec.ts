@@ -52,4 +52,27 @@ describe('funcionAccessGuard', () => {
     const result = runGuard('12', '5') as UrlTree & { commands: unknown[] };
     expect(result).toEqual(expect.objectContaining({ commands: ['/butacas', 12] }));
   });
+
+  it('funcionId inválido (NaN) con peliculaId válido redirige a horarios', () => {
+    autorizarFuncion(5);
+    const result = runGuard('12', 'xyz') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(expect.objectContaining({ commands: ['/butacas', 12] }));
+    expect(toastrMock.warning).toHaveBeenCalled();
+  });
+
+  it('ambos ids inválidos redirige a cartelera', () => {
+    const result = runGuard('abc', 'xyz') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+    expect(toastrMock.warning).toHaveBeenCalled();
+  });
+
+  it('funcionId 0 o negativo redirige a horarios de la película', () => {
+    autorizarFuncion(5);
+    expect(runGuard('12', '0')).toEqual(
+      expect.objectContaining({ commands: ['/butacas', 12] })
+    );
+    expect(runGuard('12', '-1')).toEqual(
+      expect.objectContaining({ commands: ['/butacas', 12] })
+    );
+  });
 });

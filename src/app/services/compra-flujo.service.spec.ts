@@ -1,4 +1,4 @@
-import { CompraFlujoService } from './compra-flujo.service';
+import { CompraFlujoService, MAX_ENTRADAS_COMPRA } from './compra-flujo.service';
 
 describe('CompraFlujoService', () => {
   let service: CompraFlujoService;
@@ -35,5 +35,28 @@ describe('CompraFlujoService', () => {
     expect(service.funcionId).toBeNull();
     expect(service.asientosSeleccionados).toEqual([]);
     expect(service.consumirPreservarHolds()).toBe(false);
+  });
+
+  it('clear NO limpia peliculaId (estado parcial documentado)', () => {
+    service.setContexto(77, 10);
+    service.clear();
+    expect(service.peliculaId).toBe(77);
+  });
+
+  it('setContexto y clearSeleccion', () => {
+    service.setContexto(3, 8);
+    expect(service.peliculaId).toBe(3);
+    expect(service.funcionId).toBe(8);
+    service.setSeleccion(['C1', 'C2']);
+    service.clearSeleccion();
+    expect(service.asientosSeleccionados).toEqual([]);
+    expect(service.funcionId).toBe(8);
+  });
+
+  it('documenta MAX_ENTRADAS_COMPRA = 20 (límite aplicado en UI, no en el service)', () => {
+    expect(MAX_ENTRADAS_COMPRA).toBe(20);
+    // El service acepta más de 20; el tope vive en compra-asientos.
+    service.setSeleccion(Array.from({ length: 25 }, (_, i) => `A${i + 1}`));
+    expect(service.asientosSeleccionados.length).toBe(25);
   });
 });
