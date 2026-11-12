@@ -62,4 +62,22 @@ describe('RegistroComponent', () => {
     component.form.controls.confirmPassword.markAsTouched();
     expect(component.passwordsNoCoinciden()).toBe(true);
   });
+
+  it('telefonoIncompleto() cuando solo hay área o número y touched', () => {
+    component.form.patchValue({
+      nombre: 'A',
+      apellido: 'B',
+      email: 'a@b.com',
+      password: '123456',
+      confirmPassword: '123456',
+      codigoArea: '0223',
+      numeroLocal: '',
+    });
+    expect(component.telefonoIncompleto()).toBe(false);
+    component.form.controls.codigoArea.markAsTouched();
+    expect(component.form.hasError('telefonoIncompleto') || component.form.hasError('telefonoInvalido')).toBe(
+      true
+    );
+    expect(component.telefonoIncompleto()).toBe(true);
+  });
 });

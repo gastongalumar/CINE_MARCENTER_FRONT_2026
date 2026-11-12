@@ -107,6 +107,16 @@ export class CrearAdminComponent {
     );
   }
 
+  telefonoIncompleto(): boolean {
+    return (
+      (this.form.hasError('telefonoIncompleto') || this.form.hasError('telefonoInvalido')) &&
+      (!!this.form.get('codigoArea')?.touched ||
+        !!this.form.get('codigoArea')?.dirty ||
+        !!this.form.get('numeroLocal')?.touched ||
+        !!this.form.get('numeroLocal')?.dirty)
+    );
+  }
+
   onCampoBlur(): void {
     refreshView(this.cdr);
   }

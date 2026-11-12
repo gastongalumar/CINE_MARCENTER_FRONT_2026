@@ -10,8 +10,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { CandyComboService } from '../../services/candy-combo';
+import { esControlInvalido } from '../../utils/form-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -32,7 +33,9 @@ export class AdminCandyFormComponent implements OnDestroy {
   private formSub: Subscription | null = null;
 
   private readonly init = afterNextRender(() => {
-    this.formSub = this.form.statusChanges.subscribe(() => refreshView(this.cdr));
+    this.formSub = merge(this.form.statusChanges, this.form.valueChanges).subscribe(() =>
+      refreshView(this.cdr)
+    );
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       const id = Number(idParam);
@@ -59,6 +62,10 @@ export class AdminCandyFormComponent implements OnDestroy {
 
   get titulo(): string {
     return this.editandoId ? 'Editar combo' : 'Nuevo combo';
+  }
+
+  esInvalido(campo: string): boolean {
+    return esControlInvalido(this.form.get(campo));
   }
 
   ngOnDestroy(): void {

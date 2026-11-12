@@ -56,4 +56,17 @@ describe('PerfilComponent', () => {
     component.form.controls.nombre.setValue('A'.repeat(20));
     expect(component.form.controls.nombre.valid).toBe(true);
   });
+
+  it('codigoArea y numeroLocal fallan pattern; esInvalido exige touched', () => {
+    component.form.controls.codigoArea.setValue('abc');
+    component.form.controls.numeroLocal.setValue('15');
+    expect(component.form.controls.codigoArea.hasError('pattern')).toBe(true);
+    expect(component.form.controls.numeroLocal.hasError('pattern')).toBe(true);
+    expect(component.esInvalido('codigoArea')).toBe(false);
+
+    component.form.controls.codigoArea.markAsTouched();
+    component.form.controls.numeroLocal.markAsTouched();
+    expect(component.esInvalido('codigoArea')).toBe(true);
+    expect(component.esInvalido('numeroLocal')).toBe(true);
+  });
 });

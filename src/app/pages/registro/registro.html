@@ -79,7 +79,7 @@
               formControlName="codigoArea"
               placeholder="0223"
               inputmode="numeric"
-              [class.is-invalid]="esInvalido('codigoArea')" />
+              [class.is-invalid]="esInvalido('codigoArea') || telefonoIncompleto()" />
             @if (esInvalido('codigoArea')) {
               <div class="invalid-feedback d-block">Ej.: 0223</div>
             }
@@ -95,10 +95,12 @@
                 formControlName="numeroLocal"
                 placeholder="5678912"
                 inputmode="numeric"
-                [class.is-invalid]="esInvalido('numeroLocal')" />
+                [class.is-invalid]="esInvalido('numeroLocal') || telefonoIncompleto()" />
             </div>
             @if (esInvalido('numeroLocal')) {
               <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+            } @else if (telefonoIncompleto()) {
+              <div class="invalid-feedback d-block">Completá área y número (sin 15), o dejá ambos vacíos.</div>
             }
             <small class="text-muted">Opcional. Ej.: 0223 / 5678912</small>
           </div>

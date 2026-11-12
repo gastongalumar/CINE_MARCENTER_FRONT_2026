@@ -69,5 +69,30 @@ describe('AdminDescuentoFormComponent', () => {
     component.form.patchValue({ tipo: 'MONTO_FIJO', valor: 150 });
     expect(component.form.controls.valor.errors).toBeNull();
   });
+
+  it('esInvalido es true solo si el control es inválido y touched/dirty', () => {
+    component.form.controls.valor.setValue(150);
+    expect(component.esInvalido('valor')).toBe(false);
+
+    component.form.controls.valor.markAsTouched();
+    expect(component.esInvalido('valor')).toBe(true);
+
+    component.form.controls.valor.setValue(50);
+    expect(component.esInvalido('valor')).toBe(false);
+  });
+
+  it('usosMaximos: null/vacío válido; 0 y negativos fallan min(1)', () => {
+    component.form.controls.usosMaximos.setValue(null);
+    expect(component.form.controls.usosMaximos.errors).toBeNull();
+
+    component.form.controls.usosMaximos.setValue(0);
+    expect(component.form.controls.usosMaximos.hasError('min')).toBe(true);
+
+    component.form.controls.usosMaximos.setValue(-20);
+    expect(component.form.controls.usosMaximos.hasError('min')).toBe(true);
+
+    component.form.controls.usosMaximos.setValue(5);
+    expect(component.form.controls.usosMaximos.errors).toBeNull();
+  });
 });
 

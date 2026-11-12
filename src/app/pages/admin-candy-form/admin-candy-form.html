@@ -35,7 +35,17 @@
                 id="nombreCombo"
                 class="form-control"
                 formControlName="nombre"
-                placeholder="Ej.: Combo Clásico" />
+                placeholder="Ej.: Combo Clásico"
+                [class.is-invalid]="esInvalido('nombre')" />
+              @if (esInvalido('nombre')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.nombre.errors?.['required']) {
+                    El nombre es obligatorio.
+                  } @else if (form.controls.nombre.errors?.['maxlength']) {
+                    Máximo 80 caracteres.
+                  }
+                </div>
+              }
             </div>
 
             <div class="mb-2">
@@ -50,7 +60,22 @@
             <div class="row g-2">
               <div class="col-md-6 mb-2">
                 <label class="form-label" for="precioCombo">Precio *</label>
-                <input id="precioCombo" type="number" class="form-control" formControlName="precio" min="1" />
+                <input
+                  id="precioCombo"
+                  type="number"
+                  class="form-control"
+                  formControlName="precio"
+                  min="1"
+                  [class.is-invalid]="esInvalido('precio')" />
+                @if (esInvalido('precio')) {
+                  <div class="invalid-feedback d-block">
+                    @if (form.controls.precio.errors?.['required']) {
+                      El precio es obligatorio.
+                    } @else if (form.controls.precio.errors?.['min']) {
+                      El precio debe ser al menos 1.
+                    }
+                  </div>
+                }
               </div>
               <div class="col-md-6 mb-2">
                 <label class="form-label" for="iconoCombo">Ícono Material</label>
