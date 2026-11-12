@@ -3,7 +3,10 @@ import { authGuard } from './guards/auth';
 import { butacasAccessGuard } from './guards/butacas-access';
 import { compraPagoGuard } from './guards/compra-pago';
 import { funcionAccessGuard } from './guards/funcion-access';
+import { guestGuard } from './guards/guest';
+import { resetTokenGuard } from './guards/reset-token';
 import { roleGuard } from './guards/role';
+import { ticketOwnerGuard } from './guards/ticket-owner';
 
 /**
  * Rutas de la aplicación.
@@ -23,6 +26,7 @@ export const routes: Routes = [
         path: 'login',
         title: 'Iniciar sesión | Cinemacenter',
         loadComponent: () => import('./pages/login/login').then((m) => m.LoginComponent),
+        canActivate: [guestGuard],
     },
     {
         path: 'oauth2/redirect',
@@ -36,18 +40,21 @@ export const routes: Routes = [
         path: 'registro',
         title: 'Crear cuenta | Cinemacenter',
         loadComponent: () => import('./pages/registro/registro').then((m) => m.RegistroComponent),
+        canActivate: [guestGuard],
     },
     {
         path: 'olvidar-password',
         title: 'Recuperar contraseña | Cinemacenter',
         loadComponent: () =>
             import('./pages/olvidar-password/olvidar-password').then((m) => m.OlvidarPasswordComponent),
+        canActivate: [guestGuard],
     },
     {
         path: 'reset-password',
         title: 'Nueva contraseña | Cinemacenter',
         loadComponent: () =>
             import('./pages/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
+        canActivate: [resetTokenGuard],
     },
     {
         path: 'cartelera',
@@ -95,7 +102,13 @@ export const routes: Routes = [
         title: 'Confirmar pago | Cinemacenter',
         loadComponent: () =>
             import('./pages/compra/compra-checkout').then((m) => m.CompraCheckoutComponent),
-        canActivate: [authGuard, butacasAccessGuard, funcionAccessGuard, compraPagoGuard],
+        canActivate: [
+            authGuard,
+            roleGuard('CLIENTE'),
+            butacasAccessGuard,
+            funcionAccessGuard,
+            compraPagoGuard,
+        ],
     },
     {
         path: 'butacas/:peliculaId/funcion/:funcionId',
@@ -109,20 +122,21 @@ export const routes: Routes = [
         title: 'Seleccionar horario | Cinemacenter',
         loadComponent: () =>
             import('./pages/compra/compra-horarios').then((m) => m.CompraHorariosComponent),
-        canActivate: [authGuard, butacasAccessGuard],
+        // Público: ver horarios sin login. Asientos/pago siguen con authGuard.
+        canActivate: [butacasAccessGuard],
     },
     {
         path: 'ticket/:numero',
         title: 'Tu ticket | Cinemacenter',
         loadComponent: () => import('./pages/ticket/ticket').then((m) => m.TicketComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE'), ticketOwnerGuard],
     },
     {
         path: 'mis-reservas',
         title: 'Mis reservas | Cinemacenter',
         loadComponent: () =>
             import('./pages/mis-reservas/mis-reservas').then((m) => m.MisReservasComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE')],
     },
     {
         path: 'perfil',
@@ -135,7 +149,7 @@ export const routes: Routes = [
         title: 'Pago exitoso | Cinemacenter',
         loadComponent: () =>
             import('./pages/pago-resultado/pago-resultado').then((m) => m.PagoResultadoComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE')],
         data: { estado: 'exito' },
     },
     {
@@ -143,7 +157,7 @@ export const routes: Routes = [
         title: 'Pago rechazado | Cinemacenter',
         loadComponent: () =>
             import('./pages/pago-resultado/pago-resultado').then((m) => m.PagoResultadoComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE')],
         data: { estado: 'error' },
     },
     {
@@ -151,7 +165,7 @@ export const routes: Routes = [
         title: 'Pago pendiente | Cinemacenter',
         loadComponent: () =>
             import('./pages/pago-resultado/pago-resultado').then((m) => m.PagoResultadoComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE')],
         data: { estado: 'pendiente' },
     },
 

@@ -32,7 +32,7 @@ export class ListadoFuncionesComponent {
 
   readonly funciones = signal<Funcion[]>([]);
   readonly cargando = signal(true);
-  readonly soloVigentes = signal(false);
+  readonly soloVigentes = signal(true);
   readonly filtroDia = signal('');
   readonly filtroHorario = signal('');
   readonly pagina = signal(1);

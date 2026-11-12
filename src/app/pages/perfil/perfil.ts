@@ -186,9 +186,8 @@ export class PerfilComponent {
           this.toastr.success('Datos actualizados', 'Listo');
           refreshView(this.cd);
         },
-        error: (error) => {
+        error: () => {
           this.cargandoDatos.set(false);
-          this.toastr.error(getErrorMessage(error, 'No se pudieron guardar los datos.'), 'Error');
           refreshView(this.cd);
         },
       });

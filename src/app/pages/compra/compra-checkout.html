@@ -175,14 +175,20 @@
           </div>
 
           <div class="checkout-cta">
+            <div class="alert alert-warning py-2" *ngIf="reservaPendientePagoId != null">
+              La reserva ya está creada. Reintentá el pago con Mercado Pago.
+            </div>
             <button
               type="button"
               class="btn btn-primary btn-lg checkout-confirm"
               [disabled]="!metodoPago || confirmando"
               (click)="confirmarCompra()">
               <span *ngIf="confirmando" class="spinner-border spinner-border-sm me-2"></span>
-              <ng-container *ngIf="!confirmando">
+              <ng-container *ngIf="!confirmando && reservaPendientePagoId == null">
                 Confirmar · $ {{ calcularTotal() | number:'1.0-0' }}
+              </ng-container>
+              <ng-container *ngIf="!confirmando && reservaPendientePagoId != null">
+                Reintentar pago
               </ng-container>
               <ng-container *ngIf="confirmando">Procesando…</ng-container>
             </button>

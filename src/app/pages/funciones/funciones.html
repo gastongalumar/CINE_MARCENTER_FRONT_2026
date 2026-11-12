@@ -52,7 +52,7 @@
                   formControlName="peliculaId"
                   [class.is-invalid]="esInvalido(formIndividual, 'peliculaId')">
                   <option [ngValue]="null">Seleccionar…</option>
-                  @for (pelicula of peliculas(); track pelicula.id) {
+                  @for (pelicula of peliculasDisponibles(); track pelicula.id) {
                     <option [ngValue]="pelicula.id">{{ pelicula.nombre }}</option>
                   }
                 </select>
@@ -187,7 +187,7 @@
                   formControlName="peliculaId"
                   [class.is-invalid]="esInvalido(formRango, 'peliculaId')">
                   <option [ngValue]="null">Seleccionar…</option>
-                  @for (pelicula of peliculas(); track pelicula.id) {
+                  @for (pelicula of peliculasDisponibles(); track pelicula.id) {
                     <option [ngValue]="pelicula.id">{{ pelicula.nombre }}</option>
                   }
                 </select>

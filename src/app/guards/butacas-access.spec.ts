@@ -42,4 +42,17 @@ describe('butacasAccessGuard', () => {
     expect(result).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
     expect(toastrMock.warning).toHaveBeenCalled();
   });
+
+  it('id no numérico (NaN) bloquea y redirige a cartelera', () => {
+    autorizarButacas(12);
+    const result = runGuard('abc') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+    expect(toastrMock.warning).toHaveBeenCalled();
+  });
+
+  it('id 0 o negativo bloquea aunque haya ticket guardado', () => {
+    autorizarButacas(12);
+    expect(runGuard('0')).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+    expect(runGuard('-3')).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+  });
 });

@@ -84,6 +84,11 @@ export class AuthService {
 
     const claims = decodeJwtPayload(token);
     const tipo = parseTipoUsuario(claims?.tipo);
+    if (!tipo) {
+      this.limpiarStorage();
+      return;
+    }
+
     const nombreCompleto =
       (claims?.nombreCompleto || '').trim() ||
       `${claims?.nombre ?? ''} ${claims?.apellido ?? ''}`.trim() ||
@@ -208,15 +213,21 @@ export class AuthService {
   // ---------------------------------------------------------------------
 
   private guardarSesion(response: AuthResponse): void {
-    if (this.isBrowser && response?.token) {
+    const tipo = response ? parseTipoUsuario(response.tipo) : null;
+    if (!response?.token || !tipo) {
+      this._token.set(null);
+      this._currentUser.set(null);
+      this.limpiarStorage();
+      return;
+    }
+
+    if (this.isBrowser) {
       sessionStorage.setItem(TOKEN_STORAGE_KEY, response.token);
     }
-    const normalizado: AuthResponse | null = response
-      ? { ...response, tipo: parseTipoUsuario(response.tipo) }
-      : null;
-    this._token.set(normalizado?.token ?? null);
+    const normalizado: AuthResponse = { ...response, tipo };
+    this._token.set(normalizado.token);
     this._currentUser.set(normalizado);
-    this.guardarFotoStorage(normalizado?.fotoPerfilUrl || null);
+    this.guardarFotoStorage(normalizado.fotoPerfilUrl || null);
   }
 
   private guardarFotoStorage(fotoPerfilUrl: string | null): void {

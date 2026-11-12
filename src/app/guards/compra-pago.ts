@@ -17,6 +17,16 @@ export const compraPagoGuard: CanActivateFn = (route) => {
   const peliculaId = Number(route.paramMap.get('peliculaId'));
   const funcionId = Number(route.paramMap.get('funcionId'));
 
+  if (!Number.isFinite(peliculaId) || peliculaId <= 0) {
+    toastr.warning('No se pudo identificar la película de la compra.', 'Compra');
+    return router.createUrlTree(['/cartelera']);
+  }
+
+  if (!Number.isFinite(funcionId) || funcionId <= 0) {
+    toastr.info('Elegí una función válida para continuar.', 'Compra');
+    return router.createUrlTree(['/butacas', peliculaId]);
+  }
+
   const asientosUrl = ['/butacas', peliculaId, 'funcion', funcionId];
 
   if (auth.isAdmin()) {
@@ -27,7 +37,7 @@ export const compraPagoGuard: CanActivateFn = (route) => {
     return router.createUrlTree(asientosUrl);
   }
 
-  if (!compra.tieneSeleccionPara(funcionId)) {
+  if (compra.peliculaId !== peliculaId || !compra.tieneSeleccionPara(funcionId)) {
     toastr.info('Seleccioná al menos un asiento para continuar al pago.', 'Compra');
     return router.createUrlTree(asientosUrl);
   }

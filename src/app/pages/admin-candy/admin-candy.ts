@@ -4,7 +4,6 @@ import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CandyComboService } from '../../services/candy-combo';
 import { CandyCombo } from '../../models/candy-combo';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -34,9 +33,8 @@ export class AdminCandyComponent {
         this.cargando = false;
         refreshView(this.cdr);
       },
-      error: (err) => {
+      error: () => {
         this.cargando = false;
-        this.toastr.error(getErrorMessage(err, 'No se pudieron cargar los combos'));
         refreshView(this.cdr);
       },
     });
@@ -57,7 +55,6 @@ export class AdminCandyComponent {
         this.toastr.success('Combo eliminado');
         this.cargar();
       },
-      error: (err) => this.toastr.error(getErrorMessage(err, 'No se pudo eliminar')),
     });
   }
 }
