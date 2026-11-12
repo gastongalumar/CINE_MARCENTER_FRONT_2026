@@ -8,8 +8,6 @@ La aplicación permite consultar la cartelera, seleccionar funciones y butacas, 
 
 > **Alcance de este repositorio:** cliente web Angular. Los datos, las reglas de negocio definitivas, la autenticación y la autorización de las operaciones protegidas dependen del backend configurado.
 
-> **Defensa oral:** ver [GUIA-DEFENSA.md](GUIA-DEFENSA.md) (mapa completo del frontend, flujo de compra, efectos festivos y frases listas).
-
 ---
 
 ## Contenido
@@ -28,11 +26,10 @@ La aplicación permite consultar la cartelera, seleccionar funciones y butacas, 
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Resolución de problemas](#resolución-de-problemas)
 - [Estado y limitaciones conocidas](#estado-y-limitaciones-conocidas)
-- [Guía de defensa](#guía-de-defensa)
 
 ## Descripción
 
-Cine Marcenter es una aplicación web para la experiencia de clientes y la operación administrativa de un cine. El cliente público puede explorar la cartelera y consultar películas. Los usuarios autenticados pueden continuar con la selección de horarios y asientos, agregar combos o códigos de descuento, gestionar sus reservas y acceder a las funciones de su cuenta. Los administradores disponen de un panel protegido para gestionar contenidos, candy, descuentos, validación de tickets, estadísticas y la personalización visual (incluido un efecto festivo global).
+Cine Marcenter es una aplicación web para la experiencia de clientes y la operación administrativa de un cine. El cliente público puede explorar la cartelera, consultar películas y ver horarios. Los usuarios autenticados pueden continuar con la selección de asientos, agregar combos o códigos de descuento, gestionar sus reservas y acceder a las funciones de su cuenta. Los administradores disponen de un panel protegido para gestionar contenidos, candy, descuentos, validación de tickets, estadísticas y la personalización visual (incluido un efecto festivo global).
 
 El frontend sigue una arquitectura Angular basada en componentes standalone, rutas con carga diferida (`loadComponent`), change detection zoneless, servicios para comunicación HTTP y orquestación de flujos, modelos TypeScript, guards de autenticación/rol/flujo de compra e interceptores HTTP.
 
@@ -43,7 +40,7 @@ El frontend sigue una arquitectura Angular basada en componentes standalone, rut
 - Consulta de cartelera, estrenos y próximas películas.
 - Visualización de la ficha y las funciones de una película.
 - Registro, inicio de sesión, recuperación de contraseña y autenticación OAuth2 (Google) con el backend.
-- Flujo de compra en tres pasos: horarios → asientos (con retención temporal / holds) → checkout.
+- Flujo de compra en tres pasos: horarios (público) → asientos (con retención temporal / holds) → checkout.
 - Combos de candy y códigos de descuento en el checkout.
 - Reserva de entradas, Mercado Pago y páginas de resultado (`exito` / `error` / `pendiente`).
 - Consulta de tickets y reservas propias.
@@ -79,6 +76,7 @@ Las operaciones disponibles para cada módulo dependen de los endpoints expuesto
 | Notificaciones | `ngx-toastr` |
 | Efectos visuales | `@tsparticles/engine`, `slim`, `plugin-emitters`, `updater-wobble` |
 | Pruebas unitarias | Vitest, mediante Angular CLI |
+| Pruebas e2e | Playwright |
 | Gestor de paquetes | npm |
 
 Las versiones exactas de dependencias se encuentran en `package.json` y `package-lock.json`.
@@ -90,11 +88,11 @@ La aplicación separa las responsabilidades principales de la siguiente manera:
 - **Páginas y componentes:** presentan la interfaz y coordinan las interacciones.
 - **Servicios:** encapsulan las llamadas HTTP y la lógica transversal (autenticación, reservas, holds, pagos, compra, personalización).
 - **Modelos:** describen los DTO y entidades intercambiados con la API.
-- **Guards:** protegen rutas por sesión, rol y continuidad del flujo de compra (`auth`, `role`, `butacasAccess`, `funcionAccess`, `compraPago`).
+- **Guards:** protegen rutas por sesión, rol, invitado, token de reset, ownership de ticket y continuidad del flujo de compra (`auth`, `guest`, `role`, `resetToken`, `ticketOwner`, `butacasAccess`, `funcionAccess`, `compraPago`).
 - **Interceptors:** adjuntan el Bearer JWT y centralizan el tratamiento de errores HTTP (con opción de omitir toast por `HttpContext`).
 - **Effects:** presets de partículas para efectos festivos (`src/app/effects/`).
 - **Pipes y utilidades:** transformaciones de presentación, fechas, JWT, tickets de navegación a butacas y errores de formularios.
-- **Entornos:** contienen la dirección base de la API.
+- **Entornos:** contienen la dirección base de la API (`environment.ts` / `environment.prod.ts`).
 
 Las páginas se cargan de forma diferida desde `src/app/app.routes.ts`. La configuración de Angular y los proveedores HTTP se encuentran en `src/app/app.config.ts`.
 
@@ -108,7 +106,7 @@ Los roles contemplados por el frontend son `CLIENTE`, `ADMINISTRADOR` y `SUPERAD
 
 La aplicación conserva el token JWT en `sessionStorage` (clave `access_token`), aislando la sesión por pestaña, y deriva el rol de la respuesta de autenticación o de los claims del token. El estado de sesión se expone con **signals** en `AuthService`.
 
-`authGuard` limita el acceso a rutas con sesión vigente y `roleGuard` restringe rutas administrativas. Los guards del flujo de compra (`butacasAccessGuard`, `funcionAccessGuard`, `compraPagoGuard`) evitan deep-links incompletos y bloquean la compra al personal. Estos controles mejoran la navegación de la interfaz, pero **no sustituyen la autorización del servidor**: el backend debe validar el token, el rol y los permisos en cada endpoint protegido.
+`authGuard` limita el acceso a rutas con sesión vigente, `guestGuard` restringe login/registro/recuperación a usuarios sin sesión, `resetTokenGuard` valida el token de reset de contraseña y `roleGuard` restringe rutas por rol. Los guards del flujo de compra (`butacasAccessGuard`, `funcionAccessGuard`, `compraPagoGuard`) evitan deep-links incompletos y bloquean la compra al personal; `ticketOwnerGuard` limita la vista del ticket. Estos controles mejoran la navegación de la interfaz, pero **no sustituyen la autorización del servidor**: el backend debe validar el token, el rol y los permisos en cada endpoint protegido.
 
 ### Flujo de compra (resumen)
 
@@ -118,7 +116,7 @@ La aplicación conserva el token JWT en `sessionStorage` (clave `access_token`),
   → /butacas/:peliculaId/funcion/:funcionId/pago
 ```
 
-Estado compartido en memoria: `CompraFlujoService` (máx. 20 entradas). Concurrencia de asientos mediante `HoldService` y polling del estado de la función. Checkout opcional con candy y descuentos; pago con Mercado Pago o emisión directa de ticket.
+El primer paso (horarios) es público; asientos y checkout requieren autenticación. Estado compartido en memoria: `CompraFlujoService` (máx. 20 entradas). Concurrencia de asientos mediante `HoldService` y polling del estado de la función. El mapa de butacas vive en el componente `seat-map`, usado por `pages/compra/compra-asientos`. Checkout opcional con candy y descuentos; pago con Mercado Pago o emisión directa de ticket.
 
 ### Personalización y efectos festivos
 
@@ -168,7 +166,7 @@ npm ci --legacy-peer-deps
 
 Iniciá por separado el backend compatible con la API y verificá que responda en la dirección configurada. La aplicación no incluye un servidor simulado ni datos de prueba locales.
 
-Configuración predeterminada:
+Configuración predeterminada (desarrollo):
 
 ```text
 API REST: http://localhost:8080/api
@@ -187,7 +185,7 @@ Abrí [http://localhost:4200](http://localhost:4200) en el navegador. Angular re
 
 ## Configuración de la API
 
-La configuración se define actualmente en `src/environments/environment.ts`:
+La configuración de desarrollo se define en `src/environments/environment.ts`:
 
 ```ts
 export const environment = {
@@ -197,12 +195,22 @@ export const environment = {
 };
 ```
 
-- `apiUrl` es el prefijo utilizado por los servicios, por ejemplo `http://localhost:8080/api/peliculas`.
+En producción, `angular.json` aplica `fileReplacements` y sustituye ese archivo por `src/environments/environment.prod.ts`:
+
+```ts
+export const environment = {
+  production: true,
+  apiUrl: '/api',
+  baseUrl: '',
+};
+```
+
+Con esa configuración, el frontend y la API se esperan en el mismo origen (por ejemplo, Nginx como proxy hacia el backend).
+
+- `apiUrl` es el prefijo utilizado por los servicios, por ejemplo `http://localhost:8080/api/peliculas` en desarrollo o `/api/peliculas` en producción.
 - `baseUrl` se utiliza cuando una integración necesita la raíz del servidor (por ejemplo OAuth2 Google).
 
-Para desarrollo local, reemplazá host y puerto por los que correspondan a tu backend. Para desplegar en otro entorno, configurá la URL del servidor apropiada antes de compilar y revisá que el backend permita el origen del frontend mediante CORS.
-
-> **Importante:** este proyecto no cuenta actualmente con una estrategia de reemplazo de archivos de entorno declarada en `angular.json`. Por eso, no asumas que una compilación de producción cambia automáticamente la URL local configurada: verificá la configuración efectiva antes de publicar.
+Para desarrollo local, reemplazá host y puerto por los que correspondan a tu backend. Para otro despliegue, ajustá `environment.prod.ts` (o el entorno efectivo) antes de compilar y revisá que el backend permita el origen del frontend mediante CORS cuando no compartan origen.
 
 No incluyas credenciales, secretos, tokens ni claves privadas en el código del frontend. Todo valor distribuido en una aplicación web puede ser inspeccionado por sus usuarios.
 
@@ -234,7 +242,7 @@ Al exponer el servidor en la red local, hacelo únicamente en una red de confian
 npm run build
 ```
 
-El resultado del navegador se genera en `dist/CINE_MARCENTER_FRONT_2026/browser/`. La configuración de producción está definida en `angular.json`; antes de desplegar, configurá y validá la URL de API del entorno destino.
+El resultado del navegador se genera en `dist/CINE_MARCENTER_FRONT_2026/browser/`. La configuración de producción está definida en `angular.json` e incluye el reemplazo de entornos; antes de desplegar, validá la URL de API del entorno destino.
 
 ### Compilación de desarrollo
 
@@ -254,15 +262,20 @@ Los scripts disponibles se definen en `package.json`:
 | `npm run build` | Genera el bundle de producción. |
 | `npm run watch` | Compila en desarrollo y observa cambios. |
 | `npm test` | Ejecuta las pruebas unitarias mediante Angular CLI/Vitest. |
+| `npm run test:ci` | Ejecuta las pruebas unitarias una sola vez (`--watch=false`). |
+| `npm run e2e` | Ejecuta las pruebas end-to-end con Playwright. |
+| `npm run e2e:ui` | Abre la interfaz interactiva de Playwright. |
 | `npx ng generate component nombre` | Genera un componente Angular con Angular CLI. |
 
 Ejecutar pruebas:
 
 ```bash
 npm test
+npm run test:ci
+npm run e2e
 ```
 
-El repositorio también define un workflow de GitHub Actions en `.github/workflows/build.yml`. En push y pull request hacia las ramas configuradas, instala dependencias con `npm ci --legacy-peer-deps` y ejecuta `npm run build`.
+El repositorio también define un workflow de GitHub Actions en `.github/workflows/build.yml`. En push y pull request hacia las ramas `main`, `master` y `DEV`, instala dependencias con `npm ci --legacy-peer-deps` y ejecuta `npm run build`.
 
 ## Rutas principales
 
@@ -272,10 +285,11 @@ El repositorio también define un workflow de GitHub Actions en `.github/workflo
 |---|---|---|
 | `/cartelera` | Público | Cartelera y consulta de películas. |
 | `/pelicula/:id` | Público | Detalle de una película. |
-| `/login` | Público | Inicio de sesión. |
-| `/registro` | Público | Registro de clientes. |
-| `/olvidar-password` | Público | Solicitud de recuperación de contraseña. |
-| `/reset-password` | Público | Definir nueva contraseña. |
+| `/butacas/:peliculaId` | Público + `butacasAccessGuard` | Selección de horario. |
+| `/login` | Solo sin sesión (`guestGuard`) | Inicio de sesión. |
+| `/registro` | Solo sin sesión (`guestGuard`) | Registro de clientes. |
+| `/olvidar-password` | Solo sin sesión (`guestGuard`) | Solicitud de recuperación de contraseña. |
+| `/reset-password` | Token de reset (`resetTokenGuard`) | Definir nueva contraseña. |
 | `/oauth2/redirect` | Público | Handoff del JWT tras login con Google. |
 | `/contacto` | Público | Información de contacto. |
 | `/contacto/cumpleanos` | Público | Cumpleaños. |
@@ -286,15 +300,14 @@ El repositorio también define un workflow de GitHub Actions en `.github/workflo
 
 | Ruta | Acceso | Propósito |
 |---|---|---|
-| `/butacas/:peliculaId` | Sesión + ticket butacas | Selección de horario. |
-| `/butacas/:peliculaId/funcion/:funcionId` | + ticket función | Selección de asientos (holds). |
-| `/butacas/:peliculaId/funcion/:funcionId/pago` | + `compraPagoGuard` | Checkout (candy, descuento, pago). |
-| `/mis-reservas` | Sesión requerida | Reservas del usuario. |
+| `/butacas/:peliculaId/funcion/:funcionId` | Sesión + tickets de flujo | Selección de asientos (holds). |
+| `/butacas/:peliculaId/funcion/:funcionId/pago` | `CLIENTE` + tickets + `compraPagoGuard` | Checkout (candy, descuento, pago). |
+| `/mis-reservas` | `CLIENTE` | Reservas del usuario. |
 | `/perfil` | Sesión requerida | Perfil de usuario. |
-| `/ticket/:numero` | Sesión requerida | Consulta del ticket. |
-| `/pago/exito` | Sesión requerida | Resultado de pago exitoso. |
-| `/pago/error` | Sesión requerida | Resultado de pago rechazado. |
-| `/pago/pendiente` | Sesión requerida | Resultado de pago pendiente. |
+| `/ticket/:numero` | `CLIENTE` + `ticketOwnerGuard` | Consulta del ticket. |
+| `/pago/exito` | `CLIENTE` | Resultado de pago exitoso. |
+| `/pago/error` | `CLIENTE` | Resultado de pago rechazado. |
+| `/pago/pendiente` | `CLIENTE` | Resultado de pago pendiente. |
 
 ### Administración
 
@@ -353,17 +366,17 @@ src/
 ├── app/
 │   ├── components/       # Header, footer, listados, pickers, etc.
 │   ├── effects/          # Presets tsparticles de efectos festivos
-│   ├── guards/           # Auth, rol y acceso al flujo de compra
+│   ├── guards/           # Auth, guest, rol, reset, ticket y flujo de compra
 │   ├── interceptors/     # Bearer JWT y errores HTTP
 │   ├── models/           # Tipos y modelos de datos
-│   ├── pages/            # Páginas por funcionalidad (incl. compra/)
+│   ├── pages/            # Páginas por funcionalidad (incl. compra/ y seat-map)
 │   ├── pipes/            # Formateo y presentación
 │   ├── services/         # HTTP y orquestación
 │   ├── utils/            # JWT, butacas-access, errores, fechas…
 │   ├── app.config.ts     # Proveedores y configuración
 │   └── app.routes.ts     # Definición de rutas lazy
 ├── assets/               # Recursos estáticos
-├── environments/         # apiUrl / baseUrl
+├── environments/         # apiUrl / baseUrl (dev y prod)
 ├── styles/               # Estilos compartidos (p. ej. efectos-festivos.css)
 ├── index.html
 ├── main.ts
@@ -372,12 +385,12 @@ src/
 
 Otros archivos relevantes:
 
-- `angular.json`: configuración de build, desarrollo, estilos y presupuestos.
+- `angular.json`: configuración de build, desarrollo, estilos, presupuestos y `fileReplacements`.
 - `package.json`: dependencias y scripts.
 - `package-lock.json`: versiones reproducibles de dependencias.
 - `tsconfig*.json`: configuración de TypeScript.
+- `playwright.config.ts`: configuración de pruebas e2e.
 - `.github/workflows/build.yml`: compilación automatizada en GitHub Actions.
-- `GUIA-DEFENSA.md`: guía modo supervivencia para la defensa oral.
 
 ## Resolución de problemas
 
@@ -398,7 +411,7 @@ Verificá que el usuario exista en el backend, que el login devuelva un JWT vál
 
 ### No puedo entrar directo a `/butacas/...`
 
-El flujo de compra usa tickets de navegación en `sessionStorage`. Hay que llegar desde cartelera/ficha (o un `returnUrl` de login válido). Pegar la URL no basta.
+El flujo de compra usa tickets de navegación en `sessionStorage`. Hay que llegar desde cartelera/ficha (o un `returnUrl` de login válido). Pegar la URL no basta: los pasos de asientos y pago también exigen sesión (y rol `CLIENTE` en el checkout).
 
 ### Fallo al instalar dependencias
 
@@ -415,29 +428,14 @@ Ejecutá `npm run build` y revisá el primer error reportado por Angular o TypeS
 ## Estado y limitaciones conocidas
 
 - El backend es un proyecto independiente y no se incluye aquí.
-- La URL configurada por defecto es local (`http://localhost:8080/api`); debe adaptarse al entorno de ejecución.
+- En desarrollo la URL por defecto es `http://localhost:8080/api`; en producción el build usa `/api` vía `environment.prod.ts`.
 - Las funciones no cuentan con operación de edición en la API utilizada por este frontend.
 - La protección del cliente (guards) debe complementarse con autorización en el servidor.
 - La concurrencia de butacas depende de holds y del estado expuesto por la API; el polling del mapa es UX, no fuente de verdad.
 - Los efectos festivos dependen de que la customización esté persistida y servida por `/customizacion`.
-- Existen carpetas legacy de selección de asientos sin rutas activas; el flujo productivo es `pages/compra/*`.
+- El flujo de compra productivo es `pages/compra/*`; el mapa de asientos (`pages/seat-map`) es un componente reutilizado por ese flujo, no una ruta independiente.
 - La compilación de producción aplica un presupuesto de tamaño al bundle inicial, definido en `angular.json`.
 
-## Guía de defensa
+## Contexto académico
 
-Para preparar la defensa oral del proyecto (arquitectura, auth, compra, admin, tema y efectos festivos, preguntas típicas), usar:
-
-**[GUIA-DEFENSA.md](GUIA-DEFENSA.md)**
-
-## Equipo y contexto académico
-
-Este proyecto se desarrolla en el marco de **Programación IV — 2026** y se integra con el backend del proyecto académico correspondiente. Para la versión de entrega, completar esta sección con los datos validados por el grupo y la cátedra:
-
-- **Institución y carrera:** completar según la denominación oficial.
-- **Comisión / docente:** completar según corresponda.
-- **Integrantes:** nombres y apellidos de todos los integrantes.
-- **Repositorio del backend:** agregar el enlace si es público y corresponde compartirlo.
-
----
-
-Proyecto académico. La ejecución funcional de los flujos que dependen de datos requiere una API compatible y accesible.
+Proyecto académico de **Programación IV — 2026**. La ejecución funcional de los flujos que dependen de datos requiere una API compatible y accesible.
