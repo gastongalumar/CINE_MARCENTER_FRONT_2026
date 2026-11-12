@@ -7,11 +7,11 @@ export function esStaff(tipo: TipoUsuario | null | undefined): boolean {
   return tipo === 'SUPERADMIN' || tipo === 'ADMINISTRADOR';
 }
 
-export function parseTipoUsuario(valor: string | null | undefined): TipoUsuario {
+export function parseTipoUsuario(valor: string | null | undefined): TipoUsuario | null {
   if (valor === 'SUPERADMIN' || valor === 'ADMINISTRADOR' || valor === 'CLIENTE') {
     return valor;
   }
-  return 'CLIENTE';
+  return null;
 }
 
 export interface LoginRequest {

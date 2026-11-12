@@ -13,7 +13,6 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { CodigoDescuentoService } from '../../services/codigo-descuento';
 import { TipoDescuento } from '../../models/codigo-descuento';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -35,6 +34,11 @@ export class AdminDescuentoFormComponent implements OnDestroy {
 
   private readonly init = afterNextRender(() => {
     this.formSub = this.form.statusChanges.subscribe(() => refreshView(this.cdr));
+    this.form.controls.tipo.valueChanges.subscribe((tipo) => {
+      this.actualizarValidadoresValor(tipo);
+    });
+    this.actualizarValidadoresValor(this.form.controls.tipo.value);
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       const id = Number(idParam);
@@ -54,7 +58,11 @@ export class AdminDescuentoFormComponent implements OnDestroy {
   readonly form = this.fb.group({
     codigo: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(40)]),
     tipo: this.fb.nonNullable.control<TipoDescuento>('PORCENTAJE', Validators.required),
-    valor: this.fb.nonNullable.control(10, [Validators.required, Validators.min(0.01)]),
+    valor: this.fb.nonNullable.control(10, [
+      Validators.required,
+      Validators.min(0.01),
+      Validators.max(100),
+    ]),
     usosMaximos: this.fb.control<number | null>(null),
     descripcion: this.fb.nonNullable.control(''),
     activo: this.fb.nonNullable.control(true),
@@ -66,6 +74,16 @@ export class AdminDescuentoFormComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.formSub?.unsubscribe();
+  }
+
+  /** Ajusta Validators.max(100) cuando el tipo es PORCENTAJE. */
+  actualizarValidadoresValor(tipo: TipoDescuento): void {
+    const validators = [Validators.required, Validators.min(0.01)];
+    if (tipo === 'PORCENTAJE') {
+      validators.push(Validators.max(100));
+    }
+    this.form.controls.valor.setValidators(validators);
+    this.form.controls.valor.updateValueAndValidity({ emitEvent: false });
   }
 
   private cargarParaEditar(id: number): void {
@@ -81,11 +99,11 @@ export class AdminDescuentoFormComponent implements OnDestroy {
           descripcion: item.descripcion || '',
           activo: item.activo,
         });
+        this.actualizarValidadoresValor(item.tipo);
         this.cargando = false;
         refreshView(this.cdr);
       },
-      error: (err) => {
-        this.toastr.error(getErrorMessage(err, 'No se pudo cargar el código'));
+      error: () => {
         void this.router.navigate(['/admin/descuentos']);
       },
     });
@@ -126,9 +144,8 @@ export class AdminDescuentoFormComponent implements OnDestroy {
         this.toastr.success(creando ? 'Código creado' : 'Código actualizado');
         void this.router.navigate(['/admin/descuentos']);
       },
-      error: (err) => {
+      error: () => {
         this.guardando = false;
-        this.toastr.error(getErrorMessage(err, 'No se pudo guardar'));
         refreshView(this.cdr);
       },
     });

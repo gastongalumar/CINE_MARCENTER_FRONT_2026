@@ -10,6 +10,7 @@ import { Reserva } from '../../models/reserva';
 import { refreshView } from '../../utils/refresh-view';
 import { FechaApiPipe } from '../../pipes/fecha-api';
 import { EstadoReservaPipe, ClaseEstadoReservaPipe } from '../../pipes/estado-reserva';
+import { parseApiDateTime } from '../../utils/datetime';
 
 @Component({
   selector: 'app-mis-reservas',
@@ -62,6 +63,26 @@ export class MisReservasComponent {
 
   verTicket(numeroTicket: string): void {
     this.router.navigate(['/ticket', numeroTicket]);
+  }
+
+  /** Cancelable solo si la función no pasó y el estado no es terminal. */
+  puedeCancelar(reserva: Reserva): boolean {
+    const estado = reserva.estadoReserva;
+    if (
+      estado === 'CANCELADA' ||
+      estado === 'EXPIRADA' ||
+      estado === 'REEMBOLSADA' ||
+      estado === 'VALIDADA'
+    ) {
+      return false;
+    }
+    if (reserva.horarioFuncion) {
+      const horario = parseApiDateTime(reserva.horarioFuncion);
+      if (horario && horario.getTime() < Date.now()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   get reservasActivas(): Reserva[] {

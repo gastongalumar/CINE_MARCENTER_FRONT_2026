@@ -1,10 +1,15 @@
-import { CompraFlujoService } from './compra-flujo.service';
+import { CompraFlujoService, MAX_ENTRADAS_COMPRA } from './compra-flujo.service';
 
 describe('CompraFlujoService', () => {
   let service: CompraFlujoService;
 
   beforeEach(() => {
+    sessionStorage.clear();
     service = new CompraFlujoService();
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
   });
 
   it('setSeleccion normaliza y ordena etiquetas', () => {
@@ -27,13 +32,43 @@ describe('CompraFlujoService', () => {
     expect(service.consumirPreservarHolds()).toBe(false);
   });
 
-  it('clear limpia selección, funcionId y flag de holds', () => {
+  it('clear limpia selección, funcionId, peliculaId y flag de holds', () => {
     service.setContexto(1, 10);
     service.setSeleccion(['A1']);
     service.marcarNavegacionAPago();
     service.clear();
+    expect(service.peliculaId).toBeNull();
     expect(service.funcionId).toBeNull();
     expect(service.asientosSeleccionados).toEqual([]);
     expect(service.consumirPreservarHolds()).toBe(false);
+    expect(sessionStorage.getItem('cine.compra.flujo')).toBeNull();
+  });
+
+  it('setContexto y clearSeleccion', () => {
+    service.setContexto(3, 8);
+    expect(service.peliculaId).toBe(3);
+    expect(service.funcionId).toBe(8);
+    service.setSeleccion(['C1', 'C2']);
+    service.clearSeleccion();
+    expect(service.asientosSeleccionados).toEqual([]);
+    expect(service.funcionId).toBe(8);
+  });
+
+  it('persiste y rehidrata selección desde sessionStorage', () => {
+    service.setContexto(12, 5);
+    service.setSeleccion(['a1', 'b2']);
+
+    const next = new CompraFlujoService();
+    expect(next.peliculaId).toBe(12);
+    expect(next.funcionId).toBe(5);
+    expect(next.asientosSeleccionados).toEqual(['A1', 'B2']);
+    expect(next.tieneSeleccionPara(5)).toBe(true);
+  });
+
+  it('documenta MAX_ENTRADAS_COMPRA = 20 (límite aplicado en UI, no en el service)', () => {
+    expect(MAX_ENTRADAS_COMPRA).toBe(20);
+    // El service acepta más de 20; el tope vive en compra-asientos.
+    service.setSeleccion(Array.from({ length: 25 }, (_, i) => `A${i + 1}`));
+    expect(service.asientosSeleccionados.length).toBe(25);
   });
 });

@@ -101,7 +101,12 @@
                     <button
                       class="btn btn-sm btn-outline-danger"
                       (click)="cancelarReserva(reserva.numeroTicket)"
-                      [disabled]="cancelando">
+                      [disabled]="cancelando || !puedeCancelar(reserva)"
+                      [attr.title]="
+                        puedeCancelar(reserva)
+                          ? 'Cancelar reserva'
+                          : 'No se puede cancelar (función pasada o estado final)'
+                      ">
                       <span class="material-icons">delete</span> Cancelar
                     </button>
                   </div>

@@ -10,6 +10,11 @@ export interface Funcion {
   /** ISO local sin zona: "2026-06-15T20:00:00" */
   horario: string;
   precio: number;
+  /** Opcionales: el backend puede enriquecer el listado (forward-compatible). */
+  capacidad?: number;
+  asientosOcupados?: number;
+  asientosEnHold?: number;
+  asientosDisponibles?: number;
 }
 
 /** Body de POST /api/funciones (CrearFuncionRequestDTO). */

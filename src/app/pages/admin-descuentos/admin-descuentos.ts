@@ -4,7 +4,6 @@ import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CodigoDescuentoService } from '../../services/codigo-descuento';
 import { CodigoDescuento } from '../../models/codigo-descuento';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -34,9 +33,8 @@ export class AdminDescuentosComponent {
         this.cargando = false;
         refreshView(this.cdr);
       },
-      error: (err) => {
+      error: () => {
         this.cargando = false;
-        this.toastr.error(getErrorMessage(err, 'No se pudieron cargar los códigos'));
         refreshView(this.cdr);
       },
     });
@@ -57,7 +55,6 @@ export class AdminDescuentosComponent {
         this.toastr.success('Código eliminado');
         this.cargar();
       },
-      error: (err) => this.toastr.error(getErrorMessage(err, 'No se pudo eliminar')),
     });
   }
 

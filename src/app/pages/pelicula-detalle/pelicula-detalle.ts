@@ -129,13 +129,7 @@ export class PeliculaDetalleComponent {
   irAFunciones(): void {
     if (!this.pelicula?.id) return;
     autorizarButacas(this.pelicula.id);
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/butacas', this.pelicula.id]);
-    } else {
-      this.router.navigate(['/login'], {
-        queryParams: { returnUrl: `/butacas/${this.pelicula.id}` },
-      });
-    }
+    this.router.navigate(['/butacas', this.pelicula.id]);
   }
 
   onImageError(): void {

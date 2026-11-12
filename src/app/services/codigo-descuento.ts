@@ -8,6 +8,7 @@ import {
   ValidarCodigoResponse,
 } from '../models/codigo-descuento';
 import { MensajeResponse } from '../models/usuario';
+import { skipErrorToastContext } from '../utils/http.context';
 
 @Injectable({ providedIn: 'root' })
 export class CodigoDescuentoService {
@@ -15,7 +16,9 @@ export class CodigoDescuentoService {
   private readonly apiUrl = `${environment.apiUrl}/codigos-descuento`;
 
   validar(codigo: string, subtotal: number): Observable<ValidarCodigoResponse> {
-    return this.http.post<ValidarCodigoResponse>(`${this.apiUrl}/validar`, { codigo, subtotal });
+    return this.http.post<ValidarCodigoResponse>(`${this.apiUrl}/validar`, { codigo, subtotal }, {
+      context: skipErrorToastContext(),
+    });
   }
 
   listar(): Observable<CodigoDescuento[]> {
