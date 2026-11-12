@@ -34,6 +34,7 @@ import {
   formatearFechaCorta,
   horaLocalIso,
 } from '../../utils/datetime';
+import { esPeliculaNoPasada } from '../../utils/pelicula-vigencia';
 import { CineDatePickerComponent } from '../../components/cine-date-picker/cine-date-picker';
 import { CineTimePickerComponent } from '../../components/cine-time-picker/cine-time-picker';
 
@@ -85,6 +86,10 @@ export class FuncionesComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly peliculas = signal<Pelicula[]>([]);
+  /** Solo no pasadas (vigentes + estrenos futuros) para los selects de alta. */
+  readonly peliculasDisponibles = computed(() =>
+    this.peliculas().filter((p) => esPeliculaNoPasada(p))
+  );
   readonly salas = signal<Sala[]>([]);
   readonly modo = signal<ModoCreacion>('individual');
   readonly cargando = signal(true);

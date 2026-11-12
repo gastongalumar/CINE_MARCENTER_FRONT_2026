@@ -16,6 +16,7 @@ import { ConfirmDialogService } from '../../services/confirm-dialog';
 import { Pelicula } from '../../models/pelicula';
 import { etiquetaGenero } from '../../models/genero-pelicula';
 import { getErrorMessage } from '../../utils/api-error';
+import { esPeliculaNoPasada } from '../../utils/pelicula-vigencia';
 
 @Component({
   selector: 'app-listado-peliculas',
@@ -37,6 +38,7 @@ export class ListadoPeliculasComponent {
   readonly peliculas = signal<Pelicula[]>([]);
   readonly cargando = signal(true);
   readonly errorCarga = signal('');
+  readonly soloVigentes = signal(true);
   readonly filtro = signal('');
   readonly filtroDuracion = signal<number | null>(null);
   readonly filtroGenero = signal('');
@@ -62,15 +64,20 @@ export class ListadoPeliculasComponent {
 
   readonly hayFiltrosActivos = computed(
     () =>
-      !!this.filtro().trim() || this.filtroDuracion() !== null || !!this.filtroGenero()
+      this.soloVigentes() ||
+      !!this.filtro().trim() ||
+      this.filtroDuracion() !== null ||
+      !!this.filtroGenero()
   );
 
   readonly peliculasFiltradas = computed(() => {
     const termino = this.filtro().trim().toLowerCase();
     const duracion = this.filtroDuracion();
     const genero = this.filtroGenero();
+    const vigentes = this.soloVigentes();
 
     return this.peliculas().filter((p) => {
+      if (vigentes && !esPeliculaNoPasada(p)) return false;
       if (termino) {
         const coincideTexto =
           p.nombre.toLowerCase().includes(termino) ||
@@ -118,6 +125,11 @@ export class ListadoPeliculasComponent {
     });
   }
 
+  actualizarSoloVigentes(valor: boolean): void {
+    this.soloVigentes.set(valor);
+    this.pagina.set(1);
+  }
+
   actualizarFiltro(valor: string): void {
     this.filtro.set(valor);
     this.pagina.set(1);
@@ -134,10 +146,15 @@ export class ListadoPeliculasComponent {
   }
 
   limpiarFiltros(): void {
+    this.soloVigentes.set(false);
     this.filtro.set('');
     this.filtroDuracion.set(null);
     this.filtroGenero.set('');
     this.pagina.set(1);
+  }
+
+  esVigente(pelicula: Pelicula): boolean {
+    return esPeliculaNoPasada(pelicula);
   }
 
   irAPagina(page: number): void {

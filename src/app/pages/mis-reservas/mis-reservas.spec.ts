@@ -6,6 +6,7 @@ import { MisReservasComponent } from './mis-reservas';
 import { ReservaService } from '../../services/reserva';
 import { AuthService } from '../../services/auth';
 import { ConfirmDialogService } from '../../services/confirm-dialog';
+import { EstadoReserva } from '../../models/estado-reserva';
 import { createAuthServiceMock } from '../../../testing/auth-mocks';
 import { createToastrMock } from '../../../testing/router-mocks';
 
@@ -61,5 +62,40 @@ describe('MisReservasComponent', () => {
     confirmDialog.confirmDanger.mockReturnValue(of(false));
     component.cancelarReserva('TK1');
     expect(reservaService.cancelarReserva).not.toHaveBeenCalled();
+  });
+
+  it('puedeCancelar es false si la función ya pasó o el estado es terminal', () => {
+    expect(
+      component.puedeCancelar({
+        numeroTicket: 'TK1',
+        montoTotal: 100,
+        metodoPago: 'EFECTIVO',
+        asientosSeleccionados: ['A1'],
+        estadoReserva: EstadoReserva.CONFIRMADA,
+        horarioFuncion: '2020-01-01T20:00:00',
+      })
+    ).toBe(false);
+
+    expect(
+      component.puedeCancelar({
+        numeroTicket: 'TK2',
+        montoTotal: 100,
+        metodoPago: 'EFECTIVO',
+        asientosSeleccionados: ['A1'],
+        estadoReserva: EstadoReserva.VALIDADA,
+        horarioFuncion: '2099-01-01T20:00:00',
+      })
+    ).toBe(false);
+
+    expect(
+      component.puedeCancelar({
+        numeroTicket: 'TK3',
+        montoTotal: 100,
+        metodoPago: 'EFECTIVO',
+        asientosSeleccionados: ['A1'],
+        estadoReserva: EstadoReserva.CONFIRMADA,
+        horarioFuncion: '2099-06-15T20:00:00',
+      })
+    ).toBe(true);
   });
 });

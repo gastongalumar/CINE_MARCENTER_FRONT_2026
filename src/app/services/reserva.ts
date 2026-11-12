@@ -32,8 +32,13 @@ export class ReservaService {
   }
 
   /** GET /api/reservas/ticket/{numeroTicket} */
-  obtenerPorTicket(numeroTicket: string): Observable<Reserva> {
-    return this.http.get<Reserva>(`${this.apiUrl}/ticket/${numeroTicket}`);
+  obtenerPorTicket(
+    numeroTicket: string,
+    opciones?: { skipErrorToast?: boolean }
+  ): Observable<Reserva> {
+    return this.http.get<Reserva>(`${this.apiUrl}/ticket/${numeroTicket}`, {
+      context: opciones?.skipErrorToast ? skipErrorToastContext() : undefined,
+    });
   }
 
   /** DELETE /api/reservas/ticket/{numeroTicket} — cancelar una reserva. */

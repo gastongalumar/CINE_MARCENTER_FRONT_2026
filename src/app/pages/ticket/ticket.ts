@@ -46,14 +46,15 @@ export class TicketComponent implements OnInit {
           this.loading = false;
           this.cd.markForCheck();
         },
-        error: (e) => {
-          console.error('Error al obtener reserva:', e);
+        error: () => {
           this.loading = false;
           this.cd.markForCheck();
+          void this.router.navigate(['/mis-reservas']);
         }
       });
     } else {
       this.loading = false;
+      void this.router.navigate(['/mis-reservas']);
     }
   }
 
@@ -72,7 +73,7 @@ export class TicketComponent implements OnInit {
   }
 
   volver() {
-    this.router.navigate(['/mis-compras']);
+    void this.router.navigate(['/mis-reservas']);
   }
 }
 

@@ -4,6 +4,7 @@ import { butacasAccessGuard } from './guards/butacas-access';
 import { compraPagoGuard } from './guards/compra-pago';
 import { funcionAccessGuard } from './guards/funcion-access';
 import { roleGuard } from './guards/role';
+import { ticketOwnerGuard } from './guards/ticket-owner';
 
 /**
  * Rutas de la aplicación.
@@ -116,7 +117,7 @@ export const routes: Routes = [
         path: 'ticket/:numero',
         title: 'Tu ticket | Cinemacenter',
         loadComponent: () => import('./pages/ticket/ticket').then((m) => m.TicketComponent),
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard('CLIENTE'), ticketOwnerGuard],
     },
     {
         path: 'mis-reservas',

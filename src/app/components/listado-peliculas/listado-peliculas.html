@@ -18,6 +18,15 @@
       <h5 class="mb-0 me-auto">Películas</h5>
       <span class="badge text-bg-secondary">{{ peliculasFiltradas().length }}</span>
       <div class="filtros-listado">
+        <div class="form-check form-switch mb-0">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="soloVigentesPeliculas"
+            [checked]="soloVigentes()"
+            (change)="actualizarSoloVigentes($any($event.target).checked)" />
+          <label class="form-check-label small" for="soloVigentesPeliculas">Sólo vigentes</label>
+        </div>
         <input
           type="search"
           class="form-control form-control-sm buscador"
@@ -100,6 +109,12 @@
                   <td>
                     <div class="fw-semibold">{{ pelicula.nombre }}</div>
                     <small class="text-muted">#{{ pelicula.id }}</small>
+                    <span
+                      class="badge ms-1"
+                      [class.text-bg-success]="esVigente(pelicula)"
+                      [class.text-bg-secondary]="!esVigente(pelicula)">
+                      {{ esVigente(pelicula) ? 'Vigente' : 'Finalizada' }}
+                    </span>
                   </td>
                   <td>{{ etiquetaGenero(pelicula.genero) }}</td>
                   <td>
