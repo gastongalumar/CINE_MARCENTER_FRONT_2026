@@ -69,10 +69,18 @@
 
               <div class="col-12">
                 <label class="form-label" for="tipo">Rol *</label>
-                <select class="form-select" id="tipo" formControlName="tipo" (blur)="onCampoBlur()">
+                <select
+                  class="form-select"
+                  id="tipo"
+                  formControlName="tipo"
+                  (blur)="onCampoBlur()"
+                  [class.is-invalid]="esInvalido('tipo')">
                   <option value="ADMINISTRADOR">Administrador</option>
                   <option value="SUPERADMIN">SuperAdmin</option>
                 </select>
+                @if (esInvalido('tipo')) {
+                  <div class="invalid-feedback d-block">El rol es obligatorio.</div>
+                }
                 <small class="form-hint">SuperAdmin puede crear y eliminar otros admins</small>
               </div>
 
@@ -86,7 +94,7 @@
                   placeholder="0223"
                   inputmode="numeric"
                   (blur)="onCampoBlur()"
-                  [class.is-invalid]="esInvalido('codigoArea')" />
+                  [class.is-invalid]="esInvalido('codigoArea') || telefonoIncompleto()" />
                 @if (esInvalido('codigoArea')) {
                   <div class="invalid-feedback d-block">Ej.: 0223</div>
                 }
@@ -102,9 +110,11 @@
                   placeholder="5678912"
                   inputmode="numeric"
                   (blur)="onCampoBlur()"
-                  [class.is-invalid]="esInvalido('numeroLocal')" />
+                  [class.is-invalid]="esInvalido('numeroLocal') || telefonoIncompleto()" />
                 @if (esInvalido('numeroLocal')) {
                   <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+                } @else if (telefonoIncompleto()) {
+                  <div class="invalid-feedback d-block">Completá área y número (sin 15), o dejá ambos vacíos.</div>
                 }
                 <small class="form-hint">Ej.: 0223 / 5678912</small>
               </div>

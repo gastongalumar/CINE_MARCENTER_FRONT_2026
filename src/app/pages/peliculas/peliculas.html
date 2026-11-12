@@ -190,7 +190,11 @@
                     formControlName="descripcion"
                     rows="2"
                     maxlength="5000"
-                    placeholder="Texto largo para la ficha de la película"></textarea>
+                    placeholder="Texto largo para la ficha de la película"
+                    [class.is-invalid]="esInvalido('descripcion')"></textarea>
+                  @if (esInvalido('descripcion')) {
+                    <div class="invalid-feedback d-block">Máximo 5000 caracteres.</div>
+                  }
                 </div>
               </div>
 
@@ -199,7 +203,16 @@
                 <div class="row g-2">
                   <div class="col-md-6 mb-2">
                     <label class="form-label" for="director">Director</label>
-                    <input id="director" type="text" class="form-control" formControlName="director" maxlength="200" />
+                    <input
+                      id="director"
+                      type="text"
+                      class="form-control"
+                      formControlName="director"
+                      maxlength="200"
+                      [class.is-invalid]="esInvalido('director')" />
+                    @if (esInvalido('director')) {
+                      <div class="invalid-feedback d-block">Máximo 200 caracteres.</div>
+                    }
                   </div>
                   <div class="col-md-6 mb-2">
                     <label class="form-label" for="clasificacion">Clasificación</label>
@@ -209,7 +222,11 @@
                       class="form-control"
                       formControlName="clasificacion"
                       maxlength="100"
-                      placeholder="ATP, +13, +16…" />
+                      placeholder="ATP, +13, +16…"
+                      [class.is-invalid]="esInvalido('clasificacion')" />
+                    @if (esInvalido('clasificacion')) {
+                      <div class="invalid-feedback d-block">Máximo 100 caracteres.</div>
+                    }
                   </div>
                 </div>
 
@@ -222,7 +239,11 @@
                       class="form-control"
                       formControlName="elenco"
                       maxlength="500"
-                      placeholder="Actor 1, Actor 2…" />
+                      placeholder="Actor 1, Actor 2…"
+                      [class.is-invalid]="esInvalido('elenco')" />
+                    @if (esInvalido('elenco')) {
+                      <div class="invalid-feedback d-block">Máximo 500 caracteres.</div>
+                    }
                   </div>
                   <div class="col-md-6 mb-2">
                     <label class="form-label" for="urlTrailer">URL del tráiler</label>
@@ -232,7 +253,11 @@
                       class="form-control"
                       formControlName="urlTrailer"
                       maxlength="500"
-                      placeholder="https://www.youtube.com/watch?v=..." />
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      [class.is-invalid]="esInvalido('urlTrailer')" />
+                    @if (esInvalido('urlTrailer')) {
+                      <div class="invalid-feedback d-block">Máximo 500 caracteres.</div>
+                    }
                   </div>
                 </div>
 
@@ -244,7 +269,11 @@
                     formControlName="nominaciones"
                     rows="2"
                     maxlength="1000"
-                    placeholder="Ej.: Nominada a Mejor Película…"></textarea>
+                    placeholder="Ej.: Nominada a Mejor Película…"
+                    [class.is-invalid]="esInvalido('nominaciones')"></textarea>
+                  @if (esInvalido('nominaciones')) {
+                    <div class="invalid-feedback d-block">Máximo 1000 caracteres.</div>
+                  }
                 </div>
 
                 <div class="mb-2">

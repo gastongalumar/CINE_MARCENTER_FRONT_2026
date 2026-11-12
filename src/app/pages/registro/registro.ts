@@ -75,6 +75,16 @@ export class RegistroComponent {
     );
   }
 
+  telefonoIncompleto(): boolean {
+    return (
+      (this.form.hasError('telefonoIncompleto') || this.form.hasError('telefonoInvalido')) &&
+      (!!this.form.get('codigoArea')?.touched ||
+        !!this.form.get('codigoArea')?.dirty ||
+        !!this.form.get('numeroLocal')?.touched ||
+        !!this.form.get('numeroLocal')?.dirty)
+    );
+  }
+
   alternarPassword(): void {
     this.mostrarPassword = !this.mostrarPassword;
   }

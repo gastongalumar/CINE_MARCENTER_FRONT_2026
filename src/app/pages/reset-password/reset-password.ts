@@ -73,6 +73,7 @@ export class ResetPasswordComponent {
     }
     if (this.form.invalid || this.loading) {
       this.form.markAllAsTouched();
+      refreshView(this.cdr);
       return;
     }
 

@@ -123,7 +123,13 @@
                     formControlName="nombre"
                     [class.is-invalid]="esInvalido('nombre')" />
                   @if (esInvalido('nombre')) {
-                    <div class="invalid-feedback d-block">El nombre es obligatorio.</div>
+                    <div class="invalid-feedback d-block">
+                      @if (form.controls.nombre.errors?.['required']) {
+                        El nombre es obligatorio.
+                      } @else if (form.controls.nombre.errors?.['maxlength']) {
+                        Máximo 20 caracteres.
+                      }
+                    </div>
                   }
                 </div>
 
@@ -136,7 +142,13 @@
                     formControlName="apellido"
                     [class.is-invalid]="esInvalido('apellido')" />
                   @if (esInvalido('apellido')) {
-                    <div class="invalid-feedback d-block">El apellido es obligatorio.</div>
+                    <div class="invalid-feedback d-block">
+                      @if (form.controls.apellido.errors?.['required']) {
+                        El apellido es obligatorio.
+                      } @else if (form.controls.apellido.errors?.['maxlength']) {
+                        Máximo 20 caracteres.
+                      }
+                    </div>
                   }
                 </div>
 
@@ -150,6 +162,9 @@
                     placeholder="0223"
                     inputmode="numeric"
                     [class.is-invalid]="esInvalido('codigoArea') || telefonoIncompleto()" />
+                  @if (esInvalido('codigoArea')) {
+                    <div class="invalid-feedback d-block">Ej.: 0223</div>
+                  }
                 </div>
 
                 <div class="col-md-8">
@@ -163,7 +178,9 @@
                     inputmode="numeric"
                     [class.is-invalid]="esInvalido('numeroLocal') || telefonoIncompleto()" />
                   <small class="form-hint">Opcional. Ej.: 0223 / 5678912</small>
-                  @if (telefonoIncompleto()) {
+                  @if (esInvalido('numeroLocal')) {
+                    <div class="invalid-feedback d-block">Solo el número, sin 15</div>
+                  } @else if (telefonoIncompleto()) {
                     <div class="invalid-feedback d-block">Completá área y número (sin 15), o dejá ambos vacíos.</div>
                   }
                 </div>
