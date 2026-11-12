@@ -13,7 +13,6 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { CodigoDescuentoService } from '../../services/codigo-descuento';
 import { TipoDescuento } from '../../models/codigo-descuento';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -104,8 +103,7 @@ export class AdminDescuentoFormComponent implements OnDestroy {
         this.cargando = false;
         refreshView(this.cdr);
       },
-      error: (err) => {
-        this.toastr.error(getErrorMessage(err, 'No se pudo cargar el código'));
+      error: () => {
         void this.router.navigate(['/admin/descuentos']);
       },
     });
@@ -146,9 +144,8 @@ export class AdminDescuentoFormComponent implements OnDestroy {
         this.toastr.success(creando ? 'Código creado' : 'Código actualizado');
         void this.router.navigate(['/admin/descuentos']);
       },
-      error: (err) => {
+      error: () => {
         this.guardando = false;
-        this.toastr.error(getErrorMessage(err, 'No se pudo guardar'));
         refreshView(this.cdr);
       },
     });

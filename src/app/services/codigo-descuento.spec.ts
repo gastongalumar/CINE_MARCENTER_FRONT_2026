@@ -3,6 +3,7 @@ import { HttpTestingController } from '@angular/common/http/testing';
 import { CodigoDescuentoService } from './codigo-descuento';
 import { provideTestingHttp } from '../../testing/http-helpers';
 import { environment } from '../../environments/environment';
+import { SKIP_ERROR_TOAST } from '../utils/http.context';
 
 describe('CodigoDescuentoService', () => {
   let service: CodigoDescuentoService;
@@ -19,11 +20,12 @@ describe('CodigoDescuentoService', () => {
 
   afterEach(() => http.verify());
 
-  it('validar POST /validar', () => {
+  it('validar POST /validar con SKIP_ERROR_TOAST', () => {
     service.validar('PROMO10', 5000).subscribe();
     const req = http.expectOne(`${api}/validar`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ codigo: 'PROMO10', subtotal: 5000 });
+    expect(req.request.context.get(SKIP_ERROR_TOAST)).toBe(true);
     req.flush({ valido: true });
   });
 

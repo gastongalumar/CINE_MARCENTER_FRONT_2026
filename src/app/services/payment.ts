@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { skipErrorToastContext } from '../utils/http.context';
 
 export interface CrearPreferenciaRequest {
   reservaId: number;
@@ -21,6 +22,10 @@ export class PaymentService {
   private readonly apiUrl = `${environment.apiUrl}/pagos`;
 
   crearPreferencia(reservaId: number): Observable<CrearPreferenciaResponse> {
-    return this.http.post<CrearPreferenciaResponse>(`${this.apiUrl}/crear-preferencia`, { reservaId });
+    return this.http.post<CrearPreferenciaResponse>(
+      `${this.apiUrl}/crear-preferencia`,
+      { reservaId },
+      { context: skipErrorToastContext() },
+    );
   }
 }

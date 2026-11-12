@@ -12,7 +12,6 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { CandyComboService } from '../../services/candy-combo';
-import { getErrorMessage } from '../../utils/api-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -81,8 +80,7 @@ export class AdminCandyFormComponent implements OnDestroy {
         this.cargando = false;
         refreshView(this.cdr);
       },
-      error: (err) => {
-        this.toastr.error(getErrorMessage(err, 'No se pudo cargar el combo'));
+      error: () => {
         void this.router.navigate(['/admin/candy']);
       },
     });
@@ -119,9 +117,8 @@ export class AdminCandyFormComponent implements OnDestroy {
         this.toastr.success(creando ? 'Combo creado' : 'Combo actualizado');
         void this.router.navigate(['/admin/candy']);
       },
-      error: (err) => {
+      error: () => {
         this.guardando = false;
-        this.toastr.error(getErrorMessage(err, 'No se pudo guardar'));
         refreshView(this.cdr);
       },
     });

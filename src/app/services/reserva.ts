@@ -11,8 +11,9 @@ import { skipErrorToastContext } from '../utils/http.context';
  * Servicio HTTP de reservas y tickets.
  *
  * - `POST /api/reservas` requiere rol CLIENTE.
- * - `GET /api/reservas/mis` funciona para CLIENTE y ADMINISTRADOR.
- * - Los endpoints `/api/reservas/admin/**` requieren rol ADMINISTRADOR.
+ * - `GET /api/reservas/mis` acepta JWT; en la UI solo CLIENTE (`roleGuard`).
+ * - `GET/DELETE /api/reservas/ticket/{n}`: el backend exige dueño (CLIENTE) o staff.
+ * - Los endpoints `/api/reservas/admin/**` requieren rol ADMINISTRADOR/SUPERADMIN.
  */
 @Injectable({
   providedIn: 'root'

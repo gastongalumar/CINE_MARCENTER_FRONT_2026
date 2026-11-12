@@ -168,10 +168,8 @@ test.describe('Compra (P0)', () => {
 
     await page.goto(`/butacas/${PELICULA.id}/funcion/${FUNCION.id}/pago`);
 
-    await expect(page).toHaveURL(
-      new RegExp(`/butacas/${PELICULA.id}/funcion/${FUNCION.id}$`),
-    );
-    await expect(page.getByRole('heading', { name: 'Ocupación de la Función' })).toBeVisible();
+    // roleGuard('CLIENTE') redirige staff a cartelera antes de compraPagoGuard.
+    await expect(page).toHaveURL(/\/cartelera/);
     await expect(page.getByRole('heading', { name: 'Confirmar pago' })).toHaveCount(0);
   });
 });

@@ -40,7 +40,7 @@ export class TicketComponent implements OnInit {
     });
 
     if (numero) {
-      this.reservaService.obtenerPorTicket(numero).subscribe({
+      this.reservaService.obtenerPorTicket(numero, { skipErrorToast: true }).subscribe({
         next: (r) => {
           this.reserva = r;
           this.loading = false;

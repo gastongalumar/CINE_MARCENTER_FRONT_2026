@@ -107,9 +107,8 @@ export class CompraCheckoutComponent implements OnDestroy {
         this.loading = false;
         refreshView(this.cdr);
       },
-      error: (error: unknown) => {
+      error: () => {
         this.loading = false;
-        this.toastr.error(getErrorMessage(error, 'No se pudo cargar la función.'), 'Error');
         this.router.navigate(['/butacas', this.peliculaId, 'funcion', this.funcionId]);
       },
     });
