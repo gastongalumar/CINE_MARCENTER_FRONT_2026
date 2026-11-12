@@ -153,8 +153,12 @@
                   <div class="invalid-feedback d-block">
                     @if (formIndividual.controls.precio.errors?.['backend']; as backend) {
                       {{ backend }}
-                    } @else {
+                    } @else if (formIndividual.controls.precio.errors?.['required']) {
+                      El precio es obligatorio.
+                    } @else if (formIndividual.controls.precio.errors?.['min']) {
                       El precio debe ser mayor a 0.
+                    } @else if (formIndividual.controls.precio.errors?.['max']) {
+                      El precio no puede superar 999999.99.
                     }
                   </div>
                 }
@@ -337,8 +341,12 @@
                   <div class="invalid-feedback d-block">
                     @if (formRango.controls.precio.errors?.['backend']; as backend) {
                       {{ backend }}
-                    } @else {
+                    } @else if (formRango.controls.precio.errors?.['required']) {
+                      El precio es obligatorio.
+                    } @else if (formRango.controls.precio.errors?.['min']) {
                       El precio debe ser mayor a 0.
+                    } @else if (formRango.controls.precio.errors?.['max']) {
+                      El precio no puede superar 999999.99.
                     }
                   </div>
                 }

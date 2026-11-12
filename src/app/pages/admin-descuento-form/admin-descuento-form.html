@@ -35,16 +35,33 @@
                 id="codigoDesc"
                 class="form-control text-uppercase"
                 formControlName="codigo"
-                placeholder="MARCENTER10" />
+                placeholder="MARCENTER10"
+                [class.is-invalid]="esInvalido('codigo')" />
+              @if (esInvalido('codigo')) {
+                <div class="invalid-feedback d-block">
+                  @if (form.controls.codigo.errors?.['required']) {
+                    El código es obligatorio.
+                  } @else if (form.controls.codigo.errors?.['maxlength']) {
+                    Máximo 40 caracteres.
+                  }
+                </div>
+              }
             </div>
 
             <div class="row g-2">
               <div class="col-md-6 mb-2">
                 <label class="form-label" for="tipoDesc">Tipo *</label>
-                <select id="tipoDesc" class="form-select" formControlName="tipo">
+                <select
+                  id="tipoDesc"
+                  class="form-select"
+                  formControlName="tipo"
+                  [class.is-invalid]="esInvalido('tipo')">
                   <option value="PORCENTAJE">Porcentaje</option>
                   <option value="MONTO_FIJO">Monto fijo</option>
                 </select>
+                @if (esInvalido('tipo')) {
+                  <div class="invalid-feedback d-block">El tipo es obligatorio.</div>
+                }
               </div>
               <div class="col-md-6 mb-2">
                 <label class="form-label" for="valorDesc">Valor *</label>
@@ -54,7 +71,19 @@
                   class="form-control"
                   formControlName="valor"
                   min="0.01"
-                  step="0.01" />
+                  step="0.01"
+                  [class.is-invalid]="esInvalido('valor')" />
+                @if (esInvalido('valor')) {
+                  <div class="invalid-feedback d-block">
+                    @if (form.controls.valor.errors?.['required']) {
+                      El valor es obligatorio.
+                    } @else if (form.controls.valor.errors?.['min']) {
+                      El valor debe ser mayor a 0.
+                    } @else if (form.controls.valor.errors?.['max']) {
+                      El porcentaje no puede superar el 100%.
+                    }
+                  </div>
+                }
               </div>
             </div>
 
@@ -66,8 +95,15 @@
                 class="form-control"
                 formControlName="usosMaximos"
                 min="1"
-                placeholder="Ilimitado" />
-              <div class="form-text">Dejalo vacío para usos ilimitados.</div>
+                placeholder="Ilimitado"
+                [class.is-invalid]="esInvalido('usosMaximos')" />
+              @if (esInvalido('usosMaximos')) {
+                <div class="invalid-feedback d-block">
+                  Los usos máximos deben ser al menos 1.
+                </div>
+              } @else {
+                <div class="form-text">Dejalo vacío para usos ilimitados.</div>
+              }
             </div>
 
             <div class="mb-2">

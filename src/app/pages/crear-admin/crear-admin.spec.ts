@@ -68,4 +68,30 @@ describe('CrearAdminComponent', () => {
     expect(component.etiquetaRol('ADMINISTRADOR')).toBe('Administrador');
     expect(component.etiquetaRol('CLIENTE')).toBe('CLIENTE');
   });
+
+  it('tipo required marca esInvalido cuando touched', () => {
+    component.form.controls.tipo.setValue(null as never);
+    expect(component.form.controls.tipo.hasError('required')).toBe(true);
+    expect(component.esInvalido('tipo')).toBe(false);
+    component.form.controls.tipo.markAsTouched();
+    expect(component.esInvalido('tipo')).toBe(true);
+  });
+
+  it('telefonoIncompleto() cuando solo hay área o número y touched', () => {
+    component.form.patchValue({
+      nombre: 'A',
+      apellido: 'B',
+      email: 'a@b.com',
+      password: '123456',
+      confirmPassword: '123456',
+      codigoArea: '0223',
+      numeroLocal: '',
+    });
+    expect(component.telefonoIncompleto()).toBe(false);
+    component.form.controls.codigoArea.markAsTouched();
+    expect(component.form.hasError('telefonoIncompleto') || component.form.hasError('telefonoInvalido')).toBe(
+      true
+    );
+    expect(component.telefonoIncompleto()).toBe(true);
+  });
 });

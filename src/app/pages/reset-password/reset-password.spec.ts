@@ -52,6 +52,17 @@ describe('ResetPasswordComponent', () => {
     expect(component.form.valid).toBe(true);
   });
 
+  it('passwordNueva y confirmPassword required', async () => {
+    await setup('tok');
+    component.form.controls.passwordNueva.setValue('');
+    component.form.controls.confirmPassword.setValue('');
+    expect(component.form.controls.passwordNueva.hasError('required')).toBe(true);
+    expect(component.form.controls.confirmPassword.hasError('required')).toBe(true);
+
+    component.form.controls.confirmPassword.markAsTouched();
+    expect(component.esInvalido('confirmPassword')).toBe(true);
+  });
+
   it('sin token onSubmit setea error y no llama API', async () => {
     await setup(null);
     component.form.patchValue({ passwordNueva: '123456', confirmPassword: '123456' });

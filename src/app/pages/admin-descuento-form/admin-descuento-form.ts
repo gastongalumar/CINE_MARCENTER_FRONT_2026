@@ -10,9 +10,10 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { CodigoDescuentoService } from '../../services/codigo-descuento';
 import { TipoDescuento } from '../../models/codigo-descuento';
+import { esControlInvalido } from '../../utils/form-error';
 import { refreshView } from '../../utils/refresh-view';
 
 @Component({
@@ -33,10 +34,15 @@ export class AdminDescuentoFormComponent implements OnDestroy {
   private formSub: Subscription | null = null;
 
   private readonly init = afterNextRender(() => {
-    this.formSub = this.form.statusChanges.subscribe(() => refreshView(this.cdr));
-    this.form.controls.tipo.valueChanges.subscribe((tipo) => {
-      this.actualizarValidadoresValor(tipo);
-    });
+    this.formSub = merge(this.form.statusChanges, this.form.valueChanges).subscribe(() =>
+      refreshView(this.cdr)
+    );
+    this.formSub.add(
+      this.form.controls.tipo.valueChanges.subscribe((tipo) => {
+        this.actualizarValidadoresValor(tipo);
+        refreshView(this.cdr);
+      })
+    );
     this.actualizarValidadoresValor(this.form.controls.tipo.value);
 
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -63,13 +69,17 @@ export class AdminDescuentoFormComponent implements OnDestroy {
       Validators.min(0.01),
       Validators.max(100),
     ]),
-    usosMaximos: this.fb.control<number | null>(null),
+    usosMaximos: this.fb.control<number | null>(null, Validators.min(1)),
     descripcion: this.fb.nonNullable.control(''),
     activo: this.fb.nonNullable.control(true),
   });
 
   get titulo(): string {
     return this.editandoId ? 'Editar código' : 'Nuevo código';
+  }
+
+  esInvalido(campo: string): boolean {
+    return esControlInvalido(this.form.get(campo));
   }
 
   ngOnDestroy(): void {
@@ -128,7 +138,7 @@ export class AdminDescuentoFormComponent implements OnDestroy {
       codigo: (raw.codigo || '').trim().toUpperCase(),
       tipo: raw.tipo!,
       valor: Number(raw.valor),
-      usosMaximos: Number.isNaN(usosNum) || usosNum <= 0 ? null : usosNum,
+      usosMaximos: Number.isNaN(usosNum) ? null : usosNum,
       descripcion: (raw.descripcion || '').trim() || undefined,
       activo: !!raw.activo,
     };
