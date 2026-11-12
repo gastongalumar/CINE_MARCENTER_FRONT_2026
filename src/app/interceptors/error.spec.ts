@@ -60,6 +60,15 @@ describe('errorInterceptor', () => {
     expect(toastr.error).not.toHaveBeenCalled();
   });
 
+  it('401 en forgot-password público no hace logout', () => {
+    http.post('/api/auth/forgot-password', {}).subscribe({ error: () => undefined });
+    httpMock.expectOne('/api/auth/forgot-password').flush(
+      { message: 'fail' },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+    expect(logout).not.toHaveBeenCalled();
+  });
+
   it('muestra toast en errores no-401', () => {
     http.get('/api/x').subscribe({ error: () => undefined });
     httpMock.expectOne('/api/x').flush({ message: 'boom' }, { status: 500, statusText: 'Err' });

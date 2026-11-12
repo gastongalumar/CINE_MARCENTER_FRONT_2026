@@ -392,11 +392,7 @@ export class CarteleraComponent implements OnDestroy {
 
   irAFunciones(peliculaId: number): void {
     autorizarButacas(peliculaId);
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/butacas', peliculaId]);
-    } else {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: `/butacas/${peliculaId}` } });
-    }
+    this.router.navigate(['/butacas', peliculaId]);
   }
 
   onMovieImageError(id: number): void {

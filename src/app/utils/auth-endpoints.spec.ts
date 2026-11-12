@@ -6,10 +6,9 @@ describe('isPublicAuthEndpoint', () => {
     expect(isPublicAuthEndpoint('/api/auth/registro')).toBe(true);
   });
 
-  it('NO marca forgot/reset/registro-admin como públicos (gap documentado)', () => {
-    // Comportamiento actual: incompleto respecto a endpoints de auth públicos reales.
-    expect(isPublicAuthEndpoint('/api/auth/forgot-password')).toBe(false);
-    expect(isPublicAuthEndpoint('/api/auth/reset-password')).toBe(false);
+  it('marca forgot/reset como públicos y deja registro-admin privado', () => {
+    expect(isPublicAuthEndpoint('/api/auth/forgot-password')).toBe(true);
+    expect(isPublicAuthEndpoint('/api/auth/reset-password')).toBe(true);
     expect(isPublicAuthEndpoint('/api/auth/registro-admin')).toBe(false);
   });
 

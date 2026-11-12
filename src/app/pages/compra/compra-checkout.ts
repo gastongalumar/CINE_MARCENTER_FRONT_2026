@@ -66,6 +66,9 @@ export class CompraCheckoutComponent implements OnDestroy {
   confirmando = false;
   loading = true;
 
+  /** Reserva ya creada esperando preferencia MP (permite reintento sin clear). */
+  reservaPendientePagoId: number | null = null;
+
   private cleanupSolicitado = false;
 
   constructor(
@@ -235,6 +238,11 @@ export class CompraCheckoutComponent implements OnDestroy {
   }
 
   confirmarCompra(): void {
+    if (this.reservaPendientePagoId != null) {
+      this.reintentarPreferencia();
+      return;
+    }
+
     const clienteId = this.authService.getUserId();
     const tipo = this.authService.getTipoUsuario();
 
@@ -294,27 +302,9 @@ export class CompraCheckoutComponent implements OnDestroy {
       )
       .subscribe({
         next: (reserva) => {
-          this.cleanupSolicitado = true;
-          this.compraFlujo.clear();
-
           if (this.metodoPago === MetodoPago.MERCADO_PAGO && reserva.id != null) {
-            this.paymentService.crearPreferencia(reserva.id).subscribe({
-              next: (preferencia) => {
-                const initPoint = preferencia.init_point || preferencia.sandbox_init_point;
-                if (!initPoint) {
-                  this.toastr.error(
-                    'Mercado Pago no devolvió una URL de pago. Intentá nuevamente.',
-                    'Error'
-                  );
-                  return;
-                }
-                this.toastr.info('Redirigiendo a Mercado Pago…', 'Pago');
-                window.location.href = initPoint;
-              },
-              error: () => {
-                /* El interceptor muestra el toast de error HTTP. */
-              },
-            });
+            this.reservaPendientePagoId = reserva.id;
+            this.iniciarPreferenciaMercadoPago(reserva.id);
             return;
           }
 
@@ -323,6 +313,7 @@ export class CompraCheckoutComponent implements OnDestroy {
             this.toastr.error('Reserva creada pero no se recibió el número de ticket.', 'Error');
             return;
           }
+          this.finalizarCompraExitosa();
           this.toastr.success('¡Reserva confirmada! Tu ticket está listo.', 'Éxito');
           this.router.navigate(['/ticket', ticket]);
         },
@@ -336,6 +327,53 @@ export class CompraCheckoutComponent implements OnDestroy {
           }
         },
       });
+  }
+
+  /** Reintenta crear la preferencia MP para la reserva ya creada. */
+  reintentarPreferencia(): void {
+    if (this.reservaPendientePagoId == null) return;
+    this.iniciarPreferenciaMercadoPago(this.reservaPendientePagoId);
+  }
+
+  private iniciarPreferenciaMercadoPago(reservaId: number): void {
+    this.confirmando = true;
+    refreshView(this.cdr);
+
+    this.paymentService
+      .crearPreferencia(reservaId)
+      .pipe(
+        finalize(() => {
+          this.confirmando = false;
+          refreshView(this.cdr);
+        })
+      )
+      .subscribe({
+        next: (preferencia) => {
+          const initPoint = preferencia.init_point || preferencia.sandbox_init_point;
+          if (!initPoint) {
+            this.toastr.error(
+              'Mercado Pago no devolvió una URL de pago. Podés reintentar el pago.',
+              'Error'
+            );
+            return;
+          }
+          this.finalizarCompraExitosa();
+          this.toastr.info('Redirigiendo a Mercado Pago…', 'Pago');
+          window.location.href = initPoint;
+        },
+        error: () => {
+          this.toastr.warning(
+            'No se pudo iniciar el pago. Tu reserva sigue creada: reintentá el pago.',
+            'Pago'
+          );
+        },
+      });
+  }
+
+  private finalizarCompraExitosa(): void {
+    this.cleanupSolicitado = true;
+    this.reservaPendientePagoId = null;
+    this.compraFlujo.clear();
   }
 
   private liberarHolds(): void {

@@ -16,6 +16,7 @@ describe('compraPagoGuard', () => {
   let isAdminSignal = signal(false);
 
   beforeEach(() => {
+    sessionStorage.clear();
     toastrMock.warning.mockClear();
     toastrMock.info.mockClear();
     isAdminSignal = signal(false);
@@ -74,28 +75,36 @@ describe('compraPagoGuard', () => {
     expect(runGuard('12', '5')).toBe(true);
   });
 
-  it('funcionId inválido (NaN) redirige a asientos con NaN en la URL', () => {
-    // Number('abc') === NaN; tieneSeleccionPara(NaN) es siempre false.
+  it('funcionId inválido redirige a horarios de la película', () => {
     compra.setContexto(12, 5);
     compra.setSeleccion(['A1']);
     const result = runGuard('12', 'abc') as UrlTree & { commands: unknown[] };
     expect(result).toEqual(
-      expect.objectContaining({ commands: ['/butacas', 12, 'funcion', NaN] })
+      expect.objectContaining({ commands: ['/butacas', 12] })
     );
     expect(toastrMock.info).toHaveBeenCalled();
   });
 
-  it('peliculaId inválido no bloquea si hay selección para la función', () => {
+  it('peliculaId inválido redirige a cartelera', () => {
     compra.setContexto(12, 5);
     compra.setSeleccion(['A1']);
-    // El guard no valida peliculaId: solo admin + tieneSeleccionPara(funcionId).
-    expect(runGuard('xyz', '5')).toBe(true);
+    const result = runGuard('xyz', '5') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+    expect(toastrMock.warning).toHaveBeenCalled();
   });
 
-  it('ambos ids inválidos sin selección redirige con NaN/NaN', () => {
+  it('ambos ids inválidos redirige a cartelera', () => {
     const result = runGuard('nope', 'nope') as UrlTree & { commands: unknown[] };
+    expect(result).toEqual(expect.objectContaining({ commands: ['/cartelera'] }));
+    expect(toastrMock.warning).toHaveBeenCalled();
+  });
+
+  it('peliculaId de URL distinto al contexto redirige a asientos', () => {
+    compra.setContexto(12, 5);
+    compra.setSeleccion(['A1']);
+    const result = runGuard('99', '5') as UrlTree & { commands: unknown[] };
     expect(result).toEqual(
-      expect.objectContaining({ commands: ['/butacas', NaN, 'funcion', NaN] })
+      expect.objectContaining({ commands: ['/butacas', 99, 'funcion', 5] })
     );
     expect(toastrMock.info).toHaveBeenCalled();
   });

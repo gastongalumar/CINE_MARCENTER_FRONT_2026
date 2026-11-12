@@ -9,12 +9,12 @@ describe('auth model helpers', () => {
     expect(esStaff(undefined)).toBe(false);
   });
 
-  it('parseTipoUsuario default CLIENTE ante tipo desconocido (gap documentado)', () => {
+  it('parseTipoUsuario rechaza tipo desconocido o ausente', () => {
     expect(parseTipoUsuario('SUPERADMIN')).toBe('SUPERADMIN');
     expect(parseTipoUsuario('ADMINISTRADOR')).toBe('ADMINISTRADOR');
     expect(parseTipoUsuario('CLIENTE')).toBe('CLIENTE');
-    expect(parseTipoUsuario('HACKER')).toBe('CLIENTE');
-    expect(parseTipoUsuario(null)).toBe('CLIENTE');
-    expect(parseTipoUsuario(undefined)).toBe('CLIENTE');
+    expect(parseTipoUsuario('HACKER')).toBeNull();
+    expect(parseTipoUsuario(null)).toBeNull();
+    expect(parseTipoUsuario(undefined)).toBeNull();
   });
 });

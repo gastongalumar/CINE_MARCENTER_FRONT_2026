@@ -25,6 +25,7 @@ describe('CompraCheckoutComponent', () => {
   let crearPreferencia: ReturnType<typeof vi.fn>;
   let liberarTodos: ReturnType<typeof vi.fn>;
   let auth: ReturnType<typeof createAuthServiceMock>;
+  let toastr: ReturnType<typeof createToastrMock>;
 
   const funcion: Funcion = {
     id: 5,
@@ -35,6 +36,7 @@ describe('CompraCheckoutComponent', () => {
   };
 
   beforeEach(() => {
+    sessionStorage.clear();
     router = createRouterMock('/butacas/12/funcion/5/pago');
     compraFlujo = new CompraFlujoService();
     compraFlujo.setContexto(12, 5);
@@ -51,6 +53,7 @@ describe('CompraCheckoutComponent', () => {
     );
     crearPreferencia = vi.fn(() => throwError(() => ({ status: 500 })));
     liberarTodos = vi.fn(() => of(null));
+    toastr = createToastrMock();
 
     auth = createAuthServiceMock({
       authenticated: true,
@@ -93,7 +96,7 @@ describe('CompraCheckoutComponent', () => {
         },
         { provide: AuthService, useValue: auth },
         { provide: CompraFlujoService, useValue: compraFlujo },
-        { provide: ToastrService, useValue: createToastrMock() },
+        { provide: ToastrService, useValue: toastr },
         { provide: ChangeDetectorRef, useValue: { markForCheck: vi.fn(), detectChanges: vi.fn() } },
       ],
     });
@@ -106,23 +109,37 @@ describe('CompraCheckoutComponent', () => {
     component.metodoPago = MetodoPago.MERCADO_PAGO;
   });
 
-  it('si crearPreferencia falla tras crearReserva, CompraFlujo ya quedó limpio', () => {
-    // Behavior: on crearReserva success the component sets cleanupSolicitado=true
-    // and calls compraFlujo.clear() *before* crearPreferencia. A later preferencia
-    // error does not restore the flujo; ngOnDestroy skips liberarHolds because
-    // cleanupSolicitado is already true.
+  it('si crearPreferencia falla, mantiene el flujo y permite reintentar', () => {
     const clearSpy = vi.spyOn(compraFlujo, 'clear');
 
     component.confirmarCompra();
 
     expect(crearReserva).toHaveBeenCalled();
-    expect(clearSpy).toHaveBeenCalled();
-    expect(compraFlujo.asientosSeleccionados).toEqual([]);
-    expect(compraFlujo.funcionId).toBeNull();
+    expect(clearSpy).not.toHaveBeenCalled();
+    expect(compraFlujo.asientosSeleccionados).toEqual(['A1']);
+    expect(compraFlujo.funcionId).toBe(5);
+    expect(component.reservaPendientePagoId).toBe(99);
     expect(crearPreferencia).toHaveBeenCalledWith(99);
+    expect(toastr.warning).toHaveBeenCalled();
 
-    liberarTodos.mockClear();
-    component.ngOnDestroy();
-    expect(liberarTodos).not.toHaveBeenCalled();
+    crearPreferencia.mockClear();
+    crearPreferencia.mockReturnValueOnce(
+      of({ init_point: 'https://mp.test/pay', sandbox_init_point: null as string | null })
+    );
+
+    const assignSpy = vi.fn();
+    vi.stubGlobal('location', { href: '', assign: assignSpy });
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { href: '' },
+    });
+
+    component.reintentarPreferencia();
+
+    expect(crearPreferencia).toHaveBeenCalledWith(99);
+    expect(clearSpy).toHaveBeenCalled();
+    expect(component.reservaPendientePagoId).toBeNull();
+    expect(window.location.href).toBe('https://mp.test/pay');
   });
 });

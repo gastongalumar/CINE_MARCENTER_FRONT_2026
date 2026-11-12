@@ -53,15 +53,21 @@ describe('AdminDescuentoFormComponent', () => {
     expect(component.form.valid).toBe(true);
   });
 
-  // GAP documentado: PORCENTAJE no tiene Validators.max(100) en el form actual.
-  it('GAP: PORCENTAJE permite valor 150 (sin Validators.max(100))', () => {
+  it('PORCENTAJE rechaza valor > 100; MONTO_FIJO admite montos altos', () => {
     component.form.patchValue({
       codigo: 'OVERFLOW',
       tipo: 'PORCENTAJE',
       valor: 150,
       activo: true,
     });
+    expect(component.form.controls.valor.hasError('max')).toBe(true);
+
+    component.form.patchValue({ tipo: 'PORCENTAJE', valor: 100 });
     expect(component.form.controls.valor.errors).toBeNull();
-    expect(component.form.valid).toBe(true);
+
+    component.actualizarValidadoresValor('MONTO_FIJO');
+    component.form.patchValue({ tipo: 'MONTO_FIJO', valor: 150 });
+    expect(component.form.controls.valor.errors).toBeNull();
   });
 });
+

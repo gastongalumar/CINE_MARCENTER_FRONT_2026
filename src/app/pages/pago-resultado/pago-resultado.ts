@@ -97,18 +97,31 @@ export class PagoResultadoComponent implements OnInit {
 
     this.consultando.set(true);
 
+    const reservaId = this.obtenerReservaIdDeUrl();
+    if (reservaId == null) {
+      this.consultando.set(false);
+      this.reserva.set(null);
+      this.detalleEstado.set(
+        'No se identificó la reserva del pago. Volvé desde Mercado Pago o revisá "Mis reservas".'
+      );
+      return;
+    }
+
     this.reservaService.listarMisReservas().subscribe({
       next: (reservas) => {
-        const reservaId = this.obtenerReservaIdDeUrl();
-        const encontrada =
-          reservaId != null
-            ? reservas.find((r) => r.id === reservaId)
-            : reservas[0];
+        const encontrada = reservas.find((r) => r.id === reservaId) ?? null;
 
-        this.reserva.set(encontrada ?? null);
+        this.reserva.set(encontrada);
         this.consultando.set(false);
 
-        if (encontrada?.pagada) {
+        if (!encontrada) {
+          this.detalleEstado.set(
+            'No encontramos esa reserva en tu cuenta. Revisá "Mis reservas" en unos instantes.'
+          );
+          return;
+        }
+
+        if (encontrada.pagada) {
           this.detalleEstado.set('La reserva quedó registrada como PAGADA.');
           return;
         }

@@ -19,7 +19,13 @@
   <div class="horarios-panel" *ngIf="!loadingFunciones && funcionesPorDia.length > 0">
     <h4 class="pelicula-titulo text-accent-gold">{{ nombrePelicula }}</h4>
     <p class="horarios-ayuda text-muted">
-      {{ esAdmin ? 'Elegí un horario para ver la ocupación.' : 'Elegí un horario para continuar con tus asientos.' }}
+      {{
+        esAdmin
+          ? 'Elegí un horario para ver la ocupación.'
+          : authService.isAuthenticated()
+            ? 'Elegí un horario para continuar con tus asientos.'
+            : 'Podés ver los horarios sin cuenta. Para elegir asientos tenés que iniciar sesión.'
+      }}
     </p>
 
     <div class="dia-activo-bar">
@@ -88,7 +94,8 @@
             {{ f.salaNombre }}
           </span>
           <span class="chip-precio" *ngIf="!esAdmin">$ {{ f.precio | number:'1.0-0' }}</span>
-          <span class="chip-accion">{{ esAdmin ? 'Ver' : 'Elegir' }}</span>
+          <span class="chip-disponibles">{{ textoDisponibles(f) }}</span>
+          <span class="chip-accion">{{ etiquetaAccionChip }}</span>
         </button>
       </div>
     </section>

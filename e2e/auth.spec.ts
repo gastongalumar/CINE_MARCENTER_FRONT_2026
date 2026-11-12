@@ -76,6 +76,10 @@ test.describe('Auth (P0)', () => {
         return true;
       }
 
+      if (info.method === 'GET' && info.path.endsWith('/api/funciones/vigentes')) {
+        await json(route, 200, [FUNCION]);
+        return true;
+      }
       if (
         info.method === 'GET' &&
         info.path.endsWith(`/api/funciones/pelicula/${PELICULA.id}`)

@@ -92,9 +92,7 @@ describe('PagoResultadoComponent', () => {
     expect(component.mensaje()).toContain('acreditó correctamente');
   });
 
-  it('si falta external_reference cae en reservas[0] (known gap)', () => {
-    // Known gap: sin external_reference/reservaId válido usa la primera reserva
-    // de la lista, no necesariamente la del pago actual.
+  it('si falta external_reference no usa reservas[0]', () => {
     const component = setup({
       estado: 'exito',
       params: {},
@@ -103,7 +101,9 @@ describe('PagoResultadoComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.reserva()?.id).toBe(1);
+    expect(listarMisReservas).not.toHaveBeenCalled();
+    expect(component.reserva()).toBeNull();
+    expect(component.detalleEstado()).toContain('No se identificó la reserva');
   });
 
   it('si autenticado es false no consulta reservas', () => {

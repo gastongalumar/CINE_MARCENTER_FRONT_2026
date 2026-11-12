@@ -26,6 +26,10 @@ async function mockCompraApis(
       return true;
     }
 
+    if (info.method === 'GET' && info.path.endsWith('/api/funciones/vigentes')) {
+      await json(route, 200, [FUNCION]);
+      return true;
+    }
     if (
       info.method === 'GET' &&
       info.path.endsWith(`/api/funciones/pelicula/${PELICULA.id}`)
@@ -129,6 +133,32 @@ test.describe('Compra (P0)', () => {
     await page.goto('/butacas/1');
     await expect(page).toHaveURL(/\/cartelera/);
     await expect(page.getByRole('heading', { name: 'Cartelera de Películas' })).toBeVisible();
+  });
+
+  test('guest ve horarios; al elegir asientos va a login con returnUrl', async ({ page }) => {
+    await mockCompraApis(page);
+
+    await page.goto('/cartelera');
+    await expect(page.getByText(PELICULA.nombre).first()).toBeVisible();
+
+    await page.getByRole('button', { name: /Ver Funciones/i }).first().click();
+    await expect(page).toHaveURL(new RegExp(`/butacas/${PELICULA.id}`));
+    await expect(page).not.toHaveURL(/\/login/);
+    await expect(page.getByRole('heading', { name: 'Seleccionar Horario' })).toBeVisible();
+    await expect(page.getByText(/Podés ver los horarios sin cuenta/i)).toBeVisible();
+    await expect(page.getByText(/Disponibilidad al elegir/i).first()).toBeVisible();
+
+    const chip = page.locator('button.horario-chip').first();
+    if (!(await chip.isVisible().catch(() => false))) {
+      await page.getByRole('button', { name: /Elegir otro día/i }).click();
+      await page.locator('.dia-chip').first().click();
+    }
+    await page.locator('button.horario-chip').first().click();
+
+    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(
+      new RegExp(`returnUrl=.*butacas.*${PELICULA.id}.*funcion.*${FUNCION.id}`),
+    );
   });
 
   test('admin no puede acceder a pago', async ({ page }) => {

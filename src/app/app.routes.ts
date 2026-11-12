@@ -109,7 +109,8 @@ export const routes: Routes = [
         title: 'Seleccionar horario | Cinemacenter',
         loadComponent: () =>
             import('./pages/compra/compra-horarios').then((m) => m.CompraHorariosComponent),
-        canActivate: [authGuard, butacasAccessGuard],
+        // Público: ver horarios sin login. Asientos/pago siguen con authGuard.
+        canActivate: [butacasAccessGuard],
     },
     {
         path: 'ticket/:numero',
