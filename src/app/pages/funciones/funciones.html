@@ -164,6 +164,12 @@
                 }
               </div>
 
+              <p class="small text-muted mb-2">
+                Debe haber
+                <strong>30 minutos</strong> libres entre el fin de una función y el inicio
+                de otra en la misma sala.
+              </p>
+
               @if (salas().length === 0 && !cargando()) {
                 <div class="alert alert-warning py-2 small">
                   No hay salas cargadas. Creá una en Administración → Salas.
@@ -353,9 +359,10 @@
               </div>
 
               <p class="small text-muted mb-2">
-                Se generan funciones consecutivas por día (sin intervalo de limpieza). La
-                <strong>hora fin</strong> es el límite del día: cada función debe
-                <strong>terminar</strong> a esa hora o antes.
+                Se generan funciones por día con
+                <strong>30 minutos</strong> de intervalo de limpieza entre el fin de una
+                y el inicio de la siguiente. La <strong>hora fin</strong> es el límite
+                del día: cada función debe <strong>terminar</strong> a esa hora o antes.
               </p>
 
               @if (previewRango().inicios.length) {

@@ -72,9 +72,12 @@ export interface PreviewHorariosDia {
   ultimoRechazado?: { inicio: string; fin: string };
 }
 
+/** Minutos de limpieza entre el fin de una función y el inicio de la siguiente (por rango). */
+export const GAP_ENTRE_FUNCIONES_MINUTOS = 30;
+
 /**
- * Réplica de POST /funciones/por-rango: funciones consecutivas cuya proyección
- * completa (inicio + duración) no supera horaFin.
+ * Réplica de POST /funciones/por-rango: funciones con gap fijo de limpieza
+ * entre sí; la proyección (inicio + duración) no debe superar horaFin.
  */
 export function calcularHorariosPorDia(
   horaInicio: string,
@@ -92,7 +95,7 @@ export function calcularHorariosPorDia(
 
   while (actual + duracionMinutos <= finMin) {
     inicios.push(minutosAHora(actual));
-    actual += duracionMinutos;
+    actual += duracionMinutos + GAP_ENTRE_FUNCIONES_MINUTOS;
   }
 
   const ultimoRechazado =

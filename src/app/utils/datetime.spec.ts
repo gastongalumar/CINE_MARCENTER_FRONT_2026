@@ -56,10 +56,10 @@ describe('datetime utils', () => {
       expect(calcularHorariosPorDia('18:00', '22:00', 0).inicios).toEqual([]);
     });
 
-    it('genera inicios consecutivos que caben antes de horaFin', () => {
+    it('genera inicios con gap de 30 min que caben antes de horaFin', () => {
       const r = calcularHorariosPorDia('18:00', '22:00', 120);
-      expect(r.inicios).toEqual(['18:00', '20:00']);
-      expect(r.ultimoRechazado).toEqual({ inicio: '22:00', fin: '24:00' });
+      expect(r.inicios).toEqual(['18:00']);
+      expect(r.ultimoRechazado).toEqual({ inicio: '20:30', fin: '22:30' });
     });
   });
 });
